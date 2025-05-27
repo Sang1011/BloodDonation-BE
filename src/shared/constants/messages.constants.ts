@@ -1,0 +1,24 @@
+export const MESSAGES = {
+    AUTH: {
+      INVALID_TOKEN: 'Invalid token!',
+      EXPIRED_TOKEN: 'Token has expired! Please log in again.',
+      LOGIN_SUCCESS: 'Login successful!',
+      LOGIN_FAILED: 'Incorrect username or password!',
+      UNAUTHORIZED: 'Access denied!'
+    },
+    USERS: {
+      CREATE_SUCCESS: 'User created successfully!',
+      USER_NOT_FOUND: 'User not found!',
+      UPDATE_SUCCESS: 'User information updated successfully!',
+      DELETE_SUCCESS: 'User deleted successfully!',
+      EMAIL_EXIST: 'This email already exists!',
+      CANNOT_DELETE_ADMIN: 'Cannot delete the admin user!',
+      USER_NOT_DELETED: 'User haven\'t been deleted yet',
+    },
+    BLOOD_GROUPS: {
+      BLOOD_GROUP_NOT_FOUND: 'Blood group not found!',
+      BLOOD_GROUP_GET_ALL_SUCCESS: 'Blood groups retrieved successfully!',
+      BLOOD_GROUP_GET_BY_ID_SUCCESS: 'Blood group retrieved successfully!',
+    },
+  };
+  

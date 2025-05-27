@@ -1,8 +1,14 @@
 {
   "name": "bdss-be",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "Blood Donation Support System Backend",
+  "keywords": [
+    "nestjs",
+    "backend",
+    "blood donation",
+    "support system"
+  ],
+  "author": "Group5-SWD-2025",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
