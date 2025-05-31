@@ -19,6 +19,14 @@ export const MESSAGES = {
       ROLE_EXIST: 'This role already exists!',
       CREATE_SUCCESS: 'Role created successfully!',
       ROLE_NOT_FOUND: 'Role not found!',
-    }
+    },
+    DONATE_BLOOD: {
+      CREATE_SUCCESS: 'Donate blood record created successfully.',
+      UPDATE_SUCCESS: 'Donate blood record updated successfully.',
+      DELETE_SUCCESS: 'Donate blood record deleted successfully.',
+      NOT_FOUND: 'Donate blood record not found.',
+      RETRIEVE_ONE_SUCCESS: 'Donate blood record retrieved successfully.',
+      RETRIEVE_ALL_SUCCESS: 'All donate blood records retrieved successfully.',
+    },
   };
   

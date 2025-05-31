@@ -5,6 +5,7 @@ import { UsersModule } from './users/users.module';
 import { LocationsModule } from './locations/location.module';
 import { RolesModule } from './roles/role.module';
 import { AuthModule } from './auth/auth.module';
+import { DonateBloodModule } from './donate_bloods/donate_bloods.module';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -20,7 +21,9 @@ import { AuthModule } from './auth/auth.module';
     UsersModule,
     LocationsModule,
     RolesModule,
-    // AuthModule
+    // AuthModule,
+    DonateBloodModule,
+
   ],
 })
 export class AppModule {}
