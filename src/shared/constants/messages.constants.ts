@@ -15,10 +15,10 @@ export const MESSAGES = {
       CANNOT_DELETE_ADMIN: 'Cannot delete the admin user!',
       USER_NOT_DELETED: 'User haven\'t been deleted yet',
     },
-    BLOOD_GROUPS: {
-      BLOOD_GROUP_NOT_FOUND: 'Blood group not found!',
-      BLOOD_GROUP_GET_ALL_SUCCESS: 'Blood groups retrieved successfully!',
-      BLOOD_GROUP_GET_BY_ID_SUCCESS: 'Blood group retrieved successfully!',
-    },
+    ROLE: {
+      ROLE_EXIST: 'This role already exists!',
+      CREATE_SUCCESS: 'Role created successfully!',
+      ROLE_NOT_FOUND: 'Role not found!',
+    }
   };
   

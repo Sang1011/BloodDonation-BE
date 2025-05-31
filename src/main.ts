@@ -39,13 +39,37 @@ async function bootstrap() {
   // --- SWAGGER SETUP START ---
   const config = new DocumentBuilder()
     .setTitle('User API')
-    .setDescription('Demo API with NestJS, Mongoose, Swagger')
+    .setDescription('Blood Donation Services')
     .setVersion('1.0')
-    // .addBearerAuth()
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'Authorization',
+        in: 'header',
+      },
+      'access-token',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api-docs', app, document);
+  SwaggerModule.setup('api-docs', app, document, {
+    swaggerOptions: {
+      authAction: {
+        'access-token': {
+          name: 'Authorization',
+          schema: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+          },
+          value: 'Bearer <your-token-here>',
+        },
+      },
+    },
+  });
+
   // --- SWAGGER SETUP END ---
 
   await app.listen(configService.get<string>("PORT"));

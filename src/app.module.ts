@@ -2,7 +2,9 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from './users/users.module';
-import { BloodGroupsModule } from './bloodGroups/blood-groups.module';
+import { LocationsModule } from './locations/location.module';
+import { RolesModule } from './roles/role.module';
+import { AuthModule } from './auth/auth.module';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -16,7 +18,9 @@ import { BloodGroupsModule } from './bloodGroups/blood-groups.module';
       isGlobal: true
     }),
     UsersModule,
-    BloodGroupsModule,
+    LocationsModule,
+    RolesModule,
+    // AuthModule
   ],
 })
 export class AppModule {}

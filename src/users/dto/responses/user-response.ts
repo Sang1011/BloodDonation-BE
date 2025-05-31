@@ -8,7 +8,7 @@ export class UserResponseDto {
   role: string;
 
   @ApiProperty({ example: 'Jane Doe' })
-  name: string;
+  fullname: string;
 
   @ApiProperty({ example: 'JaneDoe@gmail.com' })
   email: string;

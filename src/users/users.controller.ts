@@ -10,6 +10,7 @@ import { DeleteUserResponse } from "./dto/responses/delete-user.response";
 import { GetUserByIdSwaggerResponse } from "./dto/responses/get-user.response";
 import { GetAllUserResponseDto } from "./dto/responses/find-all.response";
 import { FindAllQueryDTO } from "src/shared/dtos/requests/find-all-query.request";
+import { Public } from "src/shared/decorators/public.decorator";
 
 
 @ApiTags('Users')
@@ -28,6 +29,7 @@ export class UsersController {
   }
 
   @Get()
+  @Public()
   @ApiOkResponse({ type: GetAllUserResponseDto })
   @ResponseMessage("Fetch user by filter")
   findAll(@Query() query: FindAllQueryDTO) {

@@ -1,55 +1,69 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { CreateUserDto } from "./dto/requests/create-user.dto";
-import { UpdateUserDto } from "./dto/requests/update-user.dto";
 import { InjectModel } from "@nestjs/mongoose";
-import { User } from "./schemas/user.schema";
-import mongoose, { Model } from "mongoose";
-import { Role } from "src/shared/enums/user.enum";
-import { BaseModel } from "src/shared/base/base.model";
-import { MESSAGES } from "src/shared/constants/messages.constants";
-import { getHashPassword } from "src/shared/utils/getHashPassword";
-import { isValidPassword as comparePassword } from 'src/shared/helpers/auth.helper';
 import aqp, { AqpResult } from "api-query-params";
-import { isValidId } from "src/shared/utils/isValidId";
-import { BloodGroup } from "src/bloodGroups/schemas/blood-group.schema";
+import { Model } from "mongoose";
+import { MESSAGES } from "src/shared/constants/messages.constants";
+import { isValidPassword as comparePassword } from 'src/shared/helpers/auth.helper';
+import { getHashPassword } from "src/shared/utils/getHashPassword";
+import { CreateUserDto, RegisterUserDTO } from "./dto/requests/create-user.dto";
+import { UpdateUserDto } from "./dto/requests/update-user.dto";
+import { User } from "./schemas/user.schema";
+import { Role } from "src/roles/schemas/role.schema";
+import { UserRole } from "src/shared/enums/user.enum";
+import { LocationService } from "src/locations/location.service";
+import { RoleService } from "src/roles/role.service";
 
 @Injectable()
 export class UsersService {
   constructor(
-  @InjectModel(User.name) private userModel: BaseModel<User>,
-  @InjectModel(BloodGroup.name) private bloodGroupModel: Model<BloodGroup>
-) {}
+    @InjectModel(User.name) private userModel: Model<User>,
+    private readonly locationService: LocationService,
+    private readonly roleService: RoleService
+  ) { }
+
+  isCreateUserDto(obj: any): obj is CreateUserDto {
+  return 'role_name' in obj && typeof obj.role_name === 'string';
+  }
+
+  isRegisterDTO(obj: any): obj is RegisterUserDTO {
+  return !('role_name' in obj);
+  } 
 
 
-  async create(userDTO: CreateUserDto) {
-    const existedUser = await this.findOneByEmail(userDTO?.email);
+  async create(userDTO: CreateUserDto | RegisterUserDTO) {
+    const existedUser = await this.findOneByEmail(userDTO.email);
     if (existedUser) {
       throw new BadRequestException(MESSAGES.USERS.EMAIL_EXIST);
     }
 
-    const { bloodType, rhFactor, ...otherData } = userDTO;
-    const bloodGroup = await this.bloodGroupModel.findOne({ bloodType, rhFactor });
-    if (!bloodGroup) {
-      throw new BadRequestException('Invalid blood group or rh factor');
+    let roleId = "";
+    if (this.isRegisterDTO(userDTO)) {
+    const role = UserRole.MEMBER;
+    const findRoleId = await this.roleService.findByName(role);
+    roleId = findRoleId.role_id;
+    } else if (this.isCreateUserDto(userDTO)) {
+      const findRoleId = await this.roleService.findByName(userDTO.role_name);
+      roleId = findRoleId.role_id;
     }
-
+    
+    const createLoc = await this.locationService.create(userDTO.location);
+    const locationId = createLoc.location_id;
     const hashPassword = getHashPassword(userDTO?.password);
     const user = await this.userModel.create({
-      ...otherData,
-      bloodId: bloodGroup._id,
-      role: Role.MEMBER,
+      ...userDTO,
+      location_id: locationId,
+      role_id: roleId,
       password: hashPassword,
     });
 
     return {
-      _id: user._id,
-      createdAt: user.createdAt,
+      _id: user._id
     };
   }
 
 
   async findAll(currentPage: number, limit: number, qs: string) {
-    const { filter, sort, population }: AqpResult = aqp(qs);
+    const { filter, sort }: AqpResult = aqp(qs);
     delete filter.current;
     delete filter.pageSize;
     const defaultCurrent = currentPage ? currentPage : 1;
@@ -62,7 +76,10 @@ export class UsersService {
       .limit(defaultLimit)
       .sort(sort || {})
       .select("-password")
-      .populate(population)
+      .populate([
+        { path: 'location_id' },
+        { path: 'role_id' }
+      ])
       .exec();
     return {
       meta: {
@@ -76,14 +93,15 @@ export class UsersService {
   }
 
   async findOne(id: string) {
-    if (!isValidId(id)) return MESSAGES.USERS.USER_NOT_FOUND;
-
     const user = await this.userModel
       .findOne({ _id: id })
       .select('-password')
-      .populate({ path: 'role', select: { name: 1, _id: 1 } });
+      .populate([
+        { path: 'location_id' },
+        { path: 'role_id' }
+      ]);
 
-    if (!user) return MESSAGES.USERS.USER_NOT_FOUND;
+    if (!user) throw new BadRequestException(MESSAGES.USERS.USER_NOT_FOUND);
 
     return user;
   }
@@ -92,44 +110,39 @@ export class UsersService {
   async findOneByEmail(email: string) {
     return await this.userModel.findOne({
       email: email
-    }).populate({ path: "role", select: { name: 1, permissions: 1 } });
+    });
   }
 
   async update(updateUserDto: UpdateUserDto) {
-    if (!isValidId(updateUserDto._id)) return MESSAGES.USERS.USER_NOT_FOUND;
+    const get = await this.findOneByEmail(updateUserDto.email);
+    if (!get) {
+      throw new BadRequestException(MESSAGES.USERS.USER_NOT_FOUND);
+    }
+    if (updateUserDto.location) {
+      await this.locationService.update(get.location_id, updateUserDto.location);
+    }
+    await this.userModel.updateOne({ email: updateUserDto.email }, updateUserDto);
 
-    const { _id, ...updateData } = updateUserDto;
-
-    const result = await this.userModel.updateOne(
-      { _id },
-      { $set: updateData }
+    const updated = await this.userModel.updateOne(
+      { email: updateUserDto.email },
+      { $set: updateUserDto }
     );
 
-    if (result.matchedCount === 0) return MESSAGES.USERS.USER_NOT_FOUND;
+    if (updated.matchedCount === 0) {
+      throw new BadRequestException(MESSAGES.USERS.USER_NOT_FOUND);
+    }
 
     return {
-      updatedFields: Object.keys(updateData)
+      updatedFields: Object.keys(updateUserDto),
+      modifiedCount: updated.modifiedCount,
     };
   }
-
 
   async isValidPassword(password: string, hashPassword: string) {
     return await comparePassword(password, hashPassword);
   }
 
-  async findAllWithoutDeleted() {
-    return this.userModel.findAllWithoutDeleted();
-  }
-
-  async findAllDeleted() {
-    return this.userModel.findAllDeleted();
-  }
-
   async remove(id: string) {
-    if (!isValidId(id)) return MESSAGES.USERS.USER_NOT_FOUND;
-    const isDeleted = await this.userModel.findOne({ _id: id, deletedAt: { $ne: null } });
-    if (isDeleted) return { deleted: 0 };
-
     const foundUser = await this.userModel.findById(id);
     if (!foundUser) return MESSAGES.USERS.USER_NOT_FOUND;
 
@@ -137,21 +150,18 @@ export class UsersService {
       throw new BadRequestException(MESSAGES.USERS.CANNOT_DELETE_ADMIN);
     }
 
-    // Soft delete
-    const removed = await this.userModel.delete({ _id: id });
-    return { deleted: removed.modifiedCount || 0 };
+    const removed = await this.userModel.deleteOne({ user_id: id });
+    return { deleted: removed.deletedCount || 0 };
   }
 
-  async restore(id: string) {
-    if (!isValidId(id)) return MESSAGES.USERS.USER_NOT_FOUND;
+  async updateUserToken(refreshToken: string, user_id: string) {
+    return await this.userModel.updateOne(
+      { user_id: user_id },
+      { $set: { refresh_token: refreshToken } } 
+    );
+  }
 
-    // Kiểm tra user có tồn tại và đang bị xóa (soft-delete) hay không
-    const user = await this.userModel.findOne({ _id: id, deletedAt: { $exists: true } });
-    if (!user) {
-      return MESSAGES.USERS.USER_NOT_DELETED;
-    }
-
-    const restored = await this.userModel.restore({ _id: id });
-    return restored;
+  async findUserByToken(refreshToken: string){
+    return await this.userModel.findOne({ refresh_token: refreshToken})
   }
 }

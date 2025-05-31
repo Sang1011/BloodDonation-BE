@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Gender, Role } from 'src/shared/enums/user.enum';
+import { Gender } from 'src/shared/enums/user.enum';
 
 class Location {
   @ApiProperty({ example: 'Point' })
@@ -13,8 +13,8 @@ export class GetUserByIdResponse {
   @ApiProperty({ example: '68355618d7a1e66ee2d1e86a' })
   _id: string;
 
-  @ApiProperty({ enum: Role, example: Role.MEMBER })
-  role: Role;
+  @ApiProperty()
+  role: string;
 
   @ApiProperty({ example: 'Jane Doe' })
   name: string;
