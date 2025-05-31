@@ -7,7 +7,7 @@ export type BloodTypeDocument = HydratedDocument<BloodType>;
 @Schema()
 export class BloodType {
   @Prop({unique: true})
-  blood_type: number;
+  blood_type_id: number;
 
   @Prop({required: true})
   blood_name: string;
@@ -16,4 +16,4 @@ export class BloodType {
 export const BloodTypeSchema = SchemaFactory.createForClass(BloodType);
 
 // middleware
-applySmartIdField(BloodTypeSchema, BloodType.name ,'blood_type');
+applySmartIdField(BloodTypeSchema, BloodType.name ,'blood_type_id');

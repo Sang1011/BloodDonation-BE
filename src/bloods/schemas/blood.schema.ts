@@ -11,8 +11,11 @@ export class Blood {
   @Prop({ unique: true })
   blood_id: string;
 
+  // @Prop({required: true})
+  // blood_name: string;
+
   @Prop({required: true, ref: BloodType.name})
-  blood_type: number;
+  blood_type_id: number;
 
   @Prop({required: true, ref: Rh.name})
   rh_id: number;

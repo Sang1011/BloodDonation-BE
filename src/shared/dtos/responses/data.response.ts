@@ -5,5 +5,5 @@ export class ResponseData {
   statusCode: number;
 
   @ApiProperty({ example: 'Update a user' })
-  message: string;
+  messager: string;
 }

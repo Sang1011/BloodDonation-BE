@@ -19,6 +19,22 @@ export const MESSAGES = {
       ROLE_EXIST: 'This role already exists!',
       CREATE_SUCCESS: 'Role created successfully!',
       ROLE_NOT_FOUND: 'Role not found!',
+    },
+    BLOOD_TYPE: {
+      BLOOD_TYPE_EXIST: 'This blood type already exists!',
+      CREATE_SUCCESS: 'Blood type created successfully!',
+      BLOOD_TYPE_NOT_FOUND: 'Blood type not found!',
+      UPDATE_SUCCESS: 'Blood type updated successfully!',
+    },
+    RH: {
+      RH_EXIST: 'This Rh already exists!',
+      CREATE_SUCCESS: 'Rh created successfully!',
+      RH_NOT_FOUND: 'Rh not found!',
+      UPDATE_SUCCESS: 'Rh updated successfully!',
+    },
+    BLOOD: {
+      CREATE_SUCCESS: 'Blood created successfully!',
+      GET_ALL_SUCCESS: 'Get all bloods successfully!',
     }
   };
   

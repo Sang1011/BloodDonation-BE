@@ -5,6 +5,13 @@ import { UsersModule } from './users/users.module';
 import { LocationsModule } from './locations/location.module';
 import { RolesModule } from './roles/role.module';
 import { AuthModule } from './auth/auth.module';
+import { BloodTypesModule } from './blood_types/blood_types.module';
+import { RhsService } from './rhs/rhs.service';
+import { RhsModule } from './rhs/rhs.module';
+import { BloodsModule } from './bloods/bloods.module';
+import { InforHealthsModule } from './InforHealths/infor-healths.module';
+
+
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -20,6 +27,11 @@ import { AuthModule } from './auth/auth.module';
     UsersModule,
     LocationsModule,
     RolesModule,
+    BloodTypesModule,
+    RhsModule,
+    BloodsModule,
+    
+    InforHealthsModule,
     // AuthModule
   ],
 })
