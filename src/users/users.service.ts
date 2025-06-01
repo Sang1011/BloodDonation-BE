@@ -8,7 +8,6 @@ import { getHashPassword } from "src/shared/utils/getHashPassword";
 import { CreateUserDto, RegisterUserDTO } from "./dto/requests/create-user.dto";
 import { UpdateUserDto } from "./dto/requests/update-user.dto";
 import { User } from "./schemas/user.schema";
-import { Role } from "src/roles/schemas/role.schema";
 import { UserRole } from "src/shared/enums/user.enum";
 import { LocationService } from "src/locations/location.service";
 import { RoleService } from "src/roles/role.service";
@@ -113,7 +112,7 @@ export class UsersService {
     });
   }
 
-  async update(updateUserDto: UpdateUserDto) {
+  async update(id:string, updateUserDto: UpdateUserDto) {
     const get = await this.findOneByEmail(updateUserDto.email);
     if (!get) {
       throw new BadRequestException(MESSAGES.USERS.USER_NOT_FOUND);
@@ -121,21 +120,15 @@ export class UsersService {
     if (updateUserDto.location) {
       await this.locationService.update(get.location_id, updateUserDto.location);
     }
-    await this.userModel.updateOne({ email: updateUserDto.email }, updateUserDto);
+    await this.userModel.updateOne({ user_id: id }, updateUserDto);
 
-    const updated = await this.userModel.updateOne(
-      { email: updateUserDto.email },
-      { $set: updateUserDto }
+    const updatedUser = await this.userModel.findOneAndUpdate(
+      { user_id: id },
+      { $set: updateUserDto },
+      { new: true }
     );
 
-    if (updated.matchedCount === 0) {
-      throw new BadRequestException(MESSAGES.USERS.USER_NOT_FOUND);
-    }
-
-    return {
-      updatedFields: Object.keys(updateUserDto),
-      modifiedCount: updated.modifiedCount,
-    };
+    return updatedUser;
   }
 
   async isValidPassword(password: string, hashPassword: string) {

@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument } from "mongoose";
 import { ReceiverBlood } from "src/receiver_bloods/schemas/receiver_blood.schema";
 import { applySmartIdField } from "src/shared/middlewares/assign_custome_id.middleware";
+import { Storage } from "src/storages/schemas/storage.schema";
 
 export type BloodExportDocument = HydratedDocument<BloodExport>
 

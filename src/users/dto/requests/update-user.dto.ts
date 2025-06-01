@@ -14,17 +14,14 @@ export class UpdateUserDto {
     
         @ApiProperty({ example: 'Jane Doe' })
         @IsString()
-        @IsNotEmpty()
         fullname: string;
     
         @ApiProperty({ example: 'MEMBER' })
         @IsString()
-        @IsNotEmpty()
         role_name: string;
     
         @ApiProperty({ example: Gender.FEMALE, enum: Gender })
         @IsEnum(Gender)
-        @IsNotEmpty()
         gender: string;
     
         @ApiProperty({ type: CreateLocationDto })

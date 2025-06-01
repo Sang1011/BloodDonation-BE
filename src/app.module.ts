@@ -13,6 +13,8 @@ import { CentralBloodModule } from './central_bloods/central_blood.module';
 import { StorageModule } from './storages/storage.module';
 import { CentralBloodStorageModule } from './central_blood_storage/central_blood_storage.module';
 import { DonateBloodModule } from './donate_bloods/donate_bloods.module';
+import { ReceiverBloodModule } from './receiver_bloods/receiver.module';
+import { BloodExportModule } from './blood_exports/export.module';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -35,6 +37,9 @@ import { DonateBloodModule } from './donate_bloods/donate_bloods.module';
     CentralBloodModule,
     StorageModule,
     CentralBloodStorageModule,
+    InforHealthsModule,
+    ReceiverBloodModule, 
+    BloodExportModule,
     // AuthModule,
     DonateBloodModule,
   ],

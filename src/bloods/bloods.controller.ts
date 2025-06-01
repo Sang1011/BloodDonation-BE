@@ -1,15 +1,17 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { BloodsService } from './bloods.service';
 import { BloodDto } from './dto/request/blood.dto';
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ResponseMessage } from 'src/shared/decorators/message.decorator';
 import { Blood } from './schemas/blood.schema';
 import { MESSAGES } from 'src/shared/constants/messages.constants';
+import { Public } from 'src/shared/decorators/public.decorator';
+import { FindAllQueryDTO } from 'src/shared/dtos/requests/find-all-query.request';
 
 @Controller('bloods')
 @ApiTags('Bloods')
 export class BloodsController {
-    constructor(private readonly bloodsService: BloodsService) {}
+    constructor(private readonly bloodsService: BloodsService) { }
 
     @Post()
     @ApiOperation({ summary: 'Create a new blood' })
@@ -20,17 +22,18 @@ export class BloodsController {
     }
 
     @Get()
-    @ApiOperation({ summary: 'Get all bloods' })
-    @ApiOkResponse({description: MESSAGES.BLOOD.GET_ALL_SUCCESS})
-    @ResponseMessage(MESSAGES.BLOOD.GET_ALL_SUCCESS)
-    async findAll() {
-        return this.bloodsService.findAll();
+    @Public()
+    @ResponseMessage("Fetch all bloods")
+    @ApiOperation({ summary: 'Fetch all bloods' })
+    findAll(@Query() query: FindAllQueryDTO) {
+        return this.bloodsService.findAll(+query.current, +query.pageSize, query.qs);
     }
 
     @Get(':id')
+    @ResponseMessage("Get a blood by id")
     @ApiOperation({ summary: 'Get a blood by id' })
     @ApiOkResponse()
     async findOne(@Param('id') id: string) {
-        return this.bloodsService.findOne(id);
+        return this.bloodsService.findOne(+id);
     }
 }

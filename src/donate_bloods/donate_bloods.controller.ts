@@ -13,13 +13,15 @@ import {
 import { DonateBloodService } from './donate_bloods.service';
 import { CreateDonateBloodDto } from './dto/request/create_donate_bloods.dto';
 import { UpdateDonateBloodDto } from './dto/request/update_donate_bloods.dto';
-import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiResponse, ApiOperation, ApiOkResponse } from '@nestjs/swagger';
 import { CreateDonateBloodResponseDto } from './dto/response/create_donate_bloods.response';
 import { GetDonateBloodResponseDto } from './dto/response/get_donate_bloods.response';
 import { GetAllDonateBloodResponseDto } from './dto/response/get_all_donate_bloods.response';
 import { UpdateDonateBloodResponseDto } from './dto/response/update_donate_bloods.response';
 import { MESSAGES } from 'src/shared/constants/messages.constants';
 import { ResponseMessage } from 'src/shared/decorators/message.decorator';
+import { Public } from 'src/shared/decorators/public.decorator';
+import { FindAllQueryDTO } from 'src/shared/dtos/requests/find-all-query.request';
 
 @ApiTags('DonateBloods')
 @Controller('donate-bloods')
@@ -34,12 +36,10 @@ export class DonateBloodController {
   })
   @ResponseMessage(MESSAGES.DONATE_BLOOD.RETRIEVE_ALL_SUCCESS)
   @Get()
-  async findAll(
-    @Query('current') current: number,
-    @Query('pageSize') pageSize: number,
-    @Query() query: any,
-  ) {
-    return await this.donateBloodService.findAll(current, pageSize, query);
+    @Public()
+    @ResponseMessage("Fetch user by filter")
+    findAll(@Query() query: FindAllQueryDTO) {
+    return this.donateBloodService.findAll(+query.current, +query.pageSize, query.qs);
   }
 
   @ApiOperation({ summary: 'Get donate blood record by ID' })
@@ -84,9 +84,9 @@ export class DonateBloodController {
     status: 204,
     description: 'Donate blood record deleted successfully',
   })
+
   @ResponseMessage(MESSAGES.DONATE_BLOOD.DELETE_SUCCESS)
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string): Promise<void> {
     await this.donateBloodService.remove(id);
 }

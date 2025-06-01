@@ -14,6 +14,7 @@ import { RhsModule } from 'src/rhs/rhs.module';
     RhsModule,
   ],
   providers: [BloodsService],
-  controllers: [BloodsController]
+  controllers: [BloodsController],
+  exports: [BloodsService],
 })
 export class BloodsModule {}

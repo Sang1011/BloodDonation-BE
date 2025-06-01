@@ -1,16 +1,14 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsNotEmpty, IsString } from "class-validator";
 
 export class BloodDto {
-
-
-    @ApiProperty({ example: 1 })
-    @IsNumber()
+    @ApiProperty({ example: "A" })
+    @IsString()
     @IsNotEmpty()
-    blood_type_id: number;
+    blood_type: string;
 
-    @ApiProperty({ example: 1 })
-    @IsNumber()
+    @ApiProperty({ example: "+" })
+    @IsString()
     @IsNotEmpty()
-    rh_id: number;
+    rh: string;
 }

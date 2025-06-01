@@ -31,6 +31,22 @@ export class StorageService {
       .skip(offset)
       .limit(defaultLimit)
       .sort(sort || {})
+      .populate([
+        {
+          path: "donate_id",
+          model: 'DonateBlood',
+          localField: 'donate_id',      
+          foreignField: 'donate_id',  
+          justOne: true,
+        },
+        {
+          path: 'blood_id',
+          model: 'Blood',
+          localField: 'blood_id',      
+          foreignField: 'blood_id',  
+          justOne: true,
+        },
+      ])
       .exec();
     return {
       meta: {
@@ -44,7 +60,22 @@ export class StorageService {
   }
 
   async findOne(id: string) {
-    const cb = await this.storageModel.findOne({storage_id: id})
+    const cb = await this.storageModel.findOne({storage_id: id}).populate([
+        {
+          path: "donate_id",
+          model: 'DonateBlood',
+          localField: 'donate_id',      
+          foreignField: 'donate_id',  
+          justOne: true,
+        },
+        {
+          path: 'blood_id',
+          model: 'Blood',
+          localField: 'blood_id',      
+          foreignField: 'blood_id',  
+          justOne: true,
+        },
+      ])
     if (!cb) throw new NotFoundException("Storage not found");
     return cb;
   }

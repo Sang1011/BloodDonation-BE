@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from "@nestj
 import { ApiTags, ApiCreatedResponse, ApiOkResponse } from "@nestjs/swagger";
 import { ResponseMessage } from "src/shared/decorators/message.decorator";
 import { Public } from "src/shared/decorators/public.decorator";
-import { CentralBloodService } from "./cnetral_blood.service";
+import { CentralBloodService } from "./central_blood.service";
 import { CreateCentralBloodDto } from "./dtos/requests/create.dto";
 import { UpdateCentralBloodDto } from "./dtos/requests/update.dto";
 import { CreateCentralDTO } from "./dtos/responses/create.response";

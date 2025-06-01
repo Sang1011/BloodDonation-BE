@@ -43,14 +43,14 @@ export class UsersController {
     return this.usersService.findOne(id);
   }
 
-  @Patch()
+  @Patch(":id")
   @ApiOkResponse({
     description: 'Update user successfully',
     type: UpdateUserResponse,
   })
   @ResponseMessage("Update a user")
-  update(@Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(updateUserDto);
+  update(@Param("id") id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.update(id, updateUserDto);
   }
 
   @Delete(":id")
