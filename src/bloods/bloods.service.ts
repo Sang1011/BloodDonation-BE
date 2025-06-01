@@ -32,8 +32,13 @@ export class BloodsService {
     }
 
     async findOne(id: string) {
-        //return this.bloodModel.findOne({blood_id: id}).populate('blood_type_id').populate('rh_id');
-        return this.bloodModel.findOne({blood_id: id});
+        if (!id) {
+            throw new Error('Blood ID is required');
+        }
+        return this.bloodModel.findOne({blood_id: id}).populate([
+            { path: 'blood_type_id', model: 'BloodType' },
+            { path: 'rh_id', model: 'Rh' }
+        ]);
     }
 
     

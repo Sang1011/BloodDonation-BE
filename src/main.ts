@@ -72,6 +72,8 @@ async function bootstrap() {
 
   // --- SWAGGER SETUP END ---
 
+  // fs.writeFileSync('./swagger.json', JSON.stringify(document));
+  // export file
   await app.listen(configService.get<string>("PORT"));
 }
 bootstrap();
