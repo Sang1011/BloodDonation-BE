@@ -35,6 +35,14 @@ export const MESSAGES = {
     BLOOD: {
       CREATE_SUCCESS: 'Blood created successfully!',
       GET_ALL_SUCCESS: 'Get all bloods successfully!',
-    }
+    },
+    DONATE_BLOOD: {
+      CREATE_SUCCESS: 'Donate blood record created successfully.',
+      UPDATE_SUCCESS: 'Donate blood record updated successfully.',
+      DELETE_SUCCESS: 'Donate blood record deleted successfully.',
+      NOT_FOUND: 'Donate blood record not found.',
+      RETRIEVE_ONE_SUCCESS: 'Donate blood record retrieved successfully.',
+      RETRIEVE_ALL_SUCCESS: 'All donate blood records retrieved successfully.',
+    },
   };
   
