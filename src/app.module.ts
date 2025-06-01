@@ -9,8 +9,9 @@ import { BloodTypesModule } from './blood_types/blood_types.module';
 import { RhsModule } from './rhs/rhs.module';
 import { BloodsModule } from './bloods/bloods.module';
 import { InforHealthsModule } from './InforHealths/infor-healths.module';
-
-
+import { CentralBloodModule } from './central_bloods/central_blood.module';
+import { StorageModule } from './storages/storage.module';
+import { CentralBloodStorageModule } from './central_blood_storage/central_blood_storage.module';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -30,6 +31,9 @@ import { InforHealthsModule } from './InforHealths/infor-healths.module';
     RhsModule,
     BloodsModule,
     InforHealthsModule,
+    CentralBloodModule,
+    StorageModule,
+    CentralBloodStorageModule
     // AuthModule
   ],
 })

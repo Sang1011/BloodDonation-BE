@@ -1,10 +1,11 @@
-import { Controller, Post, Get, Body, Param, Patch } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { Controller, Post, Get, Body, Param, Patch, Query } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiOkResponse } from '@nestjs/swagger';
 import { LocationService } from './location.service';
 import { CreateLocationDto } from './dtos/requests/create.dto';
 import { ResponseMessage } from 'src/shared/decorators/message.decorator';
 import { UpdateLocationDto } from './dtos/requests/update.dto';
 import { Public } from 'src/shared/decorators/public.decorator';
+import { FindAllQueryDTO } from 'src/shared/dtos/requests/find-all-query.request';
 
 @ApiTags('Locations')
 @Controller('locations')
@@ -22,10 +23,10 @@ export class LocationController {
   @Get()
   @Public()
   @ApiOperation({ summary: 'Get all locations' })
-  @ApiResponse({ status: 200, description: 'List of locations' })
+  @ApiOkResponse({ status: 200, description: 'List of locations' })
   @ResponseMessage('Locations retrieved successfully')
-  async findAll() {
-    return this.locationService.findAll();
+  async findAll(@Query() query: FindAllQueryDTO) {
+    return this.locationService.findAll(+query.current, +query.pageSize, query.qs);
   }
 
   @Get(':location_id')
