@@ -15,8 +15,11 @@ import {
   ApiCookieAuth,
   ApiBody,
   ApiSecurity,
+  ApiOkResponse,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { LoginUserDTO } from "./dtos/requests/login.dto";
+import { LoginFailedResponse } from "./dtos/responses/login.response";
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -27,8 +30,8 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @ResponseMessage('User Login')
   @ApiOperation({ summary: 'User login with email and password' })
-  @ApiResponse({ status: 201, description: 'User logged in successfully.' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiOkResponse({ type: LoginUserDTO, description: 'User logged in successfully.' })
+  @ApiUnauthorizedResponse({ type: LoginFailedResponse, description: 'Invalid credentials' })
   @ApiBody({ type: LoginUserDTO })
   @Post('/login')
   handleLogin(@Req() req, @Res({ passthrough: true }) response: Response) {
@@ -53,24 +56,17 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'User info returned successfully.' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   handleAccount(@User() user: IUser) {
-    return {
-      user,
-    };
+    return this.authService.getAccount(user);
   }
 
   @Public()
-  @Get('/refresh')
-  @ResponseMessage('Get user by refresh token')
+  @Get("/refresh")
   @ApiOperation({ summary: 'Refresh access token with refresh token' })
-  @ApiCookieAuth() // Dùng cookie để lấy refresh token
   @ApiResponse({ status: 200, description: 'Token refreshed successfully.' })
   @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
-  handleRefreshToken(
-    @Req() req: Request,  // lấy request để lấy cookie
-    @Res({ passthrough: true }) response: Response,
-  ) {
-    const refreshToken = req.cookies['refresh_token'];
-    if (!refreshToken) throw new BadRequestException('Refresh token missing');
+  @ResponseMessage("Get user by refresh token")
+  handleRefreshToken(@Req() request: Request, @Res({passthrough: true}) response: Response) {
+    const refreshToken = request.cookies["refresh_token"]
     return this.authService.processNewToken(refreshToken, response);
   }
 

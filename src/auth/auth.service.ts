@@ -29,6 +29,10 @@ export class AuthService {
     return null;
   }
 
+  async getAccount(user: IUser) {
+    return this.usersService.findOne(user.user_id);
+  }
+
   async login(user: IUser, response: Response) {
     const { user_id, fullname, email, role } = user;
     const payload = {
@@ -61,12 +65,16 @@ export class AuthService {
   }
 
   async register(user: RegisterUserDTO) {
+    const existingUser = await this.usersService.findOneByEmail(user.email);
+    if (existingUser) {
+      throw new BadRequestException(MESSAGES.AUTH.EMAIL_EXIST);
+    }
     const userCreated = await this.usersService.create(user);
     if (!userCreated) return null;
-    const { _id } = userCreated;
+    const { user_id } = userCreated;
 
     return {
-      _id,
+      user_id,
     };
   }
 

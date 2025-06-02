@@ -4,10 +4,10 @@ import { CentralBlood } from 'src/central_bloods/schemas/central_blood.schema';
 import { applySmartIdField } from 'src/shared/middlewares/assign_custome_id.middleware';
 import { Storage } from 'src/storages/schemas/storage.schema';
 
-export type CentralBloodStorageDocument = HydratedDocument<CentralBloodStorage>;
+export type CentralStorageDocument = HydratedDocument<CentralStorage>;
 
-@Schema({ collection: "central_blood_storages"})
-export class CentralBloodStorage {
+@Schema({ collection: "central_storages"})
+export class CentralStorage {
     @Prop({ unique: true })
     centralStorage_id: number;
 
@@ -18,7 +18,7 @@ export class CentralBloodStorage {
     storage_id: string;
 }
 
-export const CentralBloodStorageSchema = SchemaFactory.createForClass(CentralBloodStorage);
+export const CentralStorageSchema = SchemaFactory.createForClass(CentralStorage);
 
 // middleware
-applySmartIdField(CentralBloodStorageSchema, CentralBloodStorage.name, 'centralStorage_id');
+applySmartIdField(CentralStorageSchema, CentralStorage.name, 'centralStorage_id');

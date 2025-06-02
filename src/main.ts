@@ -7,15 +7,16 @@ import { JwtAuthGuard } from "./auth/guards/jwt-auth.guard";
 import { TransformInterceptor } from "src/shared/interceptors/transform.interceptor";
 import * as cookieParser from 'cookie-parser';
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import * as fs from 'fs';
+
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
   const reflector = app.get(Reflector);
-  // app.useGlobalGuards(new JwtAuthGuard(reflector));
+  app.useGlobalGuards(new JwtAuthGuard(reflector));
   app.useGlobalInterceptors(new TransformInterceptor(reflector))
   app.useGlobalPipes(new ValidationPipe())
-
   // config cookie
   app.use(cookieParser());
 
@@ -54,7 +55,8 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api-docs', app, document, {
+  SwaggerModule.setup('api-docs', app, document, 
+    {
     swaggerOptions: {
       authAction: {
         'access-token': {

@@ -56,7 +56,7 @@ export class UsersService {
     });
 
     return {
-      _id: user._id
+      user_id: user.user_id
     };
   }
 
@@ -93,8 +93,8 @@ export class UsersService {
 
   async findOne(id: string) {
     const user = await this.userModel
-      .findOne({ _id: id })
-      .select('-password')
+      .findOne({ user_id: id })
+      .select('-password -refresh_token')
       .populate([
         { path: 'location_id' },
         { path: 'role_id' }

@@ -23,7 +23,7 @@ import { ResponseMessage } from 'src/shared/decorators/message.decorator';
 import { Public } from 'src/shared/decorators/public.decorator';
 import { FindAllQueryDTO } from 'src/shared/dtos/requests/find-all-query.request';
 
-@ApiTags('DonateBloods')
+@ApiTags('Donate Bloods')
 @Controller('donate-bloods')
 export class DonateBloodController {
   constructor(private readonly donateBloodService: DonateBloodService) {}

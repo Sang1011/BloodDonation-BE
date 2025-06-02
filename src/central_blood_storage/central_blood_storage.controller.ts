@@ -3,18 +3,18 @@ import { ApiTags, ApiCreatedResponse, ApiOkResponse } from "@nestjs/swagger";
 import { ResponseMessage } from "src/shared/decorators/message.decorator";
 import { Public } from "src/shared/decorators/public.decorator";
 import { FindAllQueryDTO } from "src/shared/dtos/requests/find-all-query.request";
-import { CentralBloodStorageService } from "./central_blood_storage.service";
 import { CreateCentralBloodStorageResponseDto } from "./dtos/responses/create.response";
 import { CreateCentralBloodStorageDto } from "./dtos/requests/create.dto";
 import { GetAllCentralStorageResponseDto } from "./dtos/responses/getAll.response";
 import { GetByIdCentralBloodStorageResponseDto } from "./dtos/responses/get.response";
 import { UpdateCentralBloodStorageDto } from "./dtos/requests/update.dto";
 import { DeleteByIdCentralBloodStorageDTO } from "./dtos/responses/delete.response";
+import { CentralStorageService } from "./central_blood_storage.service";
 
-@ApiTags('Central Blood Storages')
-@Controller('central-blood-storages')
-export class CentralBloodStorageController {
-  constructor(private readonly service: CentralBloodStorageService) {}
+@ApiTags('Central Storages')
+@Controller('central-storages')
+export class CentralStorageController {
+  constructor(private readonly service: CentralStorageService) {}
 
   @Post()
   @ApiCreatedResponse({ type: CreateCentralBloodStorageResponseDto })

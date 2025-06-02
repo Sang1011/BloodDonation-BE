@@ -4,7 +4,8 @@ export const MESSAGES = {
       EXPIRED_TOKEN: 'Token has expired! Please log in again.',
       LOGIN_SUCCESS: 'Login successful!',
       LOGIN_FAILED: 'Incorrect username or password!',
-      UNAUTHORIZED: 'Access denied!'
+      UNAUTHORIZED: 'Access denied!',
+      EMAIL_EXIST: 'This email already exists!',
     },
     USERS: {
       CREATE_SUCCESS: 'User created successfully!',

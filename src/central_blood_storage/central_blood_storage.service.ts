@@ -2,22 +2,22 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import aqp, { AqpResult } from "api-query-params";
-import { CentralBloodStorage } from "./schemas/central_blood_storage.schema";
 import { UpdateCentralBloodStorageDto } from "./dtos/requests/update.dto";
 import { CreateCentralBloodStorageDto } from "./dtos/requests/create.dto";
+import { CentralStorage } from "./schemas/central_blood_storage.schema";
 
 @Injectable()
-export class CentralBloodStorageService {
+export class CentralStorageService {
   constructor(
-    @InjectModel(CentralBloodStorage.name)
-    private readonly centralBloodStorageModel: Model<CentralBloodStorage>
+    @InjectModel(CentralStorage.name)
+    private readonly centralStorageModel: Model<CentralStorage>
   ) {}
 
   async create(dto: CreateCentralBloodStorageDto) {
-    const count = await this.centralBloodStorageModel.countDocuments();
+    const count = await this.centralStorageModel.countDocuments();
     let counter = 1;
-    if (count > 0) counter = count + 1; 
-    const created = new this.centralBloodStorageModel({...dto, centralBlood_id: counter});
+    if (count > 0) counter = count + 1;
+    const created = new this.centralStorageModel({ ...dto, centralStorage_id: counter });
     return created.save();
   }
 
@@ -28,9 +28,9 @@ export class CentralBloodStorageService {
     const defaultCurrent = currentPage ? currentPage : 1;
     const offset = (+defaultCurrent - 1) * +limit;
     const defaultLimit = +limit ? +limit : 10;
-    const totalItems = (await this.centralBloodStorageModel.find(filter)).length;
+    const totalItems = (await this.centralStorageModel.find(filter)).length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
-    const result = await this.centralBloodStorageModel.find(filter)
+    const result = await this.centralStorageModel.find(filter)
       .skip(offset)
       .limit(defaultLimit)
       .sort(sort || {})
@@ -48,20 +48,20 @@ export class CentralBloodStorageService {
 
   async findOne(id: string) {
     const num = Number.parseInt(id);
-    const cb = await this.centralBloodStorageModel.findOne({centralBlood_id: num})
+    const cb = await this.centralStorageModel.findOne({centralStorage_id: num})
     if (!cb) throw new NotFoundException("Central blood not found");
     return cb;
   }
 
-  async update(id: string, updateDto: UpdateCentralBloodStorageDto): Promise<CentralBloodStorage> {
-      const updated = await this.centralBloodStorageModel.findOneAndUpdate(
-        { centralBlood_id: id },
+  async update(id: string, updateDto: UpdateCentralBloodStorageDto): Promise<CentralStorage> {
+      const updated = await this.centralStorageModel.findOneAndUpdate(
+        { centralStorage_id: id },
         updateDto,
         { new: true },
       );
   
       if (!updated) {
-        throw new NotFoundException('Central not found');
+        throw new NotFoundException('Central Storage not found');
       }
   
       return updated;
@@ -69,8 +69,8 @@ export class CentralBloodStorageService {
 
   async remove(id: string) {
     const num = Number.parseInt(id);
-    const deleted = await this.centralBloodStorageModel.deleteOne({centralStorage_id: num});
-    if (!deleted) throw new NotFoundException("Central blood not found");
+    const deleted = await this.centralStorageModel.deleteOne({centralStorage_id: num});
+    if (!deleted) throw new NotFoundException("Central Storage not found");
     return deleted;
   }
 }
