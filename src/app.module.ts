@@ -15,6 +15,7 @@ import { DonateBloodModule } from './donate_bloods/donate_bloods.module';
 import { ReceiverBloodModule } from './receiver_bloods/receiver.module';
 import { BloodExportModule } from './blood_exports/export.module';
 import { CentralStorageModule } from './central_blood_storage/central_blood_storage.module';
+import { EmailModule } from './email/email.module';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -42,6 +43,7 @@ import { CentralStorageModule } from './central_blood_storage/central_blood_stor
     ReceiverBloodModule, 
     BloodExportModule,
     DonateBloodModule,
+    EmailModule,
   ],
 })
 export class AppModule {}
