@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { BloodsService } from './bloods.service';
 import { BloodDto } from './dto/request/blood.dto';
-import { ApiBadRequestResponse, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { ResponseMessage } from 'src/shared/decorators/message.decorator';
 import { Blood } from './schemas/blood.schema';
 import { MESSAGES } from 'src/shared/constants/messages.constants';
@@ -9,6 +9,8 @@ import { Public } from 'src/shared/decorators/public.decorator';
 import { FindAllQueryDTO } from 'src/shared/dtos/requests/find-all-query.request';
 
 @Controller('bloods')
+@ApiBearerAuth('access-token')
+@ApiSecurity('access-token')
 @ApiTags('Bloods')
 export class BloodsController {
     constructor(private readonly bloodsService: BloodsService) { }

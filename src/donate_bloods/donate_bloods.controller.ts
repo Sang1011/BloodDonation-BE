@@ -13,7 +13,7 @@ import {
 import { DonateBloodService } from './donate_bloods.service';
 import { CreateDonateBloodDto } from './dto/request/create_donate_bloods.dto';
 import { UpdateDonateBloodDto } from './dto/request/update_donate_bloods.dto';
-import { ApiTags, ApiResponse, ApiOperation, ApiOkResponse } from '@nestjs/swagger';
+import { ApiTags, ApiResponse, ApiOperation, ApiOkResponse, ApiBearerAuth, ApiSecurity } from '@nestjs/swagger';
 import { CreateDonateBloodResponseDto } from './dto/response/create_donate_bloods.response';
 import { GetDonateBloodResponseDto } from './dto/response/get_donate_bloods.response';
 import { GetAllDonateBloodResponseDto } from './dto/response/get_all_donate_bloods.response';
@@ -24,6 +24,8 @@ import { Public } from 'src/shared/decorators/public.decorator';
 import { FindAllQueryDTO } from 'src/shared/dtos/requests/find-all-query.request';
 
 @ApiTags('Donate Bloods')
+@ApiBearerAuth('access-token')
+@ApiSecurity('access-token')
 @Controller('donate-bloods')
 export class DonateBloodController {
   constructor(private readonly donateBloodService: DonateBloodService) {}

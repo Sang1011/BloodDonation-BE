@@ -1,5 +1,5 @@
 import { Controller, Post, Get, Body, Param, Patch, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiOkResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiOkResponse, ApiBearerAuth, ApiSecurity } from '@nestjs/swagger';
 import { LocationService } from './location.service';
 import { CreateLocationDto } from './dtos/requests/create.dto';
 import { ResponseMessage } from 'src/shared/decorators/message.decorator';
@@ -8,6 +8,8 @@ import { Public } from 'src/shared/decorators/public.decorator';
 import { FindAllQueryDTO } from 'src/shared/dtos/requests/find-all-query.request';
 
 @ApiTags('Locations')
+@ApiBearerAuth('access-token')
+@ApiSecurity('access-token')
 @Controller('locations')
 export class LocationController {
   constructor(private readonly locationService: LocationService) {}

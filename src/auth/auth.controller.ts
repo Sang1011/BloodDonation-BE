@@ -22,6 +22,8 @@ import { LoginUserDTO } from "./dtos/requests/login.dto";
 import { LoginFailedResponse } from "./dtos/responses/login.response";
 
 @ApiTags('Auth')
+@ApiBearerAuth('access-token')
+@ApiSecurity('access-token')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) { }
@@ -35,7 +37,7 @@ export class AuthController {
   @ApiBody({ type: LoginUserDTO })
   @Post('/login')
   handleLogin(@Req() req, @Res({ passthrough: true }) response: Response) {
-    return this.authService.login(req.user, response);
+    return this.authService.login(req, response);
   }
 
   @Public()
@@ -51,8 +53,6 @@ export class AuthController {
   @Get('/account')
   @ResponseMessage('Get logged-in user info')
   @ApiOperation({ summary: 'Get logged-in user info' })
-  @ApiBearerAuth('access-token')
-  @ApiSecurity('access-token')    
   @ApiResponse({ status: 200, description: 'User info returned successfully.' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   handleAccount(@User() user: IUser) {
@@ -73,8 +73,6 @@ export class AuthController {
   @Post('/logout')
   @ResponseMessage('Logout User')
   @ApiOperation({ summary: 'Logout user and clear tokens' })
-  @ApiBearerAuth('access-token')
-  @ApiSecurity('access-token')
   @ApiResponse({ status: 200, description: 'Logged out successfully.' })
   handleLogout(@User() user: IUser, @Res({ passthrough: true }) response: Response) {
     return this.authService.logout(user, response);

@@ -3,7 +3,7 @@ import { UsersService } from "./users.service";
 import { CreateUserDto } from "./dto/requests/create-user.dto";
 import { UpdateUserDto } from "./dto/requests/update-user.dto";
 import { ResponseMessage } from "src/shared/decorators/message.decorator";
-import { ApiCreatedResponse, ApiOkResponse, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiSecurity, ApiTags } from "@nestjs/swagger";
 import { CreateUserResponseDTO } from "./dto/responses/create-user.response";
 import { UpdateUserResponse } from "./dto/responses/update-user.response";
 import { DeleteUserResponse } from "./dto/responses/delete-user.response";
@@ -14,6 +14,8 @@ import { Public } from "src/shared/decorators/public.decorator";
 
 
 @ApiTags('Users')
+@ApiBearerAuth('access-token')
+@ApiSecurity('access-token')
 @Controller("users")
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

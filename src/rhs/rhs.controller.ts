@@ -1,13 +1,15 @@
 import { Controller, Post, Body, Patch, Param, Get, Query } from '@nestjs/common';
 import { RhsService } from './rhs.service';
 import { RhsDto } from './dto/rhs.dto';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { ResponseMessage } from 'src/shared/decorators/message.decorator';
 import { MESSAGES } from 'src/shared/constants/messages.constants';
 import { Public } from 'src/shared/decorators/public.decorator';
 import { FindAllQueryDTO } from 'src/shared/dtos/requests/find-all-query.request';
 
 @Controller('rhs')
+@ApiBearerAuth('access-token')
+@ApiSecurity('access-token')
 @ApiTags('Rhs')
 export class RhsController {
     constructor(private readonly rhsService: RhsService) { }

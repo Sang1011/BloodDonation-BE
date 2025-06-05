@@ -1,11 +1,13 @@
 import { Controller, Get, Post, Param, Body, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth, ApiSecurity } from '@nestjs/swagger';
 import { RoleService } from './role.service';
 import { ResponseMessage } from 'src/shared/decorators/message.decorator';
 import { CreateRoleDto } from './dtos/requests/create.dto';
 import { Public } from 'src/shared/decorators/public.decorator';
 
 @ApiTags('Roles')
+@ApiBearerAuth('access-token')
+@ApiSecurity('access-token')
 @Controller('roles')
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}

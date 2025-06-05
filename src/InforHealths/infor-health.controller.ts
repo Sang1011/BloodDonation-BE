@@ -3,11 +3,13 @@ import { CreateInforHealthDto } from "./dtos/requests/create.request";
 import { UpdateInforHealthDto } from "./dtos/requests/update.request";
 import { FindAllQueryDTO } from "src/shared/dtos/requests/find-all-query.request";
 import { ResponseMessage } from "src/shared/decorators/message.decorator";
-import { ApiCreatedResponse, ApiOkResponse, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiSecurity, ApiTags } from "@nestjs/swagger";
 import { Public } from "src/shared/decorators/public.decorator";
 import { InforHealthService } from "./infor-healths.service";
 
 @ApiTags("Infor Health")
+@ApiBearerAuth('access-token')
+@ApiSecurity('access-token')
 @Controller("infor-health")
 export class InforHealthController {
   constructor(private readonly inforHealthService: InforHealthService) {}

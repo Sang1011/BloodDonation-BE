@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from "@nestjs/common";
-import { ApiTags, ApiCreatedResponse, ApiOkResponse } from "@nestjs/swagger";
+import { ApiTags, ApiCreatedResponse, ApiOkResponse, ApiBearerAuth, ApiSecurity } from "@nestjs/swagger";
 import { ResponseMessage } from "src/shared/decorators/message.decorator";
 import { Public } from "src/shared/decorators/public.decorator";
 import { FindAllQueryDTO } from "src/shared/dtos/requests/find-all-query.request";
@@ -12,6 +12,8 @@ import { DeleteByIdCentralBloodStorageDTO } from "./dtos/responses/delete.respon
 import { CentralStorageService } from "./central_blood_storage.service";
 
 @ApiTags('Central Storages')
+@ApiBearerAuth('access-token')
+@ApiSecurity('access-token')
 @Controller('central-storages')
 export class CentralStorageController {
   constructor(private readonly service: CentralStorageService) {}
