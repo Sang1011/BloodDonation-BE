@@ -10,7 +10,7 @@ export class EmailService {
     constructor(private readonly mailerService: MailerService) {}
 
     async sendRegisterEmail(user: RegisterUserDTO) {
-        const result = await this.mailerService.sendMail({
+        await this.mailerService.sendMail({
             to: user.email,
             subject: `Verify your account`,
             template: './register',
@@ -19,16 +19,14 @@ export class EmailService {
                 url: "https://giotmauvang.org.vn/"
               },
         });
-        return result;
     }
 
     async sendSuccessDonateEmail(donateInfo: SendDonateBloodDTO) {
-        const result = await this.mailerService.sendMail({
+        await this.mailerService.sendMail({
             to: donateInfo.email,
             subject: `Verify your account`,
             template: './blood-donation',
         });
-        return result;
     }
 }
 
