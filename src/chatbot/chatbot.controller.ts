@@ -6,14 +6,12 @@ import { Public } from 'src/shared/decorators/public.decorator';
 import { ResponseMessage } from 'src/shared/decorators/message.decorator';
 
 @ApiTags('Chatbot')
-@ApiBearerAuth('access-token')
-@ApiSecurity('access-token')
 @Controller('chatbot')
 export class ChatbotController {
   constructor(private readonly chatbotService: ChatbotService) {}
 
   @Public()
-  @ResponseMessage('Trợ lý AI hỗ trợ hiến máu')
+  @ResponseMessage('Assistant is ready to help you!')
   @Post('ask')
   async ask(@Body() askMessageDto: AskMessageDto) {
     return this.chatbotService.askAI(askMessageDto.message);

@@ -10,7 +10,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiResponse, ApiOperation, ApiOkResponse } from '@nestjs/swagger';
+import { ApiTags, ApiResponse, ApiOperation, ApiOkResponse, ApiBearerAuth, ApiSecurity } from '@nestjs/swagger';
 import { MESSAGES } from 'src/shared/constants/messages.constants';
 import { ResponseMessage } from 'src/shared/decorators/message.decorator';
 import { Public } from 'src/shared/decorators/public.decorator';
@@ -26,7 +26,7 @@ import { UpdateReceiveBloodDto } from './dtos/requests/update_receive_bloods.dto
 @ApiTags('Receiver Bloods')
 @Controller('receiver-bloods')
 export class ReceiveBloodController {
-  constructor(private readonly receiveBloodService: ReceiverBloodService) {}
+  constructor(private readonly receiveBloodService: ReceiverBloodService) { }
 
   @ApiOperation({ summary: 'Get all receive blood records with pagination and filters' })
   @ApiResponse({
@@ -36,9 +36,9 @@ export class ReceiveBloodController {
   })
   @ResponseMessage(MESSAGES.DONATE_BLOOD.RETRIEVE_ALL_SUCCESS)
   @Get()
-    @Public()
-    @ResponseMessage("Fetch user by filter")
-    findAll(@Query() query: FindAllQueryDTO) {
+  @Public()
+  @ResponseMessage("Fetch user by filter")
+  findAll(@Query() query: FindAllQueryDTO) {
     return this.receiveBloodService.findAll(+query.current, +query.pageSize, query.qs);
   }
 
@@ -48,6 +48,8 @@ export class ReceiveBloodController {
     description: 'Fetched receive blood record successfully',
     type: GetReceiveBloodResponseDto,
   })
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiResponse({ status: 404, description: 'Receive blood record not found' })
   @ResponseMessage(MESSAGES.DONATE_BLOOD.RETRIEVE_ONE_SUCCESS)
   @Get(':id')
@@ -61,6 +63,8 @@ export class ReceiveBloodController {
     description: 'Receive blood record created successfully',
     type: CreateReceiveBloodResponseDto,
   })
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ResponseMessage(MESSAGES.DONATE_BLOOD.CREATE_SUCCESS)
   @Post()
   async create(@Body() dto: CreateReceiveBloodDto) {
@@ -73,6 +77,8 @@ export class ReceiveBloodController {
     description: 'Receive blood record updated successfully',
     type: UpdateReceiveBloodResponseDto,
   })
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ResponseMessage(MESSAGES.DONATE_BLOOD.UPDATE_SUCCESS)
   @Put(':id')
   async update(@Param('id') id: string, @Body() dto: UpdateReceiveBloodDto) {
@@ -84,10 +90,11 @@ export class ReceiveBloodController {
     status: 204,
     description: 'Receive blood record deleted successfully',
   })
-
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ResponseMessage("Receiver Blood record deleted successfully")
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<void> {
     await this.receiveBloodService.remove(id);
-}
+  }
 }

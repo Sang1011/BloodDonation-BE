@@ -12,15 +12,15 @@ import { FindAllQueryDTO } from "src/shared/dtos/requests/find-all-query.request
 import { DeleteByIdCentralDTO } from "./dtos/responses/delete.response";
 
 @ApiTags('Central Blood')
-@ApiBearerAuth('access-token')
-@ApiSecurity('access-token')
 @Controller('central-blood')
 export class CentralBloodController {
-  constructor(private readonly service: CentralBloodService) {}
+  constructor(private readonly service: CentralBloodService) { }
 
   @Post()
   @ApiCreatedResponse({ type: CreateCentralDTO })
   @ResponseMessage("Created central blood")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   create(@Body() dto: CreateCentralBloodDto) {
     return this.service.create(dto);
   }
@@ -34,6 +34,8 @@ export class CentralBloodController {
   }
 
   @Get(":id")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOkResponse({ type: GetByIdCentralDTO })
   @ResponseMessage("Get central blood center by id")
   findOne(@Param("id") id: string) {
@@ -41,6 +43,8 @@ export class CentralBloodController {
   }
 
   @Patch(":id")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOkResponse({ type: GetByIdCentralDTO })
   @ResponseMessage("Update central blood center")
   update(@Param("id") id: string, @Body() dto: UpdateCentralBloodDto) {
@@ -48,6 +52,8 @@ export class CentralBloodController {
   }
 
   @Delete(":id")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOkResponse({ type: DeleteByIdCentralDTO })
   @ResponseMessage("Delete central blood center")
   remove(@Param("id") id: string) {

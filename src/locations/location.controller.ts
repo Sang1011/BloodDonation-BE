@@ -8,13 +8,13 @@ import { Public } from 'src/shared/decorators/public.decorator';
 import { FindAllQueryDTO } from 'src/shared/dtos/requests/find-all-query.request';
 
 @ApiTags('Locations')
-@ApiBearerAuth('access-token')
-@ApiSecurity('access-token')
 @Controller('locations')
 export class LocationController {
-  constructor(private readonly locationService: LocationService) {}
+  constructor(private readonly locationService: LocationService) { }
 
   @Post()
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOperation({ summary: 'Create new location' })
   @ApiResponse({ status: 201, description: 'Location created successfully' })
   @ResponseMessage('Location created successfully')
@@ -32,6 +32,8 @@ export class LocationController {
   }
 
   @Get(':location_id')
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOperation({ summary: 'Get location by ID' })
   @ApiParam({ name: 'location_id', description: 'Location ID' })
   @ApiResponse({ status: 200, description: 'Location found' })

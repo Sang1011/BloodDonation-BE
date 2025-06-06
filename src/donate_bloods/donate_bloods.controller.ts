@@ -24,11 +24,9 @@ import { Public } from 'src/shared/decorators/public.decorator';
 import { FindAllQueryDTO } from 'src/shared/dtos/requests/find-all-query.request';
 
 @ApiTags('Donate Bloods')
-@ApiBearerAuth('access-token')
-@ApiSecurity('access-token')
 @Controller('donate-bloods')
 export class DonateBloodController {
-  constructor(private readonly donateBloodService: DonateBloodService) {}
+  constructor(private readonly donateBloodService: DonateBloodService) { }
 
   @ApiOperation({ summary: 'Get all donate blood records with pagination and filters' })
   @ApiResponse({
@@ -38,9 +36,9 @@ export class DonateBloodController {
   })
   @ResponseMessage(MESSAGES.DONATE_BLOOD.RETRIEVE_ALL_SUCCESS)
   @Get()
-    @Public()
-    @ResponseMessage("Fetch user by filter")
-    findAll(@Query() query: FindAllQueryDTO) {
+  @Public()
+  @ResponseMessage("Fetch user by filter")
+  findAll(@Query() query: FindAllQueryDTO) {
     return this.donateBloodService.findAll(+query.current, +query.pageSize, query.qs);
   }
 
@@ -53,6 +51,8 @@ export class DonateBloodController {
   @ApiResponse({ status: 404, description: 'Donate blood record not found' })
   @ResponseMessage(MESSAGES.DONATE_BLOOD.RETRIEVE_ONE_SUCCESS)
   @Get(':id')
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   async findOne(@Param('id') id: string) {
     return await this.donateBloodService.findOne(id);
   }
@@ -65,6 +65,8 @@ export class DonateBloodController {
   })
   @ResponseMessage(MESSAGES.DONATE_BLOOD.CREATE_SUCCESS)
   @Post()
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   async create(@Body() dto: CreateDonateBloodDto) {
     return await this.donateBloodService.create(dto);
   }
@@ -77,6 +79,8 @@ export class DonateBloodController {
   })
   @ResponseMessage(MESSAGES.DONATE_BLOOD.UPDATE_SUCCESS)
   @Put(':id')
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   async update(@Param('id') id: string, @Body() dto: UpdateDonateBloodDto) {
     return await this.donateBloodService.update(id, dto);
   }
@@ -89,7 +93,9 @@ export class DonateBloodController {
 
   @ResponseMessage(MESSAGES.DONATE_BLOOD.DELETE_SUCCESS)
   @Delete(':id')
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   async remove(@Param('id') id: string): Promise<void> {
     await this.donateBloodService.remove(id);
-}
+  }
 }

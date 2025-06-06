@@ -14,8 +14,6 @@ import { Public } from "src/shared/decorators/public.decorator";
 
 
 @ApiTags('Users')
-@ApiBearerAuth('access-token')
-@ApiSecurity('access-token')
 @Controller("users")
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -24,6 +22,8 @@ export class UsersController {
   description: 'User created successfully',
   type: CreateUserResponseDTO,
   })
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @Post()
   @ResponseMessage("Create a new user")
   create(@Body() createUserDto: CreateUserDto) {
@@ -38,14 +38,18 @@ export class UsersController {
   return this.usersService.findAll(+query.current, +query.pageSize, query.qs);
 }
 
-  @ApiOkResponse({ type: GetUserByIdSwaggerResponse })
   @Get(":id")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
+  @ApiOkResponse({ type: GetUserByIdSwaggerResponse })
   @ResponseMessage("Fetch user by id")
   findOne(@Param("id") id: string) {
     return this.usersService.findOne(id);
   }
 
   @Patch(":id")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOkResponse({
     description: 'Update user successfully',
     type: UpdateUserResponse,
@@ -56,6 +60,8 @@ export class UsersController {
   }
 
   @Delete(":id")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOkResponse({
     description: 'User deleted successfully',
     type: DeleteUserResponse,

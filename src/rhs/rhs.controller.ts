@@ -8,13 +8,13 @@ import { Public } from 'src/shared/decorators/public.decorator';
 import { FindAllQueryDTO } from 'src/shared/dtos/requests/find-all-query.request';
 
 @Controller('rhs')
-@ApiBearerAuth('access-token')
-@ApiSecurity('access-token')
 @ApiTags('Rhs')
 export class RhsController {
     constructor(private readonly rhsService: RhsService) { }
 
     @Post()
+    @ApiBearerAuth('access-token')
+    @ApiSecurity('access-token')
     @ApiOperation({ summary: 'Create a new Rh' })
     @ApiOkResponse({ type: RhsDto })
     @ResponseMessage(MESSAGES.RH.CREATE_SUCCESS)
@@ -23,6 +23,8 @@ export class RhsController {
     }
 
     @Patch(':id')
+    @ApiBearerAuth('access-token')
+    @ApiSecurity('access-token')
     @ApiOperation({ summary: 'Update a Rh' })
     @ApiOkResponse({ type: RhsDto })
     @ResponseMessage(MESSAGES.RH.UPDATE_SUCCESS)
@@ -39,6 +41,8 @@ export class RhsController {
     }
 
     @Get(":id")
+    @ApiBearerAuth('access-token')
+    @ApiSecurity('access-token')
     @ResponseMessage("Fetch Rh by id")
     @ApiOperation({ summary: 'Fetch Rh by id' })
     findOne(@Param("id") id: string) {

@@ -9,13 +9,13 @@ import { Public } from 'src/shared/decorators/public.decorator';
 import { FindAllQueryDTO } from 'src/shared/dtos/requests/find-all-query.request';
 
 @Controller('bloods')
-@ApiBearerAuth('access-token')
-@ApiSecurity('access-token')
 @ApiTags('Bloods')
 export class BloodsController {
     constructor(private readonly bloodsService: BloodsService) { }
 
     @Post()
+    @ApiBearerAuth('access-token')
+    @ApiSecurity('access-token')
     @ApiOperation({ summary: 'Create a new blood' })
     @ApiCreatedResponse({ type: BloodDto, description: MESSAGES.BLOOD.CREATE_SUCCESS })
     @ResponseMessage(MESSAGES.BLOOD.CREATE_SUCCESS)
@@ -32,6 +32,8 @@ export class BloodsController {
     }
 
     @Get(':id')
+    @ApiBearerAuth('access-token')
+    @ApiSecurity('access-token')
     @ResponseMessage("Get a blood by id")
     @ApiOperation({ summary: 'Get a blood by id' })
     @ApiOkResponse()

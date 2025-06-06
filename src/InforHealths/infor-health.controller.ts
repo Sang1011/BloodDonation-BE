@@ -8,13 +8,13 @@ import { Public } from "src/shared/decorators/public.decorator";
 import { InforHealthService } from "./infor-healths.service";
 
 @ApiTags("Infor Health")
-@ApiBearerAuth('access-token')
-@ApiSecurity('access-token')
 @Controller("infor-health")
 export class InforHealthController {
-  constructor(private readonly inforHealthService: InforHealthService) {}
+  constructor(private readonly inforHealthService: InforHealthService) { }
 
   @Post()
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiCreatedResponse({
     description: "Health information created successfully",
   })
@@ -34,6 +34,8 @@ export class InforHealthController {
   }
 
   @Get(":id")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOkResponse({
     description: "Get health info by ID"
   })
@@ -43,6 +45,8 @@ export class InforHealthController {
   }
 
   @Patch(":id")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOkResponse({
     description: "Health info updated successfully"
   })
@@ -52,6 +56,8 @@ export class InforHealthController {
   }
 
   @Delete(":id")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOkResponse({
     description: "Health info deleted successfully"
   })

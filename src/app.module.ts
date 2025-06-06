@@ -17,6 +17,8 @@ import { BloodExportModule } from './blood_exports/export.module';
 import { CentralStorageModule } from './central_blood_storage/central_blood_storage.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
 import { EmailModule } from './email/email.module';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { APP_GUARD } from '@nestjs/core';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -40,12 +42,17 @@ import { EmailModule } from './email/email.module';
     CentralBloodModule,
     StorageModule,
     CentralStorageModule,
-    InforHealthsModule,
     ReceiverBloodModule, 
     BloodExportModule,
     DonateBloodModule,
     ChatbotModule,
     EmailModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
   ],
 })
 export class AppModule {}

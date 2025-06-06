@@ -2,8 +2,8 @@
 import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
-import { IS_PUBLIC_KEY } from 'src/shared/constants/auth.constants';
 import { MESSAGES } from 'src/shared/constants/messages.constants';
+import { IS_PUBLIC_KEY } from 'src/shared/decorators/public.decorator';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -16,10 +16,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       context.getHandler(),
       context.getClass(),
     ]);
+    console.log('🛡️ isPublic:', isPublic);
     if (isPublic) {
       return true;
     }
-
     const request = context.switchToHttp().getRequest();
 
     if (!request.headers.authorization && request.cookies?.refresh_token) {

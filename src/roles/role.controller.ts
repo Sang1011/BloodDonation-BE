@@ -6,13 +6,13 @@ import { CreateRoleDto } from './dtos/requests/create.dto';
 import { Public } from 'src/shared/decorators/public.decorator';
 
 @ApiTags('Roles')
-@ApiBearerAuth('access-token')
-@ApiSecurity('access-token')
 @Controller('roles')
 export class RoleController {
-  constructor(private readonly roleService: RoleService) {}
+  constructor(private readonly roleService: RoleService) { }
 
   @Post()
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOperation({ summary: 'Create a new role' })
   @ApiResponse({ status: 201, description: 'Role created successfully.' })
   @ResponseMessage('Role created successfully')
@@ -30,6 +30,8 @@ export class RoleController {
   }
 
   @Get(':role_id')
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOperation({ summary: 'Get role by ID' })
   @ApiParam({ name: 'role_id', required: true, description: 'Role ID' })
   @ApiResponse({ status: 200, description: 'Role found' })

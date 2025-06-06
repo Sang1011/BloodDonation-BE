@@ -22,8 +22,6 @@ import { LoginUserDTO } from "./dtos/requests/login.dto";
 import { LoginFailedResponse } from "./dtos/responses/login.response";
 
 @ApiTags('Auth')
-@ApiBearerAuth('access-token')
-@ApiSecurity('access-token')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) { }
@@ -51,6 +49,8 @@ export class AuthController {
   }
 
   @Get('/account')
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ResponseMessage('Get logged-in user info')
   @ApiOperation({ summary: 'Get logged-in user info' })
   @ApiResponse({ status: 200, description: 'User info returned successfully.' })
@@ -65,12 +65,14 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Token refreshed successfully.' })
   @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
   @ResponseMessage("Get user by refresh token")
-  handleRefreshToken(@Req() request: Request, @Res({passthrough: true}) response: Response) {
+  handleRefreshToken(@Req() request: Request, @Res({ passthrough: true }) response: Response) {
     const refreshToken = request.cookies["refresh_token"]
     return this.authService.processNewToken(refreshToken, response);
   }
 
   @Post('/logout')
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ResponseMessage('Logout User')
   @ApiOperation({ summary: 'Logout user and clear tokens' })
   @ApiResponse({ status: 200, description: 'Logged out successfully.' })
