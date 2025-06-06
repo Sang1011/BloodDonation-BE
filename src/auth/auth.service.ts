@@ -8,13 +8,15 @@ import { Request, Response } from 'express';
 import { IUser } from 'src/shared/interfaces/user.interface';
 import { MESSAGES } from 'src/shared/constants/messages.constants';
 import { RoleService } from 'src/roles/role.service';
+import { EmailService } from 'src/email/email.service';
 
 @Injectable()
 export class AuthService {
   constructor(private usersService: UsersService,
     private roleService: RoleService,
     private jwtService: JwtService,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private emailService: EmailService
   ) { }
 
   // username, pass la 2 tham so thu vien passport nem ve
@@ -73,8 +75,13 @@ export class AuthService {
       throw new BadRequestException(MESSAGES.AUTH.EMAIL_EXIST);
     }
     const userCreated = await this.usersService.create(user);
+    
     if (!userCreated) return null;
     const { user_id } = userCreated;
+
+    
+    this.emailService.sendRegisterEmail(user);
+    
 
     return {
       user_id,
