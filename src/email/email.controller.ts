@@ -20,8 +20,8 @@ export class EmailController {
 
   @Public()
   @ResponseMessage('Send email Register User success')
-  @Post('send-cancel-donate-blood')
-  async sendCancelDonateBlood(@Body() registerDTO: RegisterUserDTO) {
+  @Post('send-register-email')
+  async sendRegisterEmail(@Body() registerDTO: RegisterUserDTO) {
     return this.emailService.sendRegisterEmail(registerDTO);
   }
 }

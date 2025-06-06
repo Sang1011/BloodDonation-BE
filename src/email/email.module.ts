@@ -13,8 +13,8 @@ import { EmailController } from './email.controller';
       useFactory: async (configService: ConfigService) => ({
         transport: {
            host: configService.get<string>('MAILER_HOST'),
-          //  port: parseInt(configService.get<string>('MAILER_PORT')),
-          secure: false,
+           port: parseInt(configService.get<string>('MAILER_PORT')),
+          secure: true,
           auth: {
              user: configService.get<string>('MAILER_USER'),
              pass: configService.get<string>('MAILER_PASSWORD'),
