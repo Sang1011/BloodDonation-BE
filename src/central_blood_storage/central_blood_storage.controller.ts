@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from "@nestjs/common";
-import { ApiTags, ApiCreatedResponse, ApiOkResponse } from "@nestjs/swagger";
+import { ApiTags, ApiCreatedResponse, ApiOkResponse, ApiBearerAuth, ApiSecurity } from "@nestjs/swagger";
 import { ResponseMessage } from "src/shared/decorators/message.decorator";
 import { Public } from "src/shared/decorators/public.decorator";
 import { FindAllQueryDTO } from "src/shared/dtos/requests/find-all-query.request";
@@ -14,11 +14,13 @@ import { CentralStorageService } from "./central_blood_storage.service";
 @ApiTags('Central Storages')
 @Controller('central-storages')
 export class CentralStorageController {
-  constructor(private readonly service: CentralStorageService) {}
+  constructor(private readonly service: CentralStorageService) { }
 
   @Post()
   @ApiCreatedResponse({ type: CreateCentralBloodStorageResponseDto })
   @ResponseMessage("Created a storage")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   create(@Body() dto: CreateCentralBloodStorageDto) {
     return this.service.create(dto);
   }
@@ -32,6 +34,8 @@ export class CentralStorageController {
   }
 
   @Get(":id")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOkResponse({ type: GetByIdCentralBloodStorageResponseDto })
   @ResponseMessage("Get a storage by id")
   findOne(@Param("id") id: string) {
@@ -39,6 +43,8 @@ export class CentralStorageController {
   }
 
   @Patch(":id")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOkResponse({ type: GetByIdCentralBloodStorageResponseDto })
   @ResponseMessage("Update a storage")
   update(@Param("id") id: string, @Body() dto: UpdateCentralBloodStorageDto) {
@@ -46,6 +52,8 @@ export class CentralStorageController {
   }
 
   @Delete(":id")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOkResponse({ type: DeleteByIdCentralBloodStorageDTO })
   @ResponseMessage("Delete a storage")
   remove(@Param("id") id: string) {

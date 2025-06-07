@@ -4,17 +4,19 @@ import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { RegisterUserDTO } from 'src/users/dto/requests/create-user.dto';
 import { ConfigService } from '@nestjs/config';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { IUser } from 'src/shared/interfaces/user.interface';
 import { MESSAGES } from 'src/shared/constants/messages.constants';
 import { RoleService } from 'src/roles/role.service';
+import { EmailService } from 'src/email/email.service';
 
 @Injectable()
 export class AuthService {
   constructor(private usersService: UsersService,
     private roleService: RoleService,
     private jwtService: JwtService,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private emailService: EmailService
   ) { }
 
   // username, pass la 2 tham so thu vien passport nem ve
@@ -33,15 +35,18 @@ export class AuthService {
     return this.usersService.findOne(user.user_id);
   }
 
-  async login(user: IUser, response: Response) {
-    const { user_id, fullname, email, role } = user;
+  async login(request: Request, response: Response) {
+    const user = request.user as any;
+    const { user_id, fullname, email, role_id } = user;
+    const getRole = await this.roleService.findById(role_id);
+
     const payload = {
       sub: "token login",
       iss: "from server",
       user_id,
       fullname,
       email,
-      role,
+      role: getRole.role_name,
     }
     const refreshToken = this.createRefreshToken(payload);
     await this.usersService.updateUserToken(refreshToken, user_id);
@@ -59,7 +64,7 @@ export class AuthService {
         user_id,
         fullname,
         email,
-        role,
+        role: getRole.role_name,
       }
     };
   }
@@ -70,8 +75,13 @@ export class AuthService {
       throw new BadRequestException(MESSAGES.AUTH.EMAIL_EXIST);
     }
     const userCreated = await this.usersService.create(user);
+    
     if (!userCreated) return null;
     const { user_id } = userCreated;
+
+    
+    this.emailService.sendRegisterEmail(user);
+    
 
     return {
       user_id,
@@ -81,7 +91,7 @@ export class AuthService {
   createRefreshToken(payload: any) {
     const refreshToken = this.jwtService.sign(payload, {
       secret: this.configService.get<string>("JWT_REFRESH_TOKEN_SECRET"),
-      expiresIn: this.configService.get<string>("JWT_REFRESH_EXPIRE")
+      expiresIn: "1d"
     });
     return refreshToken;
   }

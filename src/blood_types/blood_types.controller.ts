@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Post, Body, Put, Query } from '@nestjs/common';
 import { BloodTypesService } from './blood_types.service';
-import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { BloodTypeDto } from './dto/request/bloodtype.dto';
 import { ResponseMessage } from 'src/shared/decorators/message.decorator';
 import { MESSAGES } from 'src/shared/constants/messages.constants';
@@ -14,6 +14,8 @@ export class BloodTypesController {
 
 
     @Post()
+    @ApiBearerAuth('access-token')
+    @ApiSecurity('access-token')
     @ApiResponse({ status: 201, description: 'Return the created blood type' })
     @ResponseMessage(MESSAGES.BLOOD_TYPE.CREATE_SUCCESS)
     async create(@Body() bloodType: BloodTypeDto) {
@@ -29,6 +31,8 @@ export class BloodTypesController {
     }
 
     @Get(':id')
+    @ApiBearerAuth('access-token')
+    @ApiSecurity('access-token')
     @ResponseMessage("Fetch a blood types by id")
     @ApiOperation({ summary: 'Get a blood type by ID' })
     @ApiOkResponse({
@@ -41,6 +45,8 @@ export class BloodTypesController {
 
 
     @Put(':id')
+    @ApiBearerAuth('access-token')
+    @ApiSecurity('access-token')
     @ApiOperation({ summary: 'Update a blood type by ID' })
     @ApiOkResponse({
         description: 'Update a blood type by ID',

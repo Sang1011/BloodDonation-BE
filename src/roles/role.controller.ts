@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Param, Body, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth, ApiSecurity } from '@nestjs/swagger';
 import { RoleService } from './role.service';
 import { ResponseMessage } from 'src/shared/decorators/message.decorator';
 import { CreateRoleDto } from './dtos/requests/create.dto';
@@ -8,9 +8,11 @@ import { Public } from 'src/shared/decorators/public.decorator';
 @ApiTags('Roles')
 @Controller('roles')
 export class RoleController {
-  constructor(private readonly roleService: RoleService) {}
+  constructor(private readonly roleService: RoleService) { }
 
   @Post()
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOperation({ summary: 'Create a new role' })
   @ApiResponse({ status: 201, description: 'Role created successfully.' })
   @ResponseMessage('Role created successfully')
@@ -28,6 +30,8 @@ export class RoleController {
   }
 
   @Get(':role_id')
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOperation({ summary: 'Get role by ID' })
   @ApiParam({ name: 'role_id', required: true, description: 'Role ID' })
   @ApiResponse({ status: 200, description: 'Role found' })

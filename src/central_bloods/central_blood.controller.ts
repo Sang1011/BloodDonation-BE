@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from "@nestjs/common";
-import { ApiTags, ApiCreatedResponse, ApiOkResponse } from "@nestjs/swagger";
+import { ApiTags, ApiCreatedResponse, ApiOkResponse, ApiBearerAuth, ApiSecurity } from "@nestjs/swagger";
 import { ResponseMessage } from "src/shared/decorators/message.decorator";
 import { Public } from "src/shared/decorators/public.decorator";
 import { CentralBloodService } from "./central_blood.service";
@@ -14,11 +14,13 @@ import { DeleteByIdCentralDTO } from "./dtos/responses/delete.response";
 @ApiTags('Central Blood')
 @Controller('central-blood')
 export class CentralBloodController {
-  constructor(private readonly service: CentralBloodService) {}
+  constructor(private readonly service: CentralBloodService) { }
 
   @Post()
   @ApiCreatedResponse({ type: CreateCentralDTO })
   @ResponseMessage("Created central blood")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   create(@Body() dto: CreateCentralBloodDto) {
     return this.service.create(dto);
   }
@@ -32,6 +34,8 @@ export class CentralBloodController {
   }
 
   @Get(":id")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOkResponse({ type: GetByIdCentralDTO })
   @ResponseMessage("Get central blood center by id")
   findOne(@Param("id") id: string) {
@@ -39,6 +43,8 @@ export class CentralBloodController {
   }
 
   @Patch(":id")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOkResponse({ type: GetByIdCentralDTO })
   @ResponseMessage("Update central blood center")
   update(@Param("id") id: string, @Body() dto: UpdateCentralBloodDto) {
@@ -46,6 +52,8 @@ export class CentralBloodController {
   }
 
   @Delete(":id")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOkResponse({ type: DeleteByIdCentralDTO })
   @ResponseMessage("Delete central blood center")
   remove(@Param("id") id: string) {
