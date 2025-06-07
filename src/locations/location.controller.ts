@@ -1,5 +1,5 @@
 import { Controller, Post, Get, Body, Param, Patch, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiOkResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiOkResponse, ApiBearerAuth, ApiSecurity } from '@nestjs/swagger';
 import { LocationService } from './location.service';
 import { CreateLocationDto } from './dtos/requests/create.dto';
 import { ResponseMessage } from 'src/shared/decorators/message.decorator';
@@ -10,9 +10,11 @@ import { FindAllQueryDTO } from 'src/shared/dtos/requests/find-all-query.request
 @ApiTags('Locations')
 @Controller('locations')
 export class LocationController {
-  constructor(private readonly locationService: LocationService) {}
+  constructor(private readonly locationService: LocationService) { }
 
   @Post()
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOperation({ summary: 'Create new location' })
   @ApiResponse({ status: 201, description: 'Location created successfully' })
   @ResponseMessage('Location created successfully')
@@ -31,6 +33,8 @@ export class LocationController {
   }
 
   @Get(':location_id')
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOperation({ summary: 'Get location by ID' })
   @ApiParam({ name: 'location_id', description: 'Location ID' })
   @ApiResponse({ status: 200, description: 'Location found' })

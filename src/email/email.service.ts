@@ -3,10 +3,16 @@ import { Injectable } from '@nestjs/common';
 import { CreateDonateBloodDto } from 'src/donate_bloods/dto/request/create_donate_bloods.dto';
 import { RegisterUserDTO } from 'src/users/dto/requests/create-user.dto';
 import { User } from 'src/users/schemas/user.schema';
+import { SendDonateBloodDTO } from './dtos/send_donate_info';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class EmailService {
-    constructor(private readonly mailerService: MailerService) {}
+    constructor(private readonly mailerService: MailerService, 
+        @InjectModel(User.name) private userModel: Model<User>,
+    ) {}
 
     async sendRegisterEmail(user: RegisterUserDTO) {
         await this.mailerService.sendMail({
@@ -20,12 +26,26 @@ export class EmailService {
         });
     }
 
-    async sendSuccessDonateEmail(donateInfo: any) {
+    async sendSuccessDonateEmail(donateInfo: SendDonateBloodDTO) {
         await this.mailerService.sendMail({
             to: donateInfo.email,
             subject: `Verify your account`,
             template: './blood-donation',
-            
+        });
+    }
+
+    async sendVerifyEmail(user: RegisterUserDTO) {
+        const token = crypto.randomUUID();
+        await this.userModel.updateOne({ email: user.email }, { $set: { verify_token: token, is_verified: false } });
+        await this.mailerService.sendMail({
+            to: user.email,
+            subject: `Verify your account`,
+            template: './verify-email',
+            context: {
+                name: user.fullname,
+                url: "http://localhost:3000/api/v1/auth/verify-email",
+                token: token
+            }
         });
     }
 }

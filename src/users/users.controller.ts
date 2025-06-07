@@ -3,7 +3,7 @@ import { UsersService } from "./users.service";
 import { CreateUserDto } from "./dto/requests/create-user.dto";
 import { UpdateUserDto } from "./dto/requests/update-user.dto";
 import { ResponseMessage } from "src/shared/decorators/message.decorator";
-import { ApiCreatedResponse, ApiOkResponse, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiSecurity, ApiTags } from "@nestjs/swagger";
 import { CreateUserResponseDTO } from "./dto/responses/create-user.response";
 import { UpdateUserResponse } from "./dto/responses/update-user.response";
 import { DeleteUserResponse } from "./dto/responses/delete-user.response";
@@ -22,6 +22,8 @@ export class UsersController {
   description: 'User created successfully',
   type: CreateUserResponseDTO,
   })
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @Post()
   @ResponseMessage("Create a new user")
   create(@Body() createUserDto: CreateUserDto) {
@@ -36,14 +38,18 @@ export class UsersController {
   return this.usersService.findAll(+query.current, +query.pageSize, query.qs);
 }
 
-  @ApiOkResponse({ type: GetUserByIdSwaggerResponse })
   @Get(":id")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
+  @ApiOkResponse({ type: GetUserByIdSwaggerResponse })
   @ResponseMessage("Fetch user by id")
   findOne(@Param("id") id: string) {
     return this.usersService.findOne(id);
   }
 
   @Patch(":id")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOkResponse({
     description: 'Update user successfully',
     type: UpdateUserResponse,
@@ -54,6 +60,8 @@ export class UsersController {
   }
 
   @Delete(":id")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOkResponse({
     description: 'User deleted successfully',
     type: DeleteUserResponse,

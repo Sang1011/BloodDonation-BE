@@ -112,6 +112,12 @@ export class UsersService {
     });
   }
 
+  async findOneByVerifyToken(token: string) {
+    return await this.userModel.findOne({
+      verify_token: token
+    });
+  }
+
   async update(id:string, updateUserDto: UpdateUserDto) {
     const get = await this.findOneByEmail(updateUserDto.email);
     if (!get) {
@@ -156,5 +162,12 @@ export class UsersService {
 
   async findUserByToken(refreshToken: string){
     return await this.userModel.findOne({ refresh_token: refreshToken})
+  }
+
+  async updateVerifyToken(user_id: string) {
+    return await this.userModel.updateOne(
+      { user_id: user_id },
+      { $set: { verify_token: null, is_verified: true } }
+    );
   }
 }

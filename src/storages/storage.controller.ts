@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from "@nestjs/common";
-import { ApiTags, ApiCreatedResponse, ApiOkResponse } from "@nestjs/swagger";
+import { ApiTags, ApiCreatedResponse, ApiOkResponse, ApiSecurity, ApiBearerAuth } from "@nestjs/swagger";
 import { ResponseMessage } from "src/shared/decorators/message.decorator";
 import { Public } from "src/shared/decorators/public.decorator";
 import { CreateStorageDTO } from "./dtos/responses/create.response";
@@ -14,9 +14,11 @@ import { StorageService } from "./storage.service";
 @ApiTags('Storages')
 @Controller('storages')
 export class StorageController {
-  constructor(private readonly service: StorageService) {}
+  constructor(private readonly service: StorageService) { }
 
   @Post()
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiCreatedResponse({ type: CreateStorageDTO })
   @ResponseMessage("Created a storage")
   create(@Body() dto: CreateStorageDto) {
@@ -32,6 +34,8 @@ export class StorageController {
   }
 
   @Get(":id")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOkResponse({ type: GetByIdStorageDTO })
   @ResponseMessage("Get a storage by id")
   findOne(@Param("id") id: string) {
@@ -39,6 +43,8 @@ export class StorageController {
   }
 
   @Patch(":id")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOkResponse({ type: GetByIdStorageDTO })
   @ResponseMessage("Update a storage")
   update(@Param("id") id: string, @Body() dto: UpdateStorageDto) {
@@ -46,6 +52,8 @@ export class StorageController {
   }
 
   @Delete(":id")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOkResponse({ type: DeleteByIdStorageDTO })
   @ResponseMessage("Delete a storage")
   remove(@Param("id") id: string) {

@@ -3,16 +3,18 @@ import { CreateInforHealthDto } from "./dtos/requests/create.request";
 import { UpdateInforHealthDto } from "./dtos/requests/update.request";
 import { FindAllQueryDTO } from "src/shared/dtos/requests/find-all-query.request";
 import { ResponseMessage } from "src/shared/decorators/message.decorator";
-import { ApiCreatedResponse, ApiOkResponse, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiSecurity, ApiTags } from "@nestjs/swagger";
 import { Public } from "src/shared/decorators/public.decorator";
 import { InforHealthService } from "./infor-healths.service";
 
 @ApiTags("Infor Health")
 @Controller("infor-health")
 export class InforHealthController {
-  constructor(private readonly inforHealthService: InforHealthService) {}
+  constructor(private readonly inforHealthService: InforHealthService) { }
 
   @Post()
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiCreatedResponse({
     description: "Health information created successfully",
   })
@@ -32,6 +34,8 @@ export class InforHealthController {
   }
 
   @Get(":id")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOkResponse({
     description: "Get health info by ID"
   })
@@ -41,6 +45,8 @@ export class InforHealthController {
   }
 
   @Patch(":id")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOkResponse({
     description: "Health info updated successfully"
   })
@@ -50,6 +56,8 @@ export class InforHealthController {
   }
 
   @Delete(":id")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOkResponse({
     description: "Health info deleted successfully"
   })

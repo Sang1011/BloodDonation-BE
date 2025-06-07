@@ -31,6 +31,12 @@ export class User {
 
   @Prop()
   refresh_token: string;
+
+  @Prop()
+  is_verified: boolean;
+
+  @Prop()
+  verify_token: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

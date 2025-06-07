@@ -1,10 +1,9 @@
-
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { RegisterUserDTO } from 'src/users/dto/requests/create-user.dto';
 import { ConfigService } from '@nestjs/config';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { IUser } from 'src/shared/interfaces/user.interface';
 import { MESSAGES } from 'src/shared/constants/messages.constants';
 import { RoleService } from 'src/roles/role.service';
@@ -35,15 +34,18 @@ export class AuthService {
     return this.usersService.findOne(user.user_id);
   }
 
-  async login(user: IUser, response: Response) {
-    const { user_id, fullname, email, role } = user;
+  async login(request: Request, response: Response) {
+    const user = request.user as any;
+    const { user_id, fullname, email, role_id } = user;
+    const getRole = await this.roleService.findById(role_id);
+
     const payload = {
       sub: "token login",
       iss: "from server",
       user_id,
       fullname,
       email,
-      role,
+      role: getRole.role_name,
     }
     const refreshToken = this.createRefreshToken(payload);
     await this.usersService.updateUserToken(refreshToken, user_id);
@@ -61,7 +63,7 @@ export class AuthService {
         user_id,
         fullname,
         email,
-        role,
+        role: getRole.role_name,
       }
     };
   }
@@ -77,7 +79,7 @@ export class AuthService {
     const { user_id } = userCreated;
 
     
-    this.emailService.sendRegisterEmail(user);
+    this.emailService.sendVerifyEmail(user);
     
 
     return {
@@ -88,7 +90,7 @@ export class AuthService {
   createRefreshToken(payload: any) {
     const refreshToken = this.jwtService.sign(payload, {
       secret: this.configService.get<string>("JWT_REFRESH_TOKEN_SECRET"),
-      expiresIn: this.configService.get<string>("JWT_REFRESH_EXPIRE")
+      expiresIn: "1d"
     });
     return refreshToken;
   }
@@ -142,5 +144,45 @@ export class AuthService {
     response.clearCookie("refresh_token");
     return "LOGOUT SUCCESSFULLY"
   }
+
+ async verifyEmail(user: IUser, token: string) {
+  const userVerify = await this.usersService.findOneByEmail(user.email);
+  if (!userVerify || !userVerify.verify_token || userVerify.is_verified) {
+    throw new BadRequestException('Invalid or already verified');
+  }
+
+  if (userVerify.verify_token !== token) {
+    throw new BadRequestException('Invalid verification token');
+  }
+  await this.usersService.updateVerifyToken(userVerify.user_id);
+  return "EMAIL VERIFIED SUCCESSFULLY";
+}
+
+async resendVerificationEmail(user: IUser) {
+  const userToVerify = await this.usersService.findOneByEmail(user.email);
+  if (!userToVerify) {
+    throw new BadRequestException('User not found');
+  }
+
+  if (userToVerify.is_verified) {
+    throw new BadRequestException('Email already verified');
+  }
+
+  const { email, fullname } = user;
+  // Resend verification email
+  await this.emailService.sendVerifyEmail({
+    email,
+    fullname,
+    password: '',
+    gender: '',
+    location: null,
+    isRegister: true
+  });
+
+  return "VERIFICATION EMAIL SENT SUCCESSFULLY";
+}
+
+
+
 }
 

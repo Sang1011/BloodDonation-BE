@@ -4,6 +4,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EmailService } from './email.service';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { join } from 'path';
+import { EmailController } from './email.controller';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
   imports: [
@@ -12,8 +14,8 @@ import { join } from 'path';
       useFactory: async (configService: ConfigService) => ({
         transport: {
            host: configService.get<string>('MAILER_HOST'),
-          //  port: parseInt(configService.get<string>('MAILER_PORT')),
-          secure: false,
+           port: parseInt(configService.get<string>('MAILER_PORT')),
+          secure: true,
           auth: {
              user: configService.get<string>('MAILER_USER'),
              pass: configService.get<string>('MAILER_PASSWORD'),
@@ -32,7 +34,9 @@ import { join } from 'path';
       }),
       inject: [ConfigService],
     }),
+    UsersModule,
   ],
+  controllers: [EmailController],
   providers: [EmailService],
   exports: [EmailService],
   

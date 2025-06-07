@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Patch, Param, Get, Query } from '@nestjs/common';
 import { RhsService } from './rhs.service';
 import { RhsDto } from './dto/rhs.dto';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { ResponseMessage } from 'src/shared/decorators/message.decorator';
 import { MESSAGES } from 'src/shared/constants/messages.constants';
 import { Public } from 'src/shared/decorators/public.decorator';
@@ -13,6 +13,8 @@ export class RhsController {
     constructor(private readonly rhsService: RhsService) { }
 
     @Post()
+    @ApiBearerAuth('access-token')
+    @ApiSecurity('access-token')
     @ApiOperation({ summary: 'Create a new Rh' })
     @ApiOkResponse({ type: RhsDto })
     @ResponseMessage(MESSAGES.RH.CREATE_SUCCESS)
@@ -21,6 +23,8 @@ export class RhsController {
     }
 
     @Patch(':id')
+    @ApiBearerAuth('access-token')
+    @ApiSecurity('access-token')
     @ApiOperation({ summary: 'Update a Rh' })
     @ApiOkResponse({ type: RhsDto })
     @ResponseMessage(MESSAGES.RH.UPDATE_SUCCESS)
@@ -37,6 +41,8 @@ export class RhsController {
     }
 
     @Get(":id")
+    @ApiBearerAuth('access-token')
+    @ApiSecurity('access-token')
     @ResponseMessage("Fetch Rh by id")
     @ApiOperation({ summary: 'Fetch Rh by id' })
     findOne(@Param("id") id: string) {
