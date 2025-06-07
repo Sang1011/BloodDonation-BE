@@ -14,12 +14,21 @@ export class CentralBloodService {
   ) {}
 
   async create(dto: CreateCentralBloodDto) {
-    const count = await this.centralBloodModel.countDocuments();
-    let counter = 1;
-    if (count > 0) counter = count + 1; 
-    const created = new this.centralBloodModel({...dto, centralBlood_id: counter});
-    return created.save();
-  }
+  const latest = await this.centralBloodModel
+    .findOne()
+    .sort({ centralBlood_id: -1 })
+    .select('centralBlood_id')
+    .lean();
+
+  const counter = latest?.centralBlood_id ? latest.centralBlood_id + 1 : 1;
+
+  const created = new this.centralBloodModel({
+    ...dto,
+    centralBlood_id: counter,
+  });
+
+  return created.save();
+}
 
   async findAll(currentPage: number, limit: number, qs: string) {
     const { filter, sort }: AqpResult = aqp(qs);

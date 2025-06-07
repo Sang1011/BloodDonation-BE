@@ -69,7 +69,7 @@ export class DonateBloodService {
         pages: totalPages,
         total: totalItems,
       },
-      data: results,
+      results
     };
   }
 

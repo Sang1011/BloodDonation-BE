@@ -60,7 +60,7 @@ export class BloodExportService {
         pages: totalPages,
         total: totalItems,
       },
-      data: results,
+      results
     };
   }
 

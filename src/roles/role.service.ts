@@ -1,14 +1,20 @@
+import { BadRequestException } from '@nestjs/common';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Role} from './schemas/role.schema';
 import { CreateRoleDto } from './dtos/requests/create.dto';
+import { MESSAGES } from 'src/shared/constants/messages.constants';
 
 @Injectable()
 export class RoleService {
   constructor(@InjectModel(Role.name) private roleModel: Model<Role>) {}
 
   async create(dto: CreateRoleDto): Promise<Role> {
+    const existingRole = await this.roleModel.findOne({ role_name: dto.role_name });
+    if (existingRole) {
+      throw new BadRequestException(MESSAGES.ROLE.ROLE_EXIST);
+    }
     const role = new this.roleModel(dto);
     const saved = await role.save();
     return {

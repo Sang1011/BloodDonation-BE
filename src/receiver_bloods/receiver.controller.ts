@@ -22,6 +22,7 @@ import { CreateReceiveBloodResponseDto } from './dtos/responses/create_receive_b
 import { CreateReceiveBloodDto } from './dtos/requests/create_receive_bloods.dto';
 import { UpdateReceiveBloodResponseDto } from './dtos/responses/update_receive_bloods.response';
 import { UpdateReceiveBloodDto } from './dtos/requests/update_receive_bloods.dto';
+import { DeleteByIdReceiveBloodDTO } from './dtos/responses/delete_receive_bloods.response';
 
 @ApiTags('Receiver Bloods')
 @Controller('receiver-bloods')
@@ -92,6 +93,7 @@ export class ReceiveBloodController {
   })
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')
+  @ApiOkResponse({type: DeleteByIdReceiveBloodDTO})
   @ResponseMessage("Receiver Blood record deleted successfully")
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<void> {

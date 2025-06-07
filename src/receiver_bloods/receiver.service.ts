@@ -61,7 +61,7 @@ export class ReceiverBloodService {
         pages: totalPages,
         total: totalItems,
       },
-      data: results,
+      results
     };
   }
 

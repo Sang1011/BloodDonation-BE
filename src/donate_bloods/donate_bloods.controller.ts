@@ -22,6 +22,7 @@ import { MESSAGES } from 'src/shared/constants/messages.constants';
 import { ResponseMessage } from 'src/shared/decorators/message.decorator';
 import { Public } from 'src/shared/decorators/public.decorator';
 import { FindAllQueryDTO } from 'src/shared/dtos/requests/find-all-query.request';
+import { DeleteByIdDonateBloodDTO } from './dto/response/delete_donate_bloods.response';
 
 @ApiTags('Donate Bloods')
 @Controller('donate-bloods')
@@ -86,15 +87,11 @@ export class DonateBloodController {
   }
 
   @ApiOperation({ summary: 'Delete a donate blood record by ID' })
-  @ApiResponse({
-    status: 204,
-    description: 'Donate blood record deleted successfully',
-  })
-
   @ResponseMessage(MESSAGES.DONATE_BLOOD.DELETE_SUCCESS)
   @Delete(':id')
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')
+  @ApiOkResponse({type: DeleteByIdDonateBloodDTO})
   async remove(@Param('id') id: string): Promise<void> {
     await this.donateBloodService.remove(id);
   }
