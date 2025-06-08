@@ -133,9 +133,7 @@ export class BloodExportService {
         if (!deleted) {
             throw new NotFoundException("Export Blood record not found");
         }
-        return {
-            data: deleted,
-        };
+        return { deleted: deleted.deletedCount || 0 };
     }
 }
 

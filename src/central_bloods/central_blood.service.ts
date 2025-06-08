@@ -80,6 +80,6 @@ export class CentralBloodService {
     const num = Number.parseInt(id);
     const deleted = await this.centralBloodModel.deleteOne({centralBlood_id: num});
     if (!deleted) throw new NotFoundException("Central blood not found");
-    return deleted;
+    return { deleted: deleted.deletedCount || 0 };
   }
 }

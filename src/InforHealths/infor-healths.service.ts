@@ -141,6 +141,6 @@ export class InforHealthService {
     async remove(id: string) {
         const deleted = await this.inforHealthModel.deleteOne({ infor_health: id });
         if (!deleted) throw new BadRequestException("Health information not found");
-        return deleted;
+        return { deleted: deleted.deletedCount || 0 };
       }
 }

@@ -71,6 +71,6 @@ export class CentralStorageService {
     const num = Number.parseInt(id);
     const deleted = await this.centralStorageModel.deleteOne({centralStorage_id: num});
     if (!deleted) throw new NotFoundException("Central Storage not found");
-    return deleted;
+    return { deleted: deleted.deletedCount || 0 };
   }
 }

@@ -1,17 +1,25 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Gender } from 'src/shared/enums/user.enum';
 
-class Location {
-  @ApiProperty({ example: 'Point' })
-  type: string;
+export class Location {
+  @ApiProperty({ example: '192.168.0.1' })
+  ipAddress: string;
 
-  @ApiProperty({ example: [0, 0] })
-  coordinates: number[];
+  @ApiProperty({ example: 'Vietnam' })
+  country: string;
+
+  @ApiProperty({ example: 'District 1' })
+  district: string;
+
+  @ApiProperty({ example: 'Nguyen Hue' })
+  road: string;
+
+  @ApiProperty({ example: '683a8fb7c86d81d306fa9e4d' })
+  location_id: string;
 }
-
 export class GetUserByIdResponse {
   @ApiProperty({ example: '68355618d7a1e66ee2d1e86a' })
-  _id: string;
+  user_id: string;
 
   @ApiProperty()
   role: string;

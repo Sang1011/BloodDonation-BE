@@ -165,9 +165,7 @@ export class DonateBloodService {
     if (!deleted) {
       throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
     }
-    return {
-      data: deleted,
-    };
+    return { deleted: deleted.deletedCount || 0 };
   }
 }
 

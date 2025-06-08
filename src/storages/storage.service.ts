@@ -97,6 +97,6 @@ export class StorageService {
   async remove(id: string) {
     const deleted = await this.storageModel.deleteOne({storage_id: id});
     if (!deleted) throw new NotFoundException("Storage not found");
-    return deleted;
+    return { deleted: deleted.deletedCount || 0 };
   }
 }
