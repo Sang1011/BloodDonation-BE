@@ -18,6 +18,7 @@ export class LocationController {
   @ApiOperation({ summary: 'Create new location' })
   @ApiResponse({ status: 201, description: 'Location created successfully' })
   @ResponseMessage('Location created successfully')
+  @Public()
   async create(@Body() body: CreateLocationDto) {
     return this.locationService.create(body);
   }

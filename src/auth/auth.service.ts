@@ -1,4 +1,3 @@
-
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
@@ -80,7 +79,7 @@ export class AuthService {
     const { user_id } = userCreated;
 
     
-    this.emailService.sendRegisterEmail(user);
+    this.emailService.sendVerifyEmail(user);
     
 
     return {
@@ -145,5 +144,45 @@ export class AuthService {
     response.clearCookie("refresh_token");
     return "LOGOUT SUCCESSFULLY"
   }
+
+ async verifyEmail(user: IUser, token: string) {
+  const userVerify = await this.usersService.findOneByEmail(user.email);
+  if (!userVerify || !userVerify.verify_token || userVerify.is_verified) {
+    throw new BadRequestException('Invalid or already verified');
+  }
+
+  if (userVerify.verify_token !== token) {
+    throw new BadRequestException('Invalid verification token');
+  }
+  await this.usersService.updateVerifyToken(userVerify.user_id);
+  return "EMAIL VERIFIED SUCCESSFULLY";
+}
+
+async resendVerificationEmail(user: IUser) {
+  const userToVerify = await this.usersService.findOneByEmail(user.email);
+  if (!userToVerify) {
+    throw new BadRequestException('User not found');
+  }
+
+  if (userToVerify.is_verified) {
+    throw new BadRequestException('Email already verified');
+  }
+
+  const { email, fullname } = user;
+  // Resend verification email
+  await this.emailService.sendVerifyEmail({
+    email,
+    fullname,
+    password: '',
+    gender: '',
+    location: null,
+    isRegister: true
+  });
+
+  return "VERIFICATION EMAIL SENT SUCCESSFULLY";
+}
+
+
+
 }
 

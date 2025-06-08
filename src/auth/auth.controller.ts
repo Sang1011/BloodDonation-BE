@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Headers, Post, Req, Res, UseGuards } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Get, Headers, Post, Query, Req, Res, UseGuards } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { LocalAuthGuard } from "./guards/local-auth.guard";
 import { RegisterUserDTO } from "src/users/dto/requests/create-user.dto";
@@ -20,6 +20,7 @@ import {
 } from '@nestjs/swagger';
 import { LoginUserDTO } from "./dtos/requests/login.dto";
 import { LoginFailedResponse } from "./dtos/responses/login.response";
+import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -78,5 +79,23 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Logged out successfully.' })
   handleLogout(@User() user: IUser, @Res({ passthrough: true }) response: Response) {
     return this.authService.logout(user, response);
+  }
+
+  @Post('/verify-email')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Verify email' })
+  @ApiResponse({ status: 200, description: 'Email verified successfully.' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - User must be logged in' })
+  @ApiBearerAuth('access-token')
+  async verifyEmail(@Query('token') token: string, @User() user: IUser) {
+    return this.authService.verifyEmail(user, token);
+  }
+
+  @Post('/resend-verification')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  async resendVerification(@User() user: IUser) {
+    return this.authService.resendVerificationEmail(user);
   }
 }
