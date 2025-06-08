@@ -109,7 +109,7 @@ export class UsersService {
   async findOneByEmail(email: string) {
     return await this.userModel.findOne({
       email: email
-    });
+    }).select('-password -refresh_token');
   }
 
   async findOneByVerifyToken(token: string) {
@@ -132,7 +132,7 @@ export class UsersService {
       { user_id: id },
       { $set: updateUserDto },
       { new: true }
-    );
+    ).select('-password -refresh_token');
 
     return updatedUser;
   }
