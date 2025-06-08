@@ -19,6 +19,8 @@ import { ChatbotModule } from './chatbot/chatbot.module';
 import { EmailModule } from './email/email.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { APP_GUARD } from '@nestjs/core';
+import { UploadModule } from './upload/upload.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -47,6 +49,8 @@ import { APP_GUARD } from '@nestjs/core';
     DonateBloodModule,
     ChatbotModule,
     EmailModule,
+    CloudinaryModule,
+    UploadModule,
   ],
   providers: [
     {
