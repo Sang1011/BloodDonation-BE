@@ -16,6 +16,7 @@ export class RoleController {
   @ApiOperation({ summary: 'Create a new role' })
   @ApiResponse({ status: 201, description: 'Role created successfully.' })
   @ResponseMessage('Role created successfully')
+  @Public()
   async create(@Body() body: CreateRoleDto) {
     return this.roleService.create(body);
   }

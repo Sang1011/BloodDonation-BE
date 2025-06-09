@@ -47,6 +47,15 @@ export class UsersController {
     return this.usersService.findOne(id);
   }
 
+  @Get(":mail")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
+  @ApiOkResponse({ type: GetUserByIdSwaggerResponse })
+  @ResponseMessage("Fetch user by email")
+  findOneByEmail(@Param("mail") mail: string) {
+    return this.usersService.findOneByEmail(mail);
+  }
+
   @Patch(":id")
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')

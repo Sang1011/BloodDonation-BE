@@ -109,6 +109,12 @@ export class UsersService {
   async findOneByEmail(email: string) {
     return await this.userModel.findOne({
       email: email
+    }).select('-password -refresh_token');
+  }
+
+  async findOneByVerifyToken(token: string) {
+    return await this.userModel.findOne({
+      verify_token: token
     });
   }
 
@@ -126,7 +132,7 @@ export class UsersService {
       { user_id: id },
       { $set: updateUserDto },
       { new: true }
-    );
+    ).select('-password -refresh_token');
 
     return updatedUser;
   }
@@ -156,5 +162,12 @@ export class UsersService {
 
   async findUserByToken(refreshToken: string){
     return await this.userModel.findOne({ refresh_token: refreshToken})
+  }
+
+  async updateVerifyToken(user_id: string) {
+    return await this.userModel.updateOne(
+      { user_id: user_id },
+      { $set: { verify_token: null, is_verified: true } }
+    );
   }
 }
