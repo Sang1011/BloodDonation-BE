@@ -19,6 +19,7 @@ import { UploadResponseDto } from './dto/response/upload.response';
 import { ResponseMessage } from 'src/shared/decorators/message.decorator';
 import { IUser } from 'src/shared/interfaces/user.interface';
 import { User } from 'src/shared/decorators/users.decorator';
+import { Express } from 'express';
 @Controller('upload')
 @ApiTags('Upload')
 export class UploadController {

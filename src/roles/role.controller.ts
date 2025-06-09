@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Param, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, HttpCode, HttpStatus, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth, ApiSecurity } from '@nestjs/swagger';
 import { RoleService } from './role.service';
 import { ResponseMessage } from 'src/shared/decorators/message.decorator';
 import { CreateRoleDto } from './dtos/requests/create.dto';
 import { Public } from 'src/shared/decorators/public.decorator';
+import { FindAllQueryDTO } from 'src/shared/dtos/requests/find-all-query.request';
 
 @ApiTags('Roles')
 @Controller('roles')
@@ -26,9 +27,9 @@ export class RoleController {
   @ApiOperation({ summary: 'Get all roles' })
   @ApiResponse({ status: 200, description: 'List of roles' })
   @ResponseMessage('Roles retrieved successfully')
-  async findAll() {
-    return this.roleService.findAll();
-  }
+  async findAll(@Query() query: FindAllQueryDTO) {
+      return this.roleService.findAll(+query.current, +query.pageSize, query.qs);
+    }
 
   @Get(':role_id')
   @ApiBearerAuth('access-token')

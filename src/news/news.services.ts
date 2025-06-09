@@ -16,7 +16,6 @@ export class NewsService {
         if (findNews) {
             throw new BadRequestException("News with this title already exists");
         }
-
         const countDocument = await this.newsModel.countDocuments();
 
         const newNews = await new this.newsModel({ ...news, news_id: countDocument + 1 });
