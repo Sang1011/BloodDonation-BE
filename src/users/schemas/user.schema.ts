@@ -29,8 +29,14 @@ export class User {
   @Prop({required: true, ref: Location.name})
   location_id: string;
 
-  @Prop()
+  @Prop({ select: false })
   refresh_token: string;
+
+  @Prop()
+  is_verified: boolean;
+
+  @Prop()
+  verify_token: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

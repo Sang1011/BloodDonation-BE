@@ -8,7 +8,7 @@ type Cloudinary = typeof cloudinaryType;
 export class UploadService {
   constructor(@Inject('CLOUDINARY') private cloudinary: Cloudinary) {}
 
-  async uploadToCloudinary(user : IUser, file: Express.Multer.File): Promise<UploadApiResponse> {
+  async uploadToCloudinary(userId: string, file: Express.Multer.File): Promise<UploadApiResponse> {
     if (!file || !file.buffer) {
       throw new Error('File is required for upload');
     }
@@ -18,7 +18,7 @@ export class UploadService {
         {
           folder: 'Blood-Donation-System',
           resource_type: 'auto',
-          public_id: `${user.user_id}/${Date.now()}-${file.originalname}`,
+          public_id: `${userId}-health_info`,
           allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'], 
           overwrite: true, 
         },

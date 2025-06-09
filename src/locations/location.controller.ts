@@ -18,6 +18,7 @@ export class LocationController {
   @ApiOperation({ summary: 'Create new location' })
   @ApiResponse({ status: 201, description: 'Location created successfully' })
   @ResponseMessage('Location created successfully')
+  @Public()
   async create(@Body() body: CreateLocationDto) {
     return this.locationService.create(body);
   }
@@ -44,6 +45,8 @@ export class LocationController {
   }
 
   @Patch(':location_id')
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
   @ApiOperation({ summary: 'Patch a location by ID' })
   @ApiParam({ name: 'location_id', description: 'Location ID' })
   @ApiResponse({ status: 200, description: 'Location updated successfully' })

@@ -1,14 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ResponseData } from 'src/shared/dtos/responses/data.response';
-
-export class UpdateUserDataDto {
-  @ApiProperty({ example: ['name', 'phone'], description: 'Fields updated' })
-  updatedFields: string[];
-}
-
+import { GetUserByIdResponse } from './get-user.response';
 export class UpdateUserResponse extends ResponseData{
   @ApiProperty({ type: Object })
-  data: UpdateUserDataDto;
+  data: GetUserByIdResponse;
 }
 
 

@@ -66,6 +66,3 @@ export class RegisterUserDTO extends OmitType(CreateUserDto, ["role_name"] as co
 
     isRegister: true;
 }
-
-
-

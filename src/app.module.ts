@@ -21,6 +21,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { UploadModule } from './upload/upload.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { NewsModule } from './news/news.module';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -51,6 +52,7 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
     EmailModule,
     CloudinaryModule,
     UploadModule,
+    NewsModule
   ],
   providers: [
     {

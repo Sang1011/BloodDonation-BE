@@ -15,13 +15,14 @@ import { ResponseMessage } from 'src/shared/decorators/message.decorator';
 import { Public } from 'src/shared/decorators/public.decorator';
 import { FindAllQueryDTO } from 'src/shared/dtos/requests/find-all-query.request';
 import { GetAllExportBloodResponseDto } from './dtos/response/get_all_export_bloods.response';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { BloodExportService } from './export.service';
 import { GetExportBloodResponseDto } from './dtos/response/get_export_bloods.response';
 import { CreateExportBloodResponseDto } from './dtos/response/create_export_bloods.response';
 import { CreateExportBloodDto } from './dtos/request/create_export.request';
 import { UpdateExportBloodResponseDto } from './dtos/response/export_donate_bloods.response';
 import { UpdateExportBloodDto } from './dtos/request/update_export.request';
+import { DeleteByIdExportBloodDTO } from './dtos/response/delete_export_bloods.response';
 
 @ApiTags('Export Bloods')
 @Controller('export-bloods')
@@ -92,12 +93,9 @@ export class BloodExportController {
   }
 
   @ApiOperation({ summary: 'Delete a export blood record by ID' })
-  @ApiResponse({
-    status: 204,
-    description: 'Export blood record deleted successfully',
-  })
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')
+  @ApiOkResponse({type: DeleteByIdExportBloodDTO})
   @ResponseMessage("Deleted export blood record successfully")
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')

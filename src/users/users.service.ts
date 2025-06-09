@@ -21,12 +21,12 @@ export class UsersService {
   ) { }
 
   isCreateUserDto(obj: any): obj is CreateUserDto {
-  return 'role_name' in obj && typeof obj.role_name === 'string';
+    return 'role_name' in obj && typeof obj.role_name === 'string';
   }
 
   isRegisterDTO(obj: any): obj is RegisterUserDTO {
-  return !('role_name' in obj);
-  } 
+    return !('role_name' in obj);
+  }
 
 
   async create(userDTO: CreateUserDto | RegisterUserDTO) {
@@ -37,14 +37,14 @@ export class UsersService {
 
     let roleId = "";
     if (this.isRegisterDTO(userDTO)) {
-    const role = UserRole.MEMBER;
-    const findRoleId = await this.roleService.findByName(role);
-    roleId = findRoleId.role_id;
+      const role = UserRole.MEMBER;
+      const findRoleId = await this.roleService.findByName(role);
+      roleId = findRoleId.role_id;
     } else if (this.isCreateUserDto(userDTO)) {
       const findRoleId = await this.roleService.findByName(userDTO.role_name);
       roleId = findRoleId.role_id;
     }
-    
+
     const createLoc = await this.locationService.create(userDTO.location);
     const locationId = createLoc.location_id;
     const hashPassword = getHashPassword(userDTO?.password);
@@ -91,10 +91,22 @@ export class UsersService {
     }
   }
 
+  async findOneWithPass(id: string) {
+    const user = await this.userModel
+      .findOne({ user_id: id })
+      .populate([
+        { path: 'location_id' },
+        { path: 'role_id' }
+      ]);
+    if (!user) throw new BadRequestException(MESSAGES.USERS.USER_NOT_FOUND);
+
+    return user;
+  }
+
   async findOne(id: string) {
     const user = await this.userModel
       .findOne({ user_id: id })
-      .select('-password -refresh_token')
+      .select('-password')
       .populate([
         { path: 'location_id' },
         { path: 'role_id' }
@@ -105,14 +117,19 @@ export class UsersService {
     return user;
   }
 
-
   async findOneByEmail(email: string) {
     return await this.userModel.findOne({
       email: email
     });
   }
 
-  async update(id:string, updateUserDto: UpdateUserDto) {
+  async findOneByVerifyToken(token: string) {
+    return await this.userModel.findOne({
+      verify_token: token
+    });
+  }
+
+  async update(id: string, updateUserDto: UpdateUserDto) {
     const get = await this.findOneByEmail(updateUserDto.email);
     if (!get) {
       throw new BadRequestException(MESSAGES.USERS.USER_NOT_FOUND);
@@ -126,7 +143,7 @@ export class UsersService {
       { user_id: id },
       { $set: updateUserDto },
       { new: true }
-    );
+    ).select('-password');
 
     return updatedUser;
   }
@@ -134,7 +151,7 @@ export class UsersService {
   async isValidPassword(password: string, hashPassword: string) {
     return await comparePassword(password, hashPassword);
   }
-
+  
   async remove(id: string) {
     const foundUser = await this.userModel.findById(id);
     if (!foundUser) return MESSAGES.USERS.USER_NOT_FOUND;
@@ -150,11 +167,18 @@ export class UsersService {
   async updateUserToken(refreshToken: string, user_id: string) {
     return await this.userModel.updateOne(
       { user_id: user_id },
-      { $set: { refresh_token: refreshToken } } 
+      { $set: { refresh_token: refreshToken } }
     );
   }
 
-  async findUserByToken(refreshToken: string){
-    return await this.userModel.findOne({ refresh_token: refreshToken})
+  async findUserByToken(refreshToken: string) {
+    return await this.userModel.findOne({ refresh_token: refreshToken })
+  }
+
+  async updateVerifyToken(user_id: string) {
+    return await this.userModel.updateOne(
+      { user_id: user_id },
+      { $set: { verify_token: null, is_verified: true } }
+    );
   }
 }

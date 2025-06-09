@@ -62,6 +62,7 @@ export class BloodTypesService {
     }
 
     async delete(id: string) {
-        return await this.bloodTypeModel.findByIdAndDelete(id);
+        const deleted = await this.bloodTypeModel.deleteOne({ blood_type_id: id });
+        return { deleted: deleted.deletedCount || 0 };
     }
 }

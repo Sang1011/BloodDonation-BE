@@ -8,15 +8,18 @@ import { BloodsService } from "src/bloods/bloods.service";
 import { CreateInforHealthDto } from "./dtos/requests/create.request";
 import { UpdateInforHealthDto } from "./dtos/requests/update.request";
 import { UsersService } from "src/users/users.service";
+import { UploadService } from "src/upload/upload.service";
+import { IUser } from "src/shared/interfaces/user.interface";
 
 @Injectable()
 export class InforHealthService {
     constructor(
         @InjectModel(InforHealth.name) private inforHealthModel: Model<InforHealth>,
         private readonly userServices: UsersService,
-        private readonly bloodServices: BloodsService
+        private readonly bloodServices: BloodsService,
+        private readonly uploadService: UploadService
     ) { }
-    async create(infoHealth: CreateInforHealthDto) {
+    async create(infoHealth: CreateInforHealthDto, file?: Express.Multer.File) {
         const { user_id, blood_id } = infoHealth;
         const user = await this.userServices.findOne(user_id);
         if (!user) {
@@ -29,6 +32,12 @@ export class InforHealthService {
         const health = await this.inforHealthModel.findOne({ user_id: user_id });
         if(health){
             throw new BadRequestException("Health information already exists for this user");
+        }
+        let imgUrl = null;
+        if (file) {
+            const result = await this.uploadService.uploadToCloudinary(user.user_id, file);
+            imgUrl = result.secure_url;
+            infoHealth.img_health = imgUrl;
         }
         const createdHealth = await this.inforHealthModel.create({
             ...infoHealth,
@@ -101,7 +110,7 @@ export class InforHealthService {
         return health;
     }
 
-    async update(id: string, updateHealthDTO: UpdateInforHealthDto) {
+    async update(id: string, updateHealthDTO: UpdateInforHealthDto, file?: Express.Multer.File) {
         const health = await this.inforHealthModel.findOne({ infor_health: id });
         if (!health) {
           throw new BadRequestException("Health information not found");
@@ -119,6 +128,12 @@ export class InforHealthService {
           throw new BadRequestException("Blood not found");
         }
       
+        let imgUrl = null;
+        if (file) {
+            const result = await this.uploadService.uploadToCloudinary(user.user_id, file);
+            imgUrl = result.secure_url;
+            updateHealthDTO.img_health = imgUrl;
+        }
         const updatedHealth = await this.inforHealthModel.findOneAndUpdate(
           { infor_health: id },
           { $set: updateHealthDTO },
@@ -139,17 +154,8 @@ export class InforHealthService {
       
 
     async remove(id: string) {
-        const foundInfo = await this.inforHealthModel.findById(id);
-      
-        if (!foundInfo) {
-          throw new BadRequestException('Health information not found');
-        }
-      
-        const removed = await this.inforHealthModel.findByIdAndDelete(id);
-      
-        return {
-          message: 'Health information deleted successfully',
-          data: removed,
-        };
+        const deleted = await this.inforHealthModel.deleteOne({ infor_health: id });
+        if (!deleted) throw new BadRequestException("Health information not found");
+        return { deleted: deleted.deletedCount || 0 };
       }
 }

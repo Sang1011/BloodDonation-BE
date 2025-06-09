@@ -29,4 +29,3 @@ export class UpdateUserDto {
         @Type(() => CreateLocationDto)
         location: CreateLocationDto;
 }
-

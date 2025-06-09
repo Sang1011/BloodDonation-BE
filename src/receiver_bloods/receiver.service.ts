@@ -61,7 +61,7 @@ export class ReceiverBloodService {
         pages: totalPages,
         total: totalItems,
       },
-      data: results,
+      results
     };
   }
 
@@ -146,9 +146,7 @@ export class ReceiverBloodService {
         if (!deleted) {
             throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
         }
-        return {
-            data: deleted,
-        };
+        return { deleted: deleted.deletedCount || 0 };
     }
 }
 

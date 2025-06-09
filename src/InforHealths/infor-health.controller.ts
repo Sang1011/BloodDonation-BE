@@ -1,11 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from "@nestjs/common";
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UploadedFile } from "@nestjs/common";
 import { CreateInforHealthDto } from "./dtos/requests/create.request";
 import { UpdateInforHealthDto } from "./dtos/requests/update.request";
 import { FindAllQueryDTO } from "src/shared/dtos/requests/find-all-query.request";
 import { ResponseMessage } from "src/shared/decorators/message.decorator";
-import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiSecurity, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiConsumes, ApiCreatedResponse, ApiOkResponse, ApiSecurity, ApiTags } from "@nestjs/swagger";
 import { Public } from "src/shared/decorators/public.decorator";
 import { InforHealthService } from "./infor-healths.service";
+import { FileInterceptor } from "@nestjs/platform-express";
 
 @ApiTags("Infor Health")
 @Controller("infor-health")
@@ -18,9 +19,11 @@ export class InforHealthController {
   @ApiCreatedResponse({
     description: "Health information created successfully",
   })
+  @UseInterceptors(FileInterceptor('img_health'))
+  @ApiConsumes('multipart/form-data')
   @ResponseMessage("Create a new health info record")
-  create(@Body() createDto: CreateInforHealthDto) {
-    return this.inforHealthService.create(createDto);
+  create(@Body() createDto: CreateInforHealthDto, @UploadedFile() file?: Express.Multer.File) {
+    return this.inforHealthService.create(createDto, file);
   }
 
   @Get()
@@ -47,13 +50,19 @@ export class InforHealthController {
   @Patch(":id")
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')
+  @UseInterceptors(FileInterceptor('img_health'))
+  @ApiConsumes('multipart/form-data')
   @ApiOkResponse({
     description: "Health info updated successfully"
   })
   @ResponseMessage("Update a health info record")
-  update(@Param("id") id: string, @Body() updateDto: UpdateInforHealthDto) {
-    return this.inforHealthService.update(id, updateDto);
-  }
+  update(
+  @Param("id") id: string,
+  @Body() updateDto: UpdateInforHealthDto,
+  @UploadedFile() file?: Express.Multer.File
+) {
+  return this.inforHealthService.update(id, updateDto, file);
+}
 
   @Delete(":id")
   @ApiBearerAuth('access-token')
