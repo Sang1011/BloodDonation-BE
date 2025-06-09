@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { ResponseData } from "src/shared/dtos/responses/data.response";
+import { WorkingHoursResponseDto } from "src/working_hours/dto/response/working_hours.response.dto";
 
 export class GetCentralResponse {
   @ApiProperty({ example: 1 })
@@ -10,6 +11,9 @@ export class GetCentralResponse {
 
   @ApiProperty({ example: '123 Lê Lợi, Quận 1, TP.HCM' })
   centralBlood_address: string;
+
+  @ApiProperty({ type: WorkingHoursResponseDto })
+  working_id: WorkingHoursResponseDto;
 }
 
 export class GetByIdCentralDTO extends ResponseData {

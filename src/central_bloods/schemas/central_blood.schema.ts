@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument } from "mongoose";
 import { applySmartIdField } from "src/shared/middlewares/assign_custome_id.middleware";
+import { WorkingHours } from "src/working_hours/schemas/working_hours.schema";
 
 export type CentralBloodDocument = HydratedDocument<CentralBlood>
 @Schema({ collection: 'central_bloods' })
@@ -13,6 +14,9 @@ export class CentralBlood {
 
     @Prop({ required: true })
     centralBlood_address: string;
+
+    @Prop({ ref: WorkingHours.name, required: true })   
+    working_id: string;
 }
 
 export const CentralBloodSchema = SchemaFactory.createForClass(CentralBlood);

@@ -1,16 +1,19 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { forwardRef, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { CentralBlood } from "./schemas/central_blood.schema";
 import { CreateCentralBloodDto } from "./dtos/requests/create.dto";
 import { UpdateCentralBloodDto } from "./dtos/requests/update.dto";
 import aqp, { AqpResult } from "api-query-params";
+import { WorkingHoursService } from "src/working_hours/working_hours.service";
 
 @Injectable()
 export class CentralBloodService {
   constructor(
     @InjectModel(CentralBlood.name)
-    private readonly centralBloodModel: Model<CentralBlood>
+    private readonly centralBloodModel: Model<CentralBlood>,
+    @Inject(forwardRef(() => WorkingHoursService))
+    private readonly workingService: WorkingHoursService,
   ) {}
 
   async create(dto: CreateCentralBloodDto) {
@@ -43,7 +46,15 @@ export class CentralBloodService {
       .skip(offset)
       .limit(defaultLimit)
       .sort(sort || {})
+      .populate({
+        path: 'working_id',
+        model: 'WorkingHours',
+        localField: 'working_id',
+        foreignField: 'working_id',
+        justOne: true,
+      })
       .exec();
+
     return {
       meta: {
         current: defaultCurrent,
@@ -57,7 +68,15 @@ export class CentralBloodService {
 
   async findOne(id: string) {
     const num = Number.parseInt(id);
-    const cb = await this.centralBloodModel.findOne({centralBlood_id: num})
+    const cb = await this.centralBloodModel.findOne({ centralBlood_id: num })
+      .populate({
+      path: 'working_id',
+      model: 'WorkingHours',
+      localField: 'working_id',
+      foreignField: 'working_id',
+      justOne: true,
+    })
+      .exec();
     if (!cb) throw new NotFoundException("Central blood not found");
     return cb;
   }
