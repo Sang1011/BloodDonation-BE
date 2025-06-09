@@ -109,7 +109,7 @@ export class UsersService {
   async findOneByEmail(email: string) {
     return await this.userModel.findOne({
       email: email
-    }).select('-password -refresh_token');
+    }).select('-refresh_token');
   }
 
   async findOneByVerifyToken(token: string) {
