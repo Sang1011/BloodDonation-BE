@@ -74,7 +74,7 @@ export class UsersService {
       .skip(offset)
       .limit(defaultLimit)
       .sort(sort || {})
-      .select("-password")
+      .select("-password -is_verified -verify_token")
       .populate([
         { path: 'location_id' },
         { path: 'role_id' }
