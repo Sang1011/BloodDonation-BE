@@ -157,5 +157,12 @@ export class InforHealthService {
         const deleted = await this.inforHealthModel.deleteOne({ infor_health: id });
         if (!deleted) throw new BadRequestException("Health information not found");
         return { deleted: deleted.deletedCount || 0 };
-      }
+    }
+
+    async findByUserId(user_id: string) {
+        const health = await this.inforHealthModel.findOne({ user_id: user_id });
+        if (!health) throw new BadRequestException("Health information not found");
+        const { infor_health } = health;
+        return infor_health;
+    }
 }
