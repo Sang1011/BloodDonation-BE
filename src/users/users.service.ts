@@ -118,9 +118,7 @@ export class UsersService {
   }
 
   async findOneByEmail(email: string) {
-    return await this.userModel.findOne({
-      email: email
-    });
+    return this.userModel.findOne({ email: email });
   }
 
   async findOneByVerifyToken(token: string) {
@@ -137,6 +135,12 @@ export class UsersService {
     if (updateUserDto.location) {
       await this.locationService.update(get.location_id, updateUserDto.location);
     }
+
+    if (updateUserDto.role_name) {
+      const findRoleId = await this.roleService.findByName(updateUserDto.role_name);
+      await this.userModel.updateOne({ user_id: id }, { $set: { role_id: findRoleId.role_id } });
+    }
+
     await this.userModel.updateOne({ user_id: id }, updateUserDto);
 
     const updatedUser = await this.userModel.findOneAndUpdate(
