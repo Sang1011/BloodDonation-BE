@@ -38,22 +38,23 @@ export class UsersController {
   return this.usersService.findAll(+query.current, +query.pageSize, query.qs);
 }
 
-  @Get(":id")
-  @ApiBearerAuth('access-token')
-  @ApiSecurity('access-token')
-  @ApiOkResponse({ type: GetUserByIdSwaggerResponse })
-  @ResponseMessage("Fetch user by id")
-  findOne(@Param("id") id: string) {
-    return this.usersService.findOne(id);
-  }
+@Get("email")
+@ApiBearerAuth('access-token')
+@ApiSecurity('access-token')
+@ApiOkResponse({ type: GetUserByIdSwaggerResponse })
+@ResponseMessage("Fetch user by email")
+findUserByEmail(@Query("email") email: string) {
+  const decodedEmail = decodeURIComponent(email);
+  return this.usersService.findOneByEmail(decodedEmail);
+}
 
-  @Get(":mail")
+  @Post("email")
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')
   @ApiOkResponse({ type: GetUserByIdSwaggerResponse })
   @ResponseMessage("Fetch user by email")
-  findOneByEmail(@Param("mail") mail: string) {
-    return this.usersService.findOneByEmail(mail);
+  findOneByEmail(@Body() body: { email: string }) {
+    return this.usersService.findOneByEmail(body.email);
   }
 
   @Patch(":id")
@@ -79,4 +80,15 @@ export class UsersController {
   remove(@Param("id") id: string) {
     return this.usersService.remove(id);
   }
+
+  @Get(":id")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
+  @ApiOkResponse({ type: GetUserByIdSwaggerResponse })
+  @ResponseMessage("Fetch user by id")
+  findOne(@Param("id") id: string) {
+    return this.usersService.findOne(id);
+  }
+  
+
 }

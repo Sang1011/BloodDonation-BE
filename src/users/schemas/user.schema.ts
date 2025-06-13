@@ -20,9 +20,14 @@ export class User {
   @Prop({required: true})
   fullname: string;
 
+  @Prop()
+  phone: string;
+
+  @Prop()
+  dob: Date;
+
   @Prop({required: true, ref: Role.name})
   role_id: string;
-
   @Prop({required: true})
   gender: string;
 

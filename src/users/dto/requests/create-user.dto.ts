@@ -2,7 +2,7 @@
 import { OmitType, PartialType } from '@nestjs/mapped-types';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsString, IsNotEmpty, IsEmail, IsEnum, IsOptional, ValidateNested } from 'class-validator';
+import { IsString, IsNotEmpty, IsEmail, IsEnum, IsOptional, ValidateNested, IsDate } from 'class-validator';
 import { CreateLocationDto } from 'src/locations/dtos/requests/create.dto';
 import { Gender } from 'src/shared/enums/user.enum';
 
@@ -53,6 +53,17 @@ export class RegisterUserDTO extends OmitType(CreateUserDto, ["role_name"] as co
     @IsString()
     @IsNotEmpty()
     fullname: string;
+
+    @ApiProperty({ example: '0912345678' })
+    @IsString()
+    @IsNotEmpty()
+    phone: string;
+
+    @ApiProperty({ example: '1990-01-01' })
+    @IsDate()
+    @IsNotEmpty()
+    @Type(() => Date)
+    dob: Date;
 
     @ApiProperty({ example: Gender.FEMALE, enum: Gender })
     @IsEnum(Gender)

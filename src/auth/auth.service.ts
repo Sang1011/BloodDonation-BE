@@ -179,7 +179,9 @@ async resendVerificationEmail(user: IUser) {
     password: '',
     gender: '',
     location: null,
-    isRegister: true
+    isRegister: true,
+    phone: '',
+    dob: new Date()
   });
 
   return "VERIFICATION EMAIL SENT SUCCESSFULLY";
