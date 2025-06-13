@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from "@nestjs/common";
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Req } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { CreateUserDto } from "./dto/requests/create-user.dto";
 import { UpdateUserDto } from "./dto/requests/update-user.dto";
@@ -11,6 +11,7 @@ import { GetUserByIdSwaggerResponse } from "./dto/responses/get-user.response";
 import { GetAllUserResponseDto } from "./dto/responses/find-all.response";
 import { FindAllQueryDTO } from "src/shared/dtos/requests/find-all-query.request";
 import { Public } from "src/shared/decorators/public.decorator";
+import { Request } from "express";
 
 
 @ApiTags('Users')
@@ -26,7 +27,7 @@ export class UsersController {
   @ApiSecurity('access-token')
   @Post()
   @ResponseMessage("Create a new user")
-  create(@Body() createUserDto: CreateUserDto) {
+  create(@Req() req: Request, @Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
 
