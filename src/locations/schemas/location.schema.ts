@@ -6,23 +6,38 @@ export type LocationDocument = HydratedDocument<Location>;
 
 @Schema()
 export class Location {
-  @Prop({unique: true})
+  @Prop({ unique: true })
   location_id: string;
-  
+
   @Prop()
   ipAddress: string;
 
-  @Prop({required: true})
+  @Prop({ required: true })
   country: string;
 
-  @Prop({required: true})
+  @Prop({ required: true })
   district: string;
 
-  @Prop({required: true})
+  @Prop({ required: true })
   road: string;
+
+  // @Prop({ required: false })
+  // houseNumber?: string;
+
+  // @Prop({
+  //   type: {
+  //     latitude: { type: Number, required: true },
+  //     longitude: { type: Number, required: true },
+  //   },
+  //   required: true,
+  // })
+  // position: {
+  //   latitude: number;
+  //   longitude: number;
+  // };
 }
 
 export const LocationSchema = SchemaFactory.createForClass(Location);
 
 // middleware
-applySmartIdField(LocationSchema, Location.name,'location_id');
+applySmartIdField(LocationSchema, Location.name, 'location_id');

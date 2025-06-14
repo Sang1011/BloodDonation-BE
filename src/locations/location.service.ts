@@ -14,7 +14,7 @@ export class LocationService {
   ) { }
 
   async create(createLocationDto: CreateLocationDto): Promise<Location> {
-    if(createLocationDto.ipAddress)
+    // if(createLocationDto.ipAddress)
     const created = new this.locationModel(createLocationDto);
     const saved = await created.save();
     return saved;
