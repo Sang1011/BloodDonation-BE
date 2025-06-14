@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { CentralBloodService } from 'src/central_bloods/central_blood.service';
 import { DonateBloodService } from 'src/donate_bloods/donate_bloods.service';
 import { LocationService } from 'src/locations/location.service';
 import { ReceiverBloodService } from 'src/receiver_bloods/receiver.service';
@@ -13,8 +14,8 @@ export class SearchService {
         private readonly locationService: LocationService,
         private readonly userService: UsersService,
         private readonly donateBloodService: DonateBloodService,
-        private readonly receiveBloodService: ReceiverBloodService
-
+        private readonly receiveBloodService: ReceiverBloodService,
+        private readonly centralService: CentralBloodService
     ) {
     }
 
@@ -61,73 +62,123 @@ export class SearchService {
         return result;
     }
 
-    async searchByDistance(user_id: string, radiusInKm: number, typeToSearch: string) {
-    if (!typeToSearch) {
-        typeToSearch = 'ALL';
-    }
-
-    const getUser = await this.userService.findOneNoPopulate(user_id);
-    const userLocation = await this.locationService.findById(getUser.location_id);
-    const [lat, lng] = [
-        userLocation.position.coordinates[1],
-        userLocation.position.coordinates[0],
-    ];
-
-    // 1. Lấy tất cả các location gần user
-    const nearbyList = await this.locationService.findNearbyUsersWithDistance(lat, lng, radiusInKm);
-
-    // 2. Lấy danh sách target tương ứng với typeToSearch
-    let targetList: SearchUser[] = [];
-
-    if (typeToSearch === SearchByDistance.DONATE) {
-        targetList = await this.searchDonorList();
-    } else if (typeToSearch === SearchByDistance.RECEIVE) {
-        targetList = await this.searchRecipientList();
-    } else if (typeToSearch === SearchByDistance.HISTORY) {
-        targetList = await this.searchCompleteRequest();
-    } else {
-        const [donors, receivers, history] = await Promise.all([
+    private async mapNearbyLocationsToSearchResult(nearbyList: Awaited<ReturnType<LocationService['findNearbyUsersWithDistance']>>) {
+        const [donors, receivers, history, allUsers] = await Promise.all([
             this.searchDonorList(),
             this.searchRecipientList(),
-            this.searchCompleteRequest()
+            this.searchCompleteRequest(),
+            this.userService.findAllNoFilter()
         ]);
-        targetList = [...donors, ...receivers, ...history];
+
+        const targetList = [...donors, ...receivers, ...history];
+        const targetMap = new Map(targetList.map(t => [t.user_id.toString(), t]));
+        const userMap = new Map(allUsers.map(u => [u._id.toString(), u.fullname]));
+
+        const resolvedResults = await Promise.all(
+            nearbyList.map(async (loc) => {
+                const user = await this.userService.getUserByLocationID(loc.location_id);
+                if (!user) return null;
+
+                const userId = user.user_id;
+                const targetData = targetMap.get(userId);
+                if (!targetData) return null;
+
+                const fullname = userMap.get(userId) ?? "Người dùng";
+                const label = targetData.requestType === 'EMERGENCY'
+                    ? getTypeLabel('cangap')
+                    : getTypeLabel(targetData.type);
+
+                return {
+                    id: loc.location_id,
+                    distance: loc.distance,
+                    type: targetData.type,
+                    name: `${fullname} - ${label}`,
+                };
+            })
+        );
+
+        return resolvedResults.filter(Boolean);
     }
 
-    // 3. Map user_id -> SearchUser để dễ tra
-    const targetMap = new Map(targetList.map(u => [u.user_id.toString(), u]));
+    async searchByCentralDistance(central_id: string, radiusInKm: number) {
+        const central = await this.centralService.findOne(central_id);
+        const [lng, lat] = central.position.coordinates;
+        const nearbyList = await this.locationService.findNearbyUsersWithDistance(lat, lng, radiusInKm);
+        return this.mapNearbyLocationsToSearchResult(nearbyList);
+    }
 
-    // 4. Lấy toàn bộ user info để gán name
-    const allUsers = await this.userService.findAllNoFilter();
-    const userMap = new Map(allUsers.map(u => [u._id.toString(), u.fullname]));
+    async searchByUserCurrentDestination(lat: number, lng: number, radiusInKm: number) {
+        const nearbyList = await this.locationService.findNearbyUsersWithDistance(lat, lng, radiusInKm);
+        return this.mapNearbyLocationsToSearchResult(nearbyList);
+    }
 
-    // 5. Lọc kết quả có user_id trùng với targetList
-    const resolvedResults = await Promise.all(
-        nearbyList.map(async (loc) => {
-            const userInLocation = await this.userService.getUserByLocationID(loc.location_id);
-            if (!userInLocation) return null;
+    async searchByDistance(user_id: string, radiusInKm: number, typeToSearch: string) {
+        if (!typeToSearch) {
+            typeToSearch = 'ALL';
+        }
 
-            const userId = userInLocation.user_id;
-            const targetData = targetMap.get(userId);
-            if (!targetData) return null;
+        const getUser = await this.userService.findOneNoPopulate(user_id);
+        const userLocation = await this.locationService.findById(getUser.location_id);
+        const [lat, lng] = [
+            userLocation.position.coordinates[1],
+            userLocation.position.coordinates[0],
+        ];
 
-            const fullname = userMap.get(userId) ?? "Người dùng";
-            const label = targetData.requestType === 'EMERGENCY'
-                ? getTypeLabel('cangap')
-                : getTypeLabel(targetData.type);
+        // 1. Lấy tất cả các location gần user
+        const nearbyList = await this.locationService.findNearbyUsersWithDistance(lat, lng, radiusInKm);
 
-            return {
-                id: loc.location_id,
-                distance: loc.distance,
-                type: targetData.type,
-                name: `${fullname} - ${label}`,
-            };
-        })
-    );
+        // 2. Lấy danh sách target tương ứng với typeToSearch
+        let targetList: SearchUser[] = [];
 
-    // 6. Lọc null
-    return resolvedResults.filter(Boolean);
-}
+        if (typeToSearch === SearchByDistance.DONATE) {
+            targetList = await this.searchDonorList();
+        } else if (typeToSearch === SearchByDistance.RECEIVE) {
+            targetList = await this.searchRecipientList();
+        } else if (typeToSearch === SearchByDistance.HISTORY) {
+            targetList = await this.searchCompleteRequest();
+        } else {
+            const [donors, receivers, history] = await Promise.all([
+                this.searchDonorList(),
+                this.searchRecipientList(),
+                this.searchCompleteRequest()
+            ]);
+            targetList = [...donors, ...receivers, ...history];
+        }
+
+        // 3. Map user_id -> SearchUser để dễ tra
+        const targetMap = new Map(targetList.map(u => [u.user_id.toString(), u]));
+
+        // 4. Lấy toàn bộ user info để gán name
+        const allUsers = await this.userService.findAllNoFilter();
+        const userMap = new Map(allUsers.map(u => [u._id.toString(), u.fullname]));
+
+        // 5. Lọc kết quả có user_id trùng với targetList
+        const resolvedResults = await Promise.all(
+            nearbyList.map(async (loc) => {
+                const userInLocation = await this.userService.getUserByLocationID(loc.location_id);
+                if (!userInLocation) return null;
+
+                const userId = userInLocation.user_id;
+                const targetData = targetMap.get(userId);
+                if (!targetData) return null;
+
+                const fullname = userMap.get(userId) ?? "Người dùng";
+                const label = targetData.requestType === 'EMERGENCY'
+                    ? getTypeLabel('cangap')
+                    : getTypeLabel(targetData.type);
+
+                return {
+                    id: loc.location_id,
+                    distance: loc.distance,
+                    type: targetData.type,
+                    name: `${fullname} - ${label}`,
+                };
+            })
+        );
+
+        // 6. Lọc null
+        return resolvedResults.filter(Boolean);
+    }
 
 
 

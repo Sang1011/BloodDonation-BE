@@ -15,11 +15,27 @@ export class CentralBlood {
     @Prop({ required: true })
     centralBlood_address: string;
 
-    @Prop({ ref: WorkingHours.name, required: true })   
+    @Prop({
+        type: {
+            type: String,
+            enum: ['Point'],
+            default: 'Point',
+        },
+        coordinates: {
+            type: [Number],
+            required: true,
+        },
+    })
+    position: {
+        type: 'Point';
+        coordinates: [number, number];
+    };
+
+    @Prop({ ref: WorkingHours.name, required: true })
     working_id: string;
 }
 
 export const CentralBloodSchema = SchemaFactory.createForClass(CentralBlood);
-
+CentralBloodSchema.index({ position: '2dsphere' })
 // middleware
 applySmartIdField(CentralBloodSchema, CentralBlood.name, 'centralBlood_id');
