@@ -5,18 +5,16 @@ import { Location } from './schemas/location.schema';
 import { CreateLocationDto } from './dtos/requests/create.dto';
 import { UpdateLocationDto } from './dtos/requests/update.dto';
 import aqp, { AqpResult } from "api-query-params";
-import { firstValueFrom } from 'rxjs';
-import { NominatimResponseItem } from 'src/shared/dtos/responses/geoLocation.response';
-import { HttpService } from '@nestjs/axios';
 import { haversineDistance } from 'src/shared/utils/calculateDistance';
 import { removeVietnameseTones } from 'src/shared/utils/removeVNTones';
+import { GeocodingService } from 'src/shared/services/geoLocation.service';
 
 @Injectable()
 export class LocationService {
   constructor(
     @InjectModel(Location.name)
     private readonly locationModel: Model<Location>,
-    private readonly httpService: HttpService
+    private readonly geolocationService: GeocodingService
   ) { }
 
   async create(createLocationDto: CreateLocationDto): Promise<Location> {
@@ -39,7 +37,7 @@ export class LocationService {
       .filter(Boolean)
       .join(', ');
     const query_address = removeVietnameseTones(full_address);
-    const { lat, lng } = await this.getLatLng(query_address);
+    const { lat, lng } = await this.geolocationService.getLatLng(query_address);
     const created = new this.locationModel({
       ...createLocationDto,
       full_address: full_address,
@@ -83,28 +81,6 @@ export class LocationService {
         distance: isSameCoords || dist < 1 ? 1 : Math.round(dist),
       };
     });
-  }
-
-  async getLatLng(address: string): Promise<{ lat: number; lng: number }> {
-    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`;
-    const response = await firstValueFrom(
-      this.httpService.get<NominatimResponseItem[]>(url, {
-        headers: {
-          'User-Agent': 'bdss-app/1.0',
-        },
-      }),
-    );
-
-    const data = response.data as NominatimResponseItem[];
-
-    if (data.length === 0) {
-      throw new NotFoundException('Location not found');
-    }
-
-    return {
-      lat: parseFloat(data[0].lat),
-      lng: parseFloat(data[0].lon),
-    };
   }
 
   async findAll(currentPage: number, limit: number, qs: string) {
@@ -178,7 +154,7 @@ export class LocationService {
     // Nếu có thay đổi địa chỉ thì cập nhật position
     if (shouldUpdatePosition) {
       const query_address = removeVietnameseTones(full_address);
-      const { lat, lng } = await this.getLatLng(query_address);
+      const { lat, lng } = await this.geolocationService.getLatLng(query_address);
       position = {
         type: 'Point',
         coordinates: [lng, lat],

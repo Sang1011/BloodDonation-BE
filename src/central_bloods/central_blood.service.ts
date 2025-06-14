@@ -6,6 +6,8 @@ import { CreateCentralBloodDto } from "./dtos/requests/create.dto";
 import { UpdateCentralBloodDto } from "./dtos/requests/update.dto";
 import aqp, { AqpResult } from "api-query-params";
 import { WorkingHoursService } from "src/working_hours/working_hours.service";
+import { removeVietnameseTones } from "src/shared/utils/removeVNTones";
+import { GeocodingService } from "src/shared/services/geoLocation.service";
 
 @Injectable()
 export class CentralBloodService {
@@ -14,6 +16,7 @@ export class CentralBloodService {
     private readonly centralBloodModel: Model<CentralBlood>,
     @Inject(forwardRef(() => WorkingHoursService))
     private readonly workingService: WorkingHoursService,
+    private readonly geoLocationService: GeocodingService
   ) {}
 
   async create(dto: CreateCentralBloodDto) {
@@ -24,10 +27,15 @@ export class CentralBloodService {
     .lean();
 
   const counter = latest?.centralBlood_id ? latest.centralBlood_id + 1 : 1;
-
+const query_address = removeVietnameseTones(dto.centralBlood_address);
+    const { lat, lng } = await this.geoLocationService.getLatLng(query_address);
   const created = new this.centralBloodModel({
     ...dto,
     centralBlood_id: counter,
+    position: {
+        type: 'Point',
+        coordinates: [lng, lat],
+    },
   });
 
   return created.save();
@@ -81,19 +89,44 @@ export class CentralBloodService {
     return cb;
   }
 
-  async update(id: string, updateDto: UpdateCentralBloodDto): Promise<CentralBlood> {
-      const updated = await this.centralBloodModel.findOneAndUpdate(
-        { centralBlood_id: id },
-        updateDto,
-        { new: true },
-      );
-  
-      if (!updated) {
-        throw new NotFoundException('Central not found');
-      }
-  
-      return updated;
-    }
+  async update(id: string, updateDto: UpdateCentralBloodDto) {
+  const numId = Number.parseInt(id);
+  const current = await this.centralBloodModel.findOne({ centralBlood_id: numId });
+
+  if (!current) {
+    throw new NotFoundException('Central not found');
+  }
+
+  let position = current.position;
+  let fullAddress = current.centralBlood_address;
+
+  // Nếu địa chỉ mới khác địa chỉ cũ thì cập nhật lại tọa độ
+  if (updateDto.centralBlood_address && updateDto.centralBlood_address !== current.centralBlood_address) {
+    const queryAddress = removeVietnameseTones(updateDto.centralBlood_address);
+    const { lat, lng } = await this.geoLocationService.getLatLng(queryAddress);
+    position = {
+      type: 'Point',
+      coordinates: [lng, lat],
+    };
+    fullAddress = updateDto.centralBlood_address;
+  }
+
+  const updated = await this.centralBloodModel.findOneAndUpdate(
+    { centralBlood_id: numId },
+    {
+      ...updateDto,
+      centralBlood_address: fullAddress,
+      position,
+    },
+    { new: true },
+  );
+
+  if (!updated) {
+    throw new NotFoundException('Central not found after update');
+  }
+
+  return updated;
+}
 
   async remove(id: string) {
     const num = Number.parseInt(id);
