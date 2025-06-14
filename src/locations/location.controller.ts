@@ -58,5 +58,4 @@ export class LocationController {
   async update(@Param('location_id') id: string, @Body() body: UpdateLocationDto) {
     return this.locationService.update(id, body);
   }
-
 }

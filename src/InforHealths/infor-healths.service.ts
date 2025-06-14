@@ -165,4 +165,10 @@ export class InforHealthService {
         const { infor_health } = health;
         return infor_health;
     }
+
+    async findByListId(ids: string[]): Promise<InforHealth[]> {
+    return this.inforHealthModel.find({
+        infor_health: { $in: ids }
+    });
+}
 }

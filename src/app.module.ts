@@ -23,6 +23,7 @@ import { UploadModule } from './upload/upload.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { NewsModule } from './news/news.module';
 import { WorkingHoursModule } from './working_hours/working_hours.module';
+import { SearchModule } from './search/search.module';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -54,7 +55,8 @@ import { WorkingHoursModule } from './working_hours/working_hours.module';
     CloudinaryModule,
     UploadModule,
     NewsModule,
-    WorkingHoursModule
+    WorkingHoursModule,
+    SearchModule
   ],
   providers: [
     {

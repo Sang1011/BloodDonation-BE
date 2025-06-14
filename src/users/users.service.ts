@@ -103,6 +103,21 @@ export class UsersService {
     return user;
   }
 
+  async findAllNoFilter(){
+    const user = await this.userModel.find()
+      .select('-password')
+    return user;
+  }
+
+  async findOneNoPopulate(id: string){
+    const user = await this.userModel.findOne({ user_id: id })
+      .select('-password')
+
+      if (!user) throw new BadRequestException(MESSAGES.USERS.USER_NOT_FOUND);
+
+    return user;
+  }
+
   async findOne(id: string) {
     const user = await this.userModel
       .findOne({ user_id: id })
@@ -184,5 +199,9 @@ export class UsersService {
       { user_id: user_id },
       { $set: { verify_token: null, is_verified: true } }
     );
+  }
+
+  async getUserByLocationID(location_id: string){
+    return await this.userModel.findOne({location_id: location_id});
   }
 }
