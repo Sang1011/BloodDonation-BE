@@ -1,24 +1,34 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class CreateLocationDto {
-  @ApiProperty({ example: '192.168.0.1' })
+  @ApiPropertyOptional({ example: '192.168.0.1' })
+  @IsString()
+  @IsOptional()
+  ipAddress?: string;
+
+  @ApiProperty({ example: 'TP.HCM' })
   @IsString()
   @IsNotEmpty()
-  ipAddress: string;
+  city: string;
 
-  @ApiProperty({ example: 'Vietnam' })
-  @IsString()
-  @IsNotEmpty()
-  country: string;
-
-  @ApiProperty({ example: 'District 1' })
+  @ApiProperty({ example: 'Quận 1' })
   @IsString()
   @IsNotEmpty()
   district: string;
 
-  @ApiProperty({ example: 'Nguyen Hue' })
+  @ApiProperty({ example: 'Bến Nghé' })
+  @IsString()
+  @IsNotEmpty()
+  ward: string;
+
+  @ApiProperty({ example: 'Nguyễn Huệ' })
   @IsString()
   @IsNotEmpty()
   road: string;
+
+  @ApiPropertyOptional({ example: '86' })
+  @IsString()
+  @IsOptional()
+  house_number?: string;
 }

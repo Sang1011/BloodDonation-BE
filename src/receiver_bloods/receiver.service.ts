@@ -9,6 +9,7 @@ import { CentralBloodService } from 'src/central_bloods/central_blood.service';
 import { InforHealthService } from 'src/InforHealths/infor-healths.service';
 import { CreateReceiveBloodDto } from './dtos/requests/create_receive_bloods.dto';
 import { UpdateReceiveBloodDto } from './dtos/requests/update_receive_bloods.dto';
+import { Status } from 'src/shared/enums/status.enum';
 
 @Injectable()
 export class ReceiverBloodService {
@@ -17,10 +18,10 @@ export class ReceiverBloodService {
     private receiverBloodModel: Model<ReceiverBlood>,
     private inforHealthsService: InforHealthService,
     private bloodsService: BloodsService
-  ) {}
+  ) { }
 
   async findAll(currentPage: number, limit: number, qs: string) {
-    const { filter, sort}: AqpResult = aqp(qs);
+    const { filter, sort }: AqpResult = aqp(qs);
     delete filter.current;
     delete filter.pageSize;
 
@@ -40,15 +41,15 @@ export class ReceiverBloodService {
         {
           path: "infor_health",
           model: 'InforHealth',
-          localField: 'infor_health',      
-          foreignField: 'infor_health',  
+          localField: 'infor_health',
+          foreignField: 'infor_health',
           justOne: true,
         },
         {
           path: 'blood_id',
           model: 'Blood',
-          localField: 'blood_id',      
-          foreignField: 'blood_id',  
+          localField: 'blood_id',
+          foreignField: 'blood_id',
           justOne: true,
         },
       ])
@@ -66,19 +67,19 @@ export class ReceiverBloodService {
   }
 
   async findOne(id: string) {
-    const receiverBlood = await this.receiverBloodModel.findOne({receiver_id: id}).populate([
+    const receiverBlood = await this.receiverBloodModel.findOne({ receiver_id: id }).populate([
       {
         path: "infor_health",
         model: 'InforHealth',
-        localField: 'infor_health',      
-        foreignField: 'infor_health',  
+        localField: 'infor_health',
+        foreignField: 'infor_health',
         justOne: true,
       },
       {
         path: 'blood_id',
         model: 'Blood',
-        localField: 'blood_id',      
-        foreignField: 'blood_id',  
+        localField: 'blood_id',
+        foreignField: 'blood_id',
         justOne: true,
       }
     ]);
@@ -89,7 +90,7 @@ export class ReceiverBloodService {
   }
 
   async create(dto: CreateReceiveBloodDto) {
-    const existingReceiverBlood = await this.receiverBloodModel.findOne({ infor_health: dto.infor_health});
+    const existingReceiverBlood = await this.receiverBloodModel.findOne({ infor_health: dto.infor_health });
     if (existingReceiverBlood) {
       throw new BadRequestException("Receiver Blood record already exists for this InforHealth");
     }
@@ -114,39 +115,91 @@ export class ReceiverBloodService {
   }
 
   async update(id: string, dto: UpdateReceiveBloodDto) {
-    const existingReceiverBlood = await this.receiverBloodModel.findOne({ receiver_id: id});
-    if(!existingReceiverBlood){
+    const existingReceiverBlood = await this.receiverBloodModel.findOne({ receiver_id: id });
+    if (!existingReceiverBlood) {
       throw new BadRequestException("Receiver Blood record not found");
     }
-    if(dto.infor_health){
+    if (dto.infor_health) {
       const inforHealth = await this.inforHealthsService.findOne(dto.infor_health);
       if (!inforHealth) {
         throw new NotFoundException("InforHealth not found");
       }
     }
-    if(dto.blood_id){
+    if (dto.blood_id) {
       const blood = await this.bloodsService.findOne(+dto.blood_id);
       if (!blood) {
         throw new NotFoundException("Blood not found");
       }
     }
-    const updated = await this.receiverBloodModel.findOneAndUpdate({receiver_id: id}, dto, { new: true });
+    const updated = await this.receiverBloodModel.findOneAndUpdate({ receiver_id: id }, dto, { new: true });
     if (!updated) {
       throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
     }
     return updated;
   }
 
-    async remove(id: string){
-        const existingReceiverBlood = await this.receiverBloodModel.findOne({ receiver_id: id });
-        if (!existingReceiverBlood) {
-            throw new NotFoundException("Receiver Blood record not found");
-        }
-        const deleted = await this.receiverBloodModel.deleteOne({receiver_id: id});
-        if (!deleted) {
-            throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
-        }
-        return { deleted: deleted.deletedCount || 0 };
+  async remove(id: string) {
+    const existingReceiverBlood = await this.receiverBloodModel.findOne({ receiver_id: id });
+    if (!existingReceiverBlood) {
+      throw new NotFoundException("Receiver Blood record not found");
     }
+    const deleted = await this.receiverBloodModel.deleteOne({ receiver_id: id });
+    if (!deleted) {
+      throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
+    }
+    return { deleted: deleted.deletedCount || 0 };
+  }
+
+
+  async findListReceiveActive() {
+  const getList = await this.receiverBloodModel.find({
+    status_receiver: Status.PENDING,
+  });
+
+  const inforHealthIds = getList.map(d => d.infor_health?.toString());
+  const inforHealths = await this.inforHealthsService.findByListId(inforHealthIds);
+
+  const result = [];
+
+  for (const rv of getList) {
+    const matchedInfor = inforHealths.find(
+      infor => infor.infor_health.toString() === rv.infor_health?.toString()
+    );
+
+    if (matchedInfor) {
+      result.push({
+        user_id: matchedInfor.user_id,
+        requestType: rv.type || 'DEFAULT',
+      });
+    }
+  }
+
+  return result;
+}
+
+  async findListReceiveComplete() {
+    const getList = await this.receiverBloodModel.find({
+      status_receiver: Status.COMPLETED
+    })
+    const inforHealthIds = getList.map(d => d.infor_health?.toString());
+  const inforHealths = await this.inforHealthsService.findByListId(inforHealthIds);
+
+  const result = [];
+
+  for (const rv of getList) {
+    const matchedInfor = inforHealths.find(
+      infor => infor.infor_health.toString() === rv.infor_health?.toString()
+    );
+
+    if (matchedInfor) {
+      result.push({
+        user_id: matchedInfor.user_id,
+        requestType: rv.type || 'DEFAULT',
+      });
+    }
+  }
+
+  return result;
+  }
 }
 

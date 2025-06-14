@@ -27,6 +27,9 @@ export class ReceiverBlood {
     @Prop({required: true})
     unit: number;
 
+    @Prop({ required: true, enum: ['EMERGENCY', 'DEFAULT'], default: 'DEFAULT' })
+    type: 'EMERGENCY' | 'DEFAULT';
+
     @Prop()
     status_regist: string;
 

@@ -10,10 +10,10 @@ export class Location {
   location_id: string;
 
   @Prop()
-  ipAddress: string;
+  ipAddress?: string;
 
   @Prop({ required: true })
-  country: string;
+  city: string;
 
   @Prop({ required: true })
   district: string;
@@ -21,23 +21,34 @@ export class Location {
   @Prop({ required: true })
   road: string;
 
-  // @Prop({ required: false })
-  // houseNumber?: string;
+  @Prop({ required: true })
+  ward: string;
 
-  // @Prop({
-  //   type: {
-  //     latitude: { type: Number, required: true },
-  //     longitude: { type: Number, required: true },
-  //   },
-  //   required: true,
-  // })
-  // position: {
-  //   latitude: number;
-  //   longitude: number;
-  // };
+  @Prop()
+  house_number?: string;
+
+  @Prop({ index: 'text' })
+  full_address: string;
+
+  @Prop({
+    type: {
+      type: String,
+      enum: ['Point'],
+      default: 'Point',
+    },
+    coordinates: {
+      type: [Number],
+      required: true,
+    },
+  })
+  position: {
+    type: 'Point';
+    coordinates: [number, number];
+  };
 }
 
 export const LocationSchema = SchemaFactory.createForClass(Location);
+LocationSchema.index({ position: '2dsphere' })
 
 // middleware
 applySmartIdField(LocationSchema, Location.name, 'location_id');

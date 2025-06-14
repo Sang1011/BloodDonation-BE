@@ -10,6 +10,7 @@ import { BloodsService } from 'src/bloods/bloods.service';
 import { CentralBloodService } from 'src/central_bloods/central_blood.service';
 import { InforHealthService } from 'src/InforHealths/infor-healths.service';
 import { IUser } from 'src/shared/interfaces/user.interface';
+import { Status } from 'src/shared/enums/status.enum';
 
 @Injectable()
 export class DonateBloodService {
@@ -188,6 +189,55 @@ export class DonateBloodService {
       throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
     }
     return donateBlood;
+  }
+
+  async findListDonateActive() {
+  const getList = await this.donateBloodModel.find({
+    status_donate: Status.PENDING,
+  });
+
+  const inforHealthIds = getList.map(d => d.infor_health?.toString());
+  const inforHealths = await this.inforHealthsService.findByListId(inforHealthIds);
+
+  const result = [];
+
+  for (const rv of getList) {
+    const matchedInfor = inforHealths.find(
+      infor => infor.infor_health.toString() === rv.infor_health?.toString()
+    );
+
+    if (matchedInfor) {
+      result.push({
+        user_id: matchedInfor.user_id
+      });
+    }
+  }
+
+  return result;
+}
+
+  async findListDonateComplete() {
+    const getList = await this.donateBloodModel.find({
+      status_donate: Status.COMPLETED
+    })
+    const inforHealthIds = getList.map(d => d.infor_health?.toString());
+  const inforHealths = await this.inforHealthsService.findByListId(inforHealthIds);
+
+  const result = [];
+
+  for (const rv of getList) {
+    const matchedInfor = inforHealths.find(
+      infor => infor.infor_health.toString() === rv.infor_health?.toString()
+    );
+
+    if (matchedInfor) {
+      result.push({
+        user_id: matchedInfor.user_id
+      });
+    }
+  }
+
+  return result;
   }
 }
 
