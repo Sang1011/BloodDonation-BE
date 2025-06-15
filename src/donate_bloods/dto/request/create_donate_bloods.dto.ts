@@ -3,10 +3,10 @@ import { IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-
 import { Status } from 'src/shared/enums/status.enum';
 
 export class CreateDonateBloodDto {
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  blood_id: string;
+  // @ApiProperty()
+  // @IsString()
+  // @IsNotEmpty()
+  // blood_id: string;
 
 
   @ApiProperty()
