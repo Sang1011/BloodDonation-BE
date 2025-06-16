@@ -11,11 +11,12 @@ import { User } from "./schemas/user.schema";
 import { UserRole } from "src/shared/enums/user.enum";
 import { LocationService } from "src/locations/location.service";
 import { RoleService } from "src/roles/role.service";
+import { BaseModel } from "src/shared/interfaces/soft-delete-model.interface";
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(User.name) private userModel: BaseModel<User>,
     private readonly locationService: LocationService,
     private readonly roleService: RoleService
   ) { }
