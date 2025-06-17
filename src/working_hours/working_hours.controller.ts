@@ -50,12 +50,32 @@ export class WorkingHoursController {
     return this.service.update(id, dto);
   }
 
+  // @Delete(":id")
+  // @ApiBearerAuth('access-token')
+  // @ApiSecurity('access-token')
+  // @ApiOkResponse({ type: DeleteByIdWorkingHoursDTO })
+  // @ResponseMessage("Delete working hours")
+  // remove(@Param("id") id: string) {
+  //   return this.service.remove(id);
+  // }
+
   @Delete(":id")
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')
   @ApiOkResponse({ type: DeleteByIdWorkingHoursDTO })
   @ResponseMessage("Delete working hours")
-  remove(@Param("id") id: string) {
-    return this.service.remove(id);
+  softRemove(@Param("id") id: string) {
+    return this.service.softRemove(id);
   }
+
+  @Patch(":id/restore")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
+  @ApiOkResponse({ type: DeleteByIdWorkingHoursDTO })
+  @ResponseMessage("Restore working hours")
+  restore(@Param("id") id: string) {
+    return this.service.restore(id);
+  }
+
+
 }

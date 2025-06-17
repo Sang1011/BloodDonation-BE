@@ -1,11 +1,13 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument } from "mongoose";
 import { applySmartIdField } from "src/shared/middlewares/assign_custome_id.middleware";
+import { applySoftDeleteStatics } from "src/shared/plugins/soft-delete.plugin";
+import { BaseSchema } from "src/shared/schemas/baseSchema";
 import { WorkingHours } from "src/working_hours/schemas/working_hours.schema";
 
 export type CentralBloodDocument = HydratedDocument<CentralBlood>
 @Schema({ collection: 'central_bloods' })
-export class CentralBlood {
+export class CentralBlood extends BaseSchema {
     @Prop({ unique: true, required: true })
     centralBlood_id: number;
 
@@ -32,10 +34,11 @@ export class CentralBlood {
     };
 
     @Prop({ ref: WorkingHours.name, required: true })
-    working_id: string;
+    working_id: string[];
 }
 
 export const CentralBloodSchema = SchemaFactory.createForClass(CentralBlood);
 CentralBloodSchema.index({ position: '2dsphere' })
 // middleware
 applySmartIdField(CentralBloodSchema, CentralBlood.name, 'centralBlood_id');
+applySoftDeleteStatics(CentralBloodSchema, 'centralBlood_id');

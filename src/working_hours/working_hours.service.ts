@@ -7,12 +7,13 @@ import { CreateWorkingHoursDto } from "./dto/request/create_working_hours.dto";
 import { UpdateWorkingHoursDto } from "./dto/request/update_working_hours.dto";
 import { CentralBlood } from "src/central_bloods/schemas/central_blood.schema";
 import { CentralBloodService } from "src/central_bloods/central_blood.service";
+import { BaseModel } from "src/shared/interfaces/soft-delete-model.interface";
 
 @Injectable()
 export class WorkingHoursService {
   constructor(
     @InjectModel(WorkingHours.name)
-    private readonly workingHoursModel: Model<WorkingHours>,
+    private readonly workingHoursModel: BaseModel<WorkingHours>,
     @InjectModel(CentralBlood.name)
     private readonly centralBloodModel: Model<CentralBlood>,
     @Inject(forwardRef(() => CentralBloodService)) private centralBloodService: CentralBloodService,
@@ -82,6 +83,24 @@ export class WorkingHoursService {
   }
 
   return { deleted: deleted.deletedCount };
+}
+
+async softRemove(id: string) {
+  const deleted = await this.workingHoursModel.softDelete(id);
+  await this.workingHoursModel.findOneAndUpdate({ working_id: id }, { is_open: false });
+  if (!deleted) {
+    throw new NotFoundException("Working hours not found");
+  }
+  return { deleted: deleted };
+}
+
+async restore(id: string) {
+  const restored = await this.workingHoursModel.restore(id);
+  await this.workingHoursModel.findOneAndUpdate({ working_id: id }, { is_open: true });
+  if (!restored) {
+    throw new NotFoundException("Working hours not found");
+  }
+  return { restored: restored };
 }
 
 }

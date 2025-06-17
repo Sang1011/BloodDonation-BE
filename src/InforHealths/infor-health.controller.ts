@@ -7,13 +7,16 @@ import { ApiBearerAuth, ApiConsumes, ApiCreatedResponse, ApiOkResponse, ApiSecur
 import { Public } from "src/shared/decorators/public.decorator";
 import { InforHealthService } from "./infor-healths.service";
 import { FileInterceptor } from "@nestjs/platform-express";
+import { IUser } from "src/shared/interfaces/user.interface";
+import { User } from "src/shared/decorators/users.decorator";
 
-@ApiTags("Infor Health")
+
+@ApiTags("Infor Health")  
 @Controller("infor-health")
 export class InforHealthController {
   constructor(private readonly inforHealthService: InforHealthService) { }
 
-  @Post()
+  @Post("/admin")
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')
   @ApiCreatedResponse({
@@ -24,6 +27,19 @@ export class InforHealthController {
   @ResponseMessage("Create a new health info record")
   create(@Body() createDto: CreateInforHealthDto, @UploadedFile() file?: Express.Multer.File) {
     return this.inforHealthService.create(createDto, file);
+  }
+
+  @Post()
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
+  @ApiCreatedResponse({
+    description: "Health information created successfully",
+  })
+  @UseInterceptors(FileInterceptor('img_health'))
+  @ApiConsumes('multipart/form-data')
+  @ResponseMessage("Create a new health info record")
+  createByUser(@User() user: IUser, @Body() createDto: CreateInforHealthDto, @UploadedFile() file?: Express.Multer.File) {
+    return this.inforHealthService.createByUser(user, createDto, file);
   }
 
   @Get()
@@ -46,8 +62,26 @@ export class InforHealthController {
   findOne(@Param("id") id: string) {
     return this.inforHealthService.findOne(id);
   }
+  
 
-  @Patch(":id")
+  @Patch(":id/admin")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
+  @UseInterceptors(FileInterceptor('img_health'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOkResponse({
+    description: "Health info updated successfully"
+  })
+  @ResponseMessage("Update a health info record")
+  updateAdmin(
+    @Param("id") id: string,
+    @Body() updateDto: UpdateInforHealthDto,
+    @UploadedFile() file?: Express.Multer.File
+  ) {
+    return this.inforHealthService.update(id, updateDto, file);
+  }
+
+  @Patch()
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')
   @UseInterceptors(FileInterceptor('img_health'))
@@ -57,12 +91,13 @@ export class InforHealthController {
   })
   @ResponseMessage("Update a health info record")
   update(
-  @Param("id") id: string,
-  @Body() updateDto: UpdateInforHealthDto,
-  @UploadedFile() file?: Express.Multer.File
-) {
-  return this.inforHealthService.update(id, updateDto, file);
-}
+    @User() user: IUser,
+    @Body() updateDto: UpdateInforHealthDto,
+    @UploadedFile() file?: Express.Multer.File
+  ) {
+    return this.inforHealthService.updateByUser(user, updateDto, file);
+  }
+
 
   @Delete(":id")
   @ApiBearerAuth('access-token')
@@ -74,4 +109,6 @@ export class InforHealthController {
   remove(@Param("id") id: string) {
     return this.inforHealthService.remove(id);
   }
+
+ 
 }

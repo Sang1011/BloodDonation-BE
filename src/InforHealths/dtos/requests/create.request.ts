@@ -3,11 +3,13 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 export class CreateInforHealthDto {
-  @ApiProperty({ example: 'USR001', description: 'ID của người dùng' })
+  @ApiProperty({ example: 'USR001', description: 'ID của người dùng', required: false })
+  @IsOptional()
   @IsString()
-  user_id: string;
+  user_id?: string;
 
-  @ApiProperty({ example: 'B001', description: 'ID của nhóm máu' })
+  @ApiProperty({ example: '1', description: 'ID của nhóm máu' })
+  @IsOptional()
   @IsString()
   blood_id: string;
 

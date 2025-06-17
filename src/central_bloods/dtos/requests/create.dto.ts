@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsMongoId, IsString } from "class-validator";
+import { IsArray, IsNotEmpty, IsMongoId, IsString } from "class-validator";
 
 export class CreateCentralBloodDto {
   @ApiProperty({ example: 'Ho Chi Minh Center' })
@@ -12,8 +12,8 @@ export class CreateCentralBloodDto {
   @IsString()
   centralBlood_address: string;
 
-@ApiProperty({ example: '68473fd4e9ee73d6fca1d5a5' })
+  @ApiProperty({ example: ['68473fd4e9ee73d6fca1d5a5', '684f0f28727a7001d329ad4c', '684f0f46727a7001d329ad50'] })
   @IsNotEmpty()
-  @IsString()
-  working_id: string;
+  @IsString({ each: true })
+  working_id: string[];
 }
