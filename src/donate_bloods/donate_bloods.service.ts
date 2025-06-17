@@ -9,6 +9,8 @@ import aqp, { AqpResult } from 'api-query-params';
 import { BloodsService } from 'src/bloods/bloods.service';
 import { CentralBloodService } from 'src/central_bloods/central_blood.service';
 import { InforHealthService } from 'src/InforHealths/infor-healths.service';
+import { IUser } from 'src/shared/interfaces/user.interface';
+import { Status } from 'src/shared/enums/status.enum';
 
 @Injectable()
 export class DonateBloodService {
@@ -103,8 +105,15 @@ export class DonateBloodService {
     return donateBlood;
   }
 
-  async create(dto: CreateDonateBloodDto) {
-    const existingDonateBlood = await this.donateBloodModel.findOne({ infor_health: dto.infor_health, date_register: dto.date_register });
+  async create(user: IUser, dto: CreateDonateBloodDto) {
+    console.log(user);
+    const inforHealth = await this.inforHealthsService.findByUserId(user.user_id);
+    console.log(inforHealth);
+    if (!inforHealth) {
+      throw new NotFoundException("InforHealth not found");
+    }
+    const blood_id = inforHealth.blood_id;
+    const existingDonateBlood = await this.donateBloodModel.findOne({ infor_health: inforHealth.infor_health, date_donate: dto.date_donate });
     if (existingDonateBlood) {
       throw new BadRequestException("This user has already registered for blood donation on this date");
     }
@@ -112,19 +121,25 @@ export class DonateBloodService {
     if (!checked) {
       throw new BadRequestException("Invalid data provided");
     }
-    const created = new this.donateBloodModel(dto);
+    
+    const created = new this.donateBloodModel({
+      ...dto,
+      infor_health: inforHealth.infor_health,
+      blood_id: blood_id,
+      date_register: new Date(),
+    });
     return await created.save();
   }
 
   async checkDuplicate(dto: CreateDonateBloodDto) {
-    const inforHealth = await this.inforHealthsService.findById(dto.infor_health);
-    if (!inforHealth) {
-      throw new NotFoundException("InforHealth not found");
-    }
-    const blood = await this.bloodsService.findOne(+dto.blood_id);
-    if (!blood) {
-      throw new NotFoundException("Blood not found");
-    }
+    // const inforHealth = await this.inforHealthsService.findById(dto.infor_health);
+    // if (!inforHealth) {
+    //   throw new NotFoundException("InforHealth not found");
+    // }
+    // const blood = await this.bloodsService.findOne(+dto.blood_id);
+    // if (!blood) {
+    //   throw new NotFoundException("Blood not found");
+    // }
     const centralBlood = await this.centralBloodService.findOne(dto.centralBlood_id.toString());
     if (!centralBlood) {
       throw new NotFoundException("CentralBlood not found");
@@ -137,18 +152,18 @@ export class DonateBloodService {
     if (!existingDonateBlood) {
       throw new BadRequestException("Donate Blood record not found");
     }
-    const inforHealth = await this.inforHealthsService.findOne(dto.infor_health);
-    if (!inforHealth) {
-      throw new NotFoundException("InforHealth not found");
-    }
-    const blood = await this.bloodsService.findOne(+dto.blood_id);
-    if (!blood) {
-      throw new NotFoundException("Blood not found");
-    }
-    const centralBlood = await this.centralBloodService.findOne(dto.centralBlood_id.toString());
-    if (!centralBlood) {
-      throw new NotFoundException("CentralBlood not found");
-    }
+    // const inforHealth = await this.inforHealthsService.findOne(dto.infor_health);
+    // if (!inforHealth) {
+    //   throw new NotFoundException("InforHealth not found");
+    // }
+    // const blood = await this.bloodsService.findOne(+dto.blood_id);
+    // if (!blood) {
+    //   throw new NotFoundException("Blood not found");
+    // }
+    // const centralBlood = await this.centralBloodService.findOne(dto.centralBlood_id.toString());
+    // if (!centralBlood) {
+    //   throw new NotFoundException("CentralBlood not found");
+    // }
     const updated = await this.donateBloodModel.findOneAndUpdate({ donate_id: id }, dto, { new: true });
     if (!updated) {
       throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
@@ -166,6 +181,67 @@ export class DonateBloodService {
       throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
     }
     return { deleted: deleted.deletedCount || 0 };
+  }
+
+  async getDonateBlood(user: IUser) {
+    const inforHealth = await this.inforHealthsService.findByUserId(user.user_id);
+    if (!inforHealth) {
+      throw new NotFoundException("InforHealth not found");
+    }
+    const donateBlood = await this.donateBloodModel.find({ infor_health: inforHealth.infor_health });
+    if (!donateBlood) {
+      throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
+    }
+    return donateBlood;
+  }
+
+  async findListDonateActive() {
+  const getList = await this.donateBloodModel.find({
+    status_donate: Status.PENDING,
+  });
+
+  const inforHealthIds = getList.map(d => d.infor_health?.toString());
+  const inforHealths = await this.inforHealthsService.findByListId(inforHealthIds);
+
+  const result = [];
+
+  for (const rv of getList) {
+    const matchedInfor = inforHealths.find(
+      infor => infor.infor_health.toString() === rv.infor_health?.toString()
+    );
+
+    if (matchedInfor) {
+      result.push({
+        user_id: matchedInfor.user_id
+      });
+    }
+  }
+
+  return result;
+}
+
+  async findListDonateComplete() {
+    const getList = await this.donateBloodModel.find({
+      status_donate: Status.COMPLETED
+    })
+    const inforHealthIds = getList.map(d => d.infor_health?.toString());
+  const inforHealths = await this.inforHealthsService.findByListId(inforHealthIds);
+
+  const result = [];
+
+  for (const rv of getList) {
+    const matchedInfor = inforHealths.find(
+      infor => infor.infor_health.toString() === rv.infor_health?.toString()
+    );
+
+    if (matchedInfor) {
+      result.push({
+        user_id: matchedInfor.user_id
+      });
+    }
+  }
+
+  return result;
   }
 }
 

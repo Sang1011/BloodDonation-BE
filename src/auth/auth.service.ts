@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { RegisterUserDTO } from 'src/users/dto/requests/create-user.dto';
@@ -8,6 +8,9 @@ import { IUser } from 'src/shared/interfaces/user.interface';
 import { MESSAGES } from 'src/shared/constants/messages.constants';
 import { RoleService } from 'src/roles/role.service';
 import { EmailService } from 'src/email/email.service';
+import { ChangeEmailDto } from './dtos/requests/change-email.dto';
+import { ChangePasswordDto } from './dtos/requests/change-password.dto';
+import { getHashPassword } from 'src/shared/utils/getHashPassword';
 
 @Injectable()
 export class AuthService {
@@ -177,12 +180,39 @@ async resendVerificationEmail(user: IUser) {
     password: '',
     gender: '',
     location: null,
-    isRegister: true
+    isRegister: true,
+    phone: '',
+    dob: new Date()
   });
 
   return "VERIFICATION EMAIL SENT SUCCESSFULLY";
 }
 
+async changeEmail(userId: string, dto: ChangeEmailDto) {
+  const user = await this.usersService.findOne(userId);
+  if (!user) throw new NotFoundException('User not found');
+
+  const exists = await this.usersService.findOneByEmail(dto.newEmail);
+  if (exists) throw new BadRequestException('Email already in use');
+
+  user.email = dto.newEmail;
+  await user.save();
+
+  return { message: 'Email updated' };
+}
+
+async changePassword(userId: string, dto: ChangePasswordDto) {
+  const user = await this.usersService.findOneWithPass(userId);
+  if (!user) throw new NotFoundException('User not found');
+
+  const isMatch = await this.usersService.isValidPassword(dto.newPassword, dto.oldPassword);
+  if (!isMatch) throw new BadRequestException('Old password is incorrect');
+
+  const hashed = getHashPassword(dto.newPassword);
+  user.password = hashed;
+  await user.save();
+  return { message: 'Password updated' };
+}
 
 
 }

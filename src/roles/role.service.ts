@@ -5,6 +5,7 @@ import { Model } from 'mongoose';
 import { Role} from './schemas/role.schema';
 import { CreateRoleDto } from './dtos/requests/create.dto';
 import { MESSAGES } from 'src/shared/constants/messages.constants';
+import aqp, { AqpResult } from "api-query-params";
 
 @Injectable()
 export class RoleService {
@@ -29,10 +30,30 @@ export class RoleService {
     return roleFound;
   }
 
-  async findAll(): Promise<Role[]> {
-    return this.roleModel.find().exec();
+   async findAll(currentPage: number, limit: number, qs: string) {
+    const { filter, sort }: AqpResult = aqp(qs);
+    delete filter.current;
+    delete filter.pageSize;
+    const defaultCurrent = currentPage ? currentPage : 1;
+    const offset = (+defaultCurrent - 1) * +limit;
+    const defaultLimit = +limit ? +limit : 10;
+    const totalItems = (await this.roleModel.find(filter)).length;
+    const totalPages = Math.ceil(totalItems / defaultLimit);
+    const result = await this.roleModel.find(filter)
+      .skip(offset)
+      .limit(defaultLimit)
+      .sort(sort || {})
+      .exec();
+    return {
+      meta: {
+        current: defaultCurrent,
+        pageSize: defaultLimit,
+        pages: totalPages,
+        total: totalItems
+      },
+      result
+    }
   }
-
   async findById(role_id: string): Promise<Role> {
     const role = await this.roleModel.findOne({ role_id }).exec();
     if (!role) throw new NotFoundException(`Role with id ${role_id} not found`);

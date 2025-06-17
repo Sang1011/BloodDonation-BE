@@ -11,22 +11,23 @@ import { User } from "./schemas/user.schema";
 import { UserRole } from "src/shared/enums/user.enum";
 import { LocationService } from "src/locations/location.service";
 import { RoleService } from "src/roles/role.service";
+import { BaseModel } from "src/shared/interfaces/soft-delete-model.interface";
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(User.name) private userModel: BaseModel<User>,
     private readonly locationService: LocationService,
     private readonly roleService: RoleService
   ) { }
 
   isCreateUserDto(obj: any): obj is CreateUserDto {
-  return 'role_name' in obj && typeof obj.role_name === 'string';
+    return 'role_name' in obj && typeof obj.role_name === 'string';
   }
 
   isRegisterDTO(obj: any): obj is RegisterUserDTO {
-  return !('role_name' in obj);
-  } 
+    return !('role_name' in obj);
+  }
 
 
   async create(userDTO: CreateUserDto | RegisterUserDTO) {
@@ -37,14 +38,14 @@ export class UsersService {
 
     let roleId = "";
     if (this.isRegisterDTO(userDTO)) {
-    const role = UserRole.MEMBER;
-    const findRoleId = await this.roleService.findByName(role);
-    roleId = findRoleId.role_id;
+      const role = UserRole.MEMBER;
+      const findRoleId = await this.roleService.findByName(role);
+      roleId = findRoleId.role_id;
     } else if (this.isCreateUserDto(userDTO)) {
       const findRoleId = await this.roleService.findByName(userDTO.role_name);
       roleId = findRoleId.role_id;
     }
-    
+
     const createLoc = await this.locationService.create(userDTO.location);
     const locationId = createLoc.location_id;
     const hashPassword = getHashPassword(userDTO?.password);
@@ -74,7 +75,7 @@ export class UsersService {
       .skip(offset)
       .limit(defaultLimit)
       .sort(sort || {})
-      .select("-password")
+      .select("-password -is_verified -verify_token")
       .populate([
         { path: 'location_id' },
         { path: 'role_id' }
@@ -91,10 +92,37 @@ export class UsersService {
     }
   }
 
+  async findOneWithPass(id: string) {
+    const user = await this.userModel
+      .findOne({ user_id: id })
+      .populate([
+        { path: 'location_id' },
+        { path: 'role_id' }
+      ]);
+    if (!user) throw new BadRequestException(MESSAGES.USERS.USER_NOT_FOUND);
+
+    return user;
+  }
+
+  async findAllNoFilter(){
+    const user = await this.userModel.find()
+      .select('-password')
+    return user;
+  }
+
+  async findOneNoPopulate(id: string){
+    const user = await this.userModel.findOne({ user_id: id })
+      .select('-password')
+
+      if (!user) throw new BadRequestException(MESSAGES.USERS.USER_NOT_FOUND);
+
+    return user;
+  }
+
   async findOne(id: string) {
     const user = await this.userModel
       .findOne({ user_id: id })
-      .select('-password -refresh_token')
+      .select('-password')
       .populate([
         { path: 'location_id' },
         { path: 'role_id' }
@@ -105,11 +133,8 @@ export class UsersService {
     return user;
   }
 
-
   async findOneByEmail(email: string) {
-    return await this.userModel.findOne({
-      email: email
-    }).select('-refresh_token');
+    return this.userModel.findOne({ email: email });
   }
 
   async findOneByVerifyToken(token: string) {
@@ -118,7 +143,7 @@ export class UsersService {
     });
   }
 
-  async update(id:string, updateUserDto: UpdateUserDto) {
+  async update(id: string, updateUserDto: UpdateUserDto) {
     const get = await this.findOneByEmail(updateUserDto.email);
     if (!get) {
       throw new BadRequestException(MESSAGES.USERS.USER_NOT_FOUND);
@@ -126,13 +151,19 @@ export class UsersService {
     if (updateUserDto.location) {
       await this.locationService.update(get.location_id, updateUserDto.location);
     }
+
+    if (updateUserDto.role_name) {
+      const findRoleId = await this.roleService.findByName(updateUserDto.role_name);
+      await this.userModel.updateOne({ user_id: id }, { $set: { role_id: findRoleId.role_id } });
+    }
+
     await this.userModel.updateOne({ user_id: id }, updateUserDto);
 
     const updatedUser = await this.userModel.findOneAndUpdate(
       { user_id: id },
       { $set: updateUserDto },
       { new: true }
-    ).select('-password -refresh_token');
+    ).select('-password');
 
     return updatedUser;
   }
@@ -140,7 +171,7 @@ export class UsersService {
   async isValidPassword(password: string, hashPassword: string) {
     return await comparePassword(password, hashPassword);
   }
-
+  
   async remove(id: string) {
     const foundUser = await this.userModel.findById(id);
     if (!foundUser) return MESSAGES.USERS.USER_NOT_FOUND;
@@ -156,12 +187,12 @@ export class UsersService {
   async updateUserToken(refreshToken: string, user_id: string) {
     return await this.userModel.updateOne(
       { user_id: user_id },
-      { $set: { refresh_token: refreshToken } } 
+      { $set: { refresh_token: refreshToken } }
     );
   }
 
-  async findUserByToken(refreshToken: string){
-    return await this.userModel.findOne({ refresh_token: refreshToken})
+  async findUserByToken(refreshToken: string) {
+    return await this.userModel.findOne({ refresh_token: refreshToken })
   }
 
   async updateVerifyToken(user_id: string) {
@@ -169,5 +200,9 @@ export class UsersService {
       { user_id: user_id },
       { $set: { verify_token: null, is_verified: true } }
     );
+  }
+
+  async getUserByLocationID(location_id: string){
+    return await this.userModel.findOne({location_id: location_id});
   }
 }

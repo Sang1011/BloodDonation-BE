@@ -3,6 +3,7 @@ import { HydratedDocument } from "mongoose";
 import { Blood } from "src/bloods/schemas/blood.schema";
 import { CentralBlood } from "src/central_bloods/schemas/central_blood.schema";
 import { InforHealth } from "src/InforHealths/schemas/inforhealth.schema";
+import { Status } from "src/shared/enums/status.enum";
 import { applySmartIdField } from "src/shared/middlewares/assign_custome_id.middleware";
 
 export type DonateBloodDocument = HydratedDocument<DonateBlood>
@@ -19,19 +20,25 @@ export class DonateBlood {
     date_register: Date;
 
     @Prop({ required: true })
-    date_receiver: Date;
+    date_donate: Date;
 
-    @Prop({ required: true })
+    @Prop()
     ml: number;
 
-    @Prop({ required: true })
+    @Prop()
     unit: number;
 
-    @Prop()
-    status_regist: string;
+    // @Prop()
+    // status_regist: string;
 
-    @Prop()
-    status_receiver: string;
+    // @Prop()
+    // status_donate: string;
+
+    @Prop({ default: Status.PENDING })
+    status_regist: Status;
+
+    @Prop({ default: Status.PENDING })
+    status_donate: Status;
 
     @Prop({ required: true, ref: InforHealth.name })
     infor_health: string;

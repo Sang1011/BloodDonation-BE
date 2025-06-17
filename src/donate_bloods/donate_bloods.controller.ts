@@ -5,7 +5,7 @@ import {
   Param,
   Body,
   Query,
-  Put,
+  Patch,
   Delete,
   HttpCode,
   HttpStatus,
@@ -23,6 +23,8 @@ import { ResponseMessage } from 'src/shared/decorators/message.decorator';
 import { Public } from 'src/shared/decorators/public.decorator';
 import { FindAllQueryDTO } from 'src/shared/dtos/requests/find-all-query.request';
 import { DeleteByIdDonateBloodDTO } from './dto/response/delete_donate_bloods.response';
+import { IUser } from 'src/shared/interfaces/user.interface';
+import { User } from 'src/shared/decorators/users.decorator';
 
 @ApiTags('Donate Bloods')
 @Controller('donate-bloods')
@@ -68,8 +70,8 @@ export class DonateBloodController {
   @Post()
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')
-  async create(@Body() dto: CreateDonateBloodDto) {
-    return await this.donateBloodService.create(dto);
+  async create( @User() user: IUser,@Body() dto: CreateDonateBloodDto) {
+    return await this.donateBloodService.create(user, dto);
   }
 
   @ApiOperation({ summary: 'Update a donate blood record by ID' })
@@ -79,7 +81,7 @@ export class DonateBloodController {
     type: UpdateDonateBloodResponseDto,
   })
   @ResponseMessage(MESSAGES.DONATE_BLOOD.UPDATE_SUCCESS)
-  @Put(':id')
+  @Patch(':id')
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')
   async update(@Param('id') id: string, @Body() dto: UpdateDonateBloodDto) {
@@ -94,5 +96,12 @@ export class DonateBloodController {
   @ApiOkResponse({type: DeleteByIdDonateBloodDTO})
   async remove(@Param('id') id: string): Promise<void> {
     await this.donateBloodService.remove(id);
+  }
+
+  @Get('/user/history')
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
+  async historyDonate(@User() user: IUser) {
+    return await this.donateBloodService.getDonateBlood(user);
   }
 }

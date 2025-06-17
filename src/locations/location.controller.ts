@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Param, Patch, Query } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, Patch, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiOkResponse, ApiBearerAuth, ApiSecurity } from '@nestjs/swagger';
 import { LocationService } from './location.service';
 import { CreateLocationDto } from './dtos/requests/create.dto';
@@ -6,6 +6,9 @@ import { ResponseMessage } from 'src/shared/decorators/message.decorator';
 import { UpdateLocationDto } from './dtos/requests/update.dto';
 import { Public } from 'src/shared/decorators/public.decorator';
 import { FindAllQueryDTO } from 'src/shared/dtos/requests/find-all-query.request';
+import { Role } from 'src/shared/decorators/role.decorator';
+import { UserRole } from 'src/shared/enums/user.enum';
+import { RoleGuard } from 'src/auth/guards/role.guard';
 
 @ApiTags('Locations')
 @Controller('locations')
@@ -18,7 +21,7 @@ export class LocationController {
   @ApiOperation({ summary: 'Create new location' })
   @ApiResponse({ status: 201, description: 'Location created successfully' })
   @ResponseMessage('Location created successfully')
-  @Public()
+  @Role(UserRole.ADMIN)
   async create(@Body() body: CreateLocationDto) {
     return this.locationService.create(body);
   }
@@ -55,5 +58,4 @@ export class LocationController {
   async update(@Param('location_id') id: string, @Body() body: UpdateLocationDto) {
     return this.locationService.update(id, body);
   }
-
 }

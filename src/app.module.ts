@@ -22,6 +22,9 @@ import { APP_GUARD } from '@nestjs/core';
 import { UploadModule } from './upload/upload.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { NewsModule } from './news/news.module';
+import { WorkingHoursModule } from './working_hours/working_hours.module';
+import { SearchModule } from './search/search.module';
+import { SharedModule } from './shared/modules/sharedModule.module';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -52,7 +55,10 @@ import { NewsModule } from './news/news.module';
     EmailModule,
     CloudinaryModule,
     UploadModule,
-    NewsModule
+    NewsModule,
+    WorkingHoursModule,
+    SharedModule,
+    SearchModule
   ],
   providers: [
     {

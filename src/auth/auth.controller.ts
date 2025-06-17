@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Headers, Post, Query, Req, Res, UseGuards } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Get, Headers, Patch, Post, Query, Req, Res, UseGuards } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { LocalAuthGuard } from "./guards/local-auth.guard";
 import { RegisterUserDTO } from "src/users/dto/requests/create-user.dto";
@@ -21,6 +21,8 @@ import {
 import { LoginUserDTO } from "./dtos/requests/login.dto";
 import { LoginFailedResponse } from "./dtos/responses/login.response";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
+import { ChangeEmailDto } from "./dtos/requests/change-email.dto";
+import { ChangePasswordDto } from "./dtos/requests/change-password.dto";
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -95,5 +97,29 @@ async verifyEmail(@Query('email') email: string, @Query('token') token: string) 
   @ApiBearerAuth('access-token')
   async resendVerification(@User() user: IUser) {
     return this.authService.resendVerificationEmail(user);
+  }
+
+
+  @Patch('change-email')
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
+  @ResponseMessage('Email updated successfully')
+  changeEmail(
+    @User() user: IUser,
+    @Body() dto: ChangeEmailDto,
+  ) {
+    return this.authService.changeEmail(user.user_id, dto);
+  }
+
+  
+  @Patch('change-password')
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
+  @ResponseMessage('Password updated successfully')
+  changePassword(
+    @User() user: IUser,
+    @Body() dto: ChangePasswordDto,
+  ) {
+    return this.authService.changePassword(user.user_id, dto);
   }
 }

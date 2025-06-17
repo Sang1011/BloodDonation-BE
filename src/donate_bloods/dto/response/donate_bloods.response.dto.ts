@@ -11,7 +11,7 @@ export class DonateBloodResponseDto {
   date_register: Date;
 
   @ApiProperty()
-  date_receiver: Date;
+  date_donate: Date;
 
   @ApiProperty()
   ml: number;
@@ -23,7 +23,7 @@ export class DonateBloodResponseDto {
   status_regist?: string;
 
   @ApiProperty({ required: false })
-  status_receiver?: string;
+  status_donate?: string;
 
   @ApiProperty()
   infor_health: string;

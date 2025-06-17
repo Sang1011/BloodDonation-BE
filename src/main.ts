@@ -8,12 +8,14 @@ import { TransformInterceptor } from "src/shared/interceptors/transform.intercep
 import * as cookieParser from 'cookie-parser';
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import * as fs from 'fs';
+import { RoleGuard } from "./auth/guards/role.guard";
 
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
   const reflector = app.get(Reflector);
+  app.useGlobalGuards(new RoleGuard(reflector));
   app.useGlobalInterceptors(new TransformInterceptor(reflector))
   app.useGlobalPipes(new ValidationPipe())
   // config cookie
