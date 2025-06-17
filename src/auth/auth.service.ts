@@ -145,8 +145,8 @@ export class AuthService {
     return "LOGOUT SUCCESSFULLY"
   }
 
- async verifyEmail(user: IUser, token: string) {
-  const userVerify = await this.usersService.findOneByEmail(user.email);
+async verifyEmail(email: string, token: string) {
+  const userVerify = await this.usersService.findOneByEmail(email);
   if (!userVerify || !userVerify.verify_token || userVerify.is_verified) {
     throw new BadRequestException('Invalid or already verified');
   }
@@ -154,6 +154,7 @@ export class AuthService {
   if (userVerify.verify_token !== token) {
     throw new BadRequestException('Invalid verification token');
   }
+  
   await this.usersService.updateVerifyToken(userVerify.user_id);
   return "EMAIL VERIFIED SUCCESSFULLY";
 }
