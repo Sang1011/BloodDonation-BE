@@ -57,6 +57,6 @@ export class CentralBloodController {
   @ApiOkResponse({ type: DeleteByIdCentralDTO })
   @ResponseMessage("Delete central blood center")
   remove(@Param("id") id: string) {
-    return this.service.remove(id);
+    return this.service.softRemove(id);
   }
 }

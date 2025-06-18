@@ -5,11 +5,13 @@ import { CentralBlood } from "src/central_bloods/schemas/central_blood.schema";
 import { InforHealth } from "src/InforHealths/schemas/inforhealth.schema";
 import { Status } from "src/shared/enums/status.enum";
 import { applySmartIdField } from "src/shared/middlewares/assign_custome_id.middleware";
+import { applySoftDeleteStatics } from "src/shared/plugins/soft-delete.plugin";
+import { BaseSchema } from "src/shared/schemas/baseSchema";
 
 export type DonateBloodDocument = HydratedDocument<DonateBlood>
 
 @Schema()
-export class DonateBlood {
+export class DonateBlood extends BaseSchema {
     @Prop({ unique: true })
     donate_id: string;
 
@@ -51,3 +53,4 @@ export const DonateBloodSchema = SchemaFactory.createForClass(DonateBlood);
 
 // middleware
 applySmartIdField(DonateBloodSchema, DonateBlood.name,'donate_id');
+applySoftDeleteStatics(DonateBloodSchema, 'donate_id');

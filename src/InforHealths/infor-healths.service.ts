@@ -10,15 +10,17 @@ import { UpdateInforHealthDto } from "./dtos/requests/update.request";
 import { UsersService } from "src/users/users.service";
 import { UploadService } from "src/upload/upload.service";
 import { IUser } from "src/shared/interfaces/user.interface";
+import { BaseModel } from "src/shared/interfaces/soft-delete-model.interface";
 
 @Injectable()
 export class InforHealthService {
     constructor(
-        @InjectModel(InforHealth.name) private inforHealthModel: Model<InforHealth>,
+        @InjectModel(InforHealth.name) private inforHealthModel: BaseModel<InforHealth>,
         private readonly userServices: UsersService,
         private readonly bloodServices: BloodsService,
         private readonly uploadService: UploadService
     ) { }
+    
     async create(infoHealth: CreateInforHealthDto, file?: Express.Multer.File) {
         const { user_id, blood_id } = infoHealth;
         const user = await this.userServices.findOne(user_id);
@@ -33,18 +35,55 @@ export class InforHealthService {
         if(health){
             throw new BadRequestException("Health information already exists for this user");
         }
+        const latest_donate = infoHealth.latest_donate;
+        
+        if (new Date(latest_donate) > new Date()) {
+            throw new BadRequestException("Not choose day in the future");
+        }
+
         let imgUrl = null;
         if (file) {
             const result = await this.uploadService.uploadToCloudinary(user.user_id, file);
             imgUrl = result.secure_url;
             infoHealth.img_health = imgUrl;
         }
+        
+
         const createdHealth = await this.inforHealthModel.create({
             ...infoHealth,
             user_id: user_id,
             blood_id: blood_id
         });
-        return createdHealth;
+        return createdHealth.save();
+    }
+
+    async createByUser(user: IUser, infoHealth: CreateInforHealthDto, file?: Express.Multer.File) {
+       
+        
+        const blood = await this.bloodServices.findOne(+infoHealth.blood_id);
+        if (!blood) {
+            throw new BadRequestException("Blood not found");
+        }
+        
+        const latest_donate = infoHealth.latest_donate;
+        
+        if (new Date(latest_donate) > new Date()) {
+            throw new BadRequestException("Not choose day in the future");
+        }
+
+        let imgUrl = null;
+        if (file) {
+            const result = await this.uploadService.uploadToCloudinary(user.user_id, file);
+            imgUrl = result.secure_url;
+            infoHealth.img_health = imgUrl;
+        }
+        
+        const createdHealth = await this.inforHealthModel.create({
+            ...infoHealth,
+            user_id: user.user_id,
+            blood_id: infoHealth.blood_id
+        });
+        return createdHealth.save();
     }
 
 
@@ -62,7 +101,13 @@ export class InforHealthService {
             .limit(defaultLimit)
             .sort(sort || {})
             .populate([
-                { path: 'user_id' },
+                {
+                    path: 'user_id',
+                    model: 'User',
+                    localField: 'user_id',
+                    foreignField: 'user_id',
+                    justOne: true
+                },
                 {
                     path: 'blood_id',
                     model: 'Blood',
@@ -87,7 +132,13 @@ export class InforHealthService {
         const health = await this.inforHealthModel
             .findOne({ infor_health: id })
             .populate([
-                { path: 'user_id' },
+                {
+                    path: 'user_id',
+                    model: 'User',
+                    localField: 'user_id',
+                    foreignField: 'user_id',
+                    justOne: true
+                },
                 {
                     path: 'blood_id',
                     model: 'Blood',
@@ -110,7 +161,7 @@ export class InforHealthService {
         return health;
     }
 
-    async update(id: string, updateHealthDTO: UpdateInforHealthDto, file?: Express.Multer.File) {
+      async update(id: string, updateHealthDTO: UpdateInforHealthDto, file?: Express.Multer.File) {
         const health = await this.inforHealthModel.findOne({ infor_health: id });
         if (!health) {
           throw new BadRequestException("Health information not found");
@@ -127,13 +178,18 @@ export class InforHealthService {
         if (!blood) {
           throw new BadRequestException("Blood not found");
         }
-      
+
+        const latest_donate = updateHealthDTO.latest_donate;
+        if (new Date(latest_donate) > new Date()) {
+            throw new BadRequestException("Not choose day in the future");
+        }
         let imgUrl = null;
         if (file) {
             const result = await this.uploadService.uploadToCloudinary(user.user_id, file);
             imgUrl = result.secure_url;
             updateHealthDTO.img_health = imgUrl;
         }
+       
         const updatedHealth = await this.inforHealthModel.findOneAndUpdate(
           { infor_health: id },
           { $set: updateHealthDTO },
@@ -151,10 +207,58 @@ export class InforHealthService {
       
         return updatedHealth;
       }
+
+      async updateByUser(user: IUser, updateHealthDTO: UpdateInforHealthDto, file?: Express.Multer.File) {
+        const health = await this.findByUserId(user.user_id);
+        console.log(health);
+        if (!health) {
+          throw new BadRequestException("Health information not found");
+        }
+
+        const { blood_id } = updateHealthDTO;      
+        const blood = await this.bloodServices.findOne(+blood_id);
+        if (!blood) {
+          throw new BadRequestException("Blood not found");
+        }
+
+        const latest_donate = updateHealthDTO.latest_donate;
+        if (new Date(latest_donate) > new Date()) {
+            throw new BadRequestException("Not choose day in the future");
+        }
+        let imgUrl = null;
+        if (file) {
+            const result = await this.uploadService.uploadToCloudinary(user.user_id, file);
+            imgUrl = result.secure_url;
+            updateHealthDTO.img_health = imgUrl;
+        }
+       
+        const updatedHealth = await this.inforHealthModel.findOneAndUpdate(
+          { infor_health: health.infor_health },
+          { $set: updateHealthDTO },
+          { new: true }
+        ).populate([
+            {
+                path: 'user_id',
+                model: 'User',
+                localField: 'user_id',
+                foreignField: 'user_id',
+                justOne: true
+            },
+            {
+                path: 'blood_id',
+                model: 'Blood',
+                localField: 'blood_id',      
+                foreignField: 'blood_id',  
+                justOne: true,
+            },
+        ]);
+      
+        return updatedHealth;
+      }
       
 
     async remove(id: string) {
-        const deleted = await this.inforHealthModel.deleteOne({ infor_health: id });
+        const deleted = await this.inforHealthModel.softDelete(id);
         if (!deleted) throw new BadRequestException("Health information not found");
         return { deleted: deleted.deletedCount || 0 };
     }

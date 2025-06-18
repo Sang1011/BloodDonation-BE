@@ -3,13 +3,15 @@ import { Type } from "class-transformer";
 import { IsDateString, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class UpdateInforHealthDto {
-      @ApiProperty({ example: 'USR001', description: 'ID của người dùng' })
+      @ApiPropertyOptional({ example: 'USR001', description: 'ID của người dùng'})
+      @IsOptional()
       @IsString()
-      user_id: string;
+      user_id?: string;
     
-      @ApiProperty({ example: 'B001', description: 'ID của nhóm máu' })
+      @ApiPropertyOptional({ example: 'B001', description: 'ID của nhóm máu' })
+      @IsOptional()
       @IsString()
-      blood_id: string;
+      blood_id?: string;
     
       @ApiPropertyOptional({ example: 170, description: 'Chiều cao (cm)' })
       @IsOptional()

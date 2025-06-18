@@ -8,12 +8,13 @@ import aqp, { AqpResult } from "api-query-params";
 import { WorkingHoursService } from "src/working_hours/working_hours.service";
 import { removeVietnameseTones } from "src/shared/utils/removeVNTones";
 import { GeocodingService } from "src/shared/services/geoLocation.service";
+import { BaseModel } from "src/shared/interfaces/soft-delete-model.interface";
 
 @Injectable()
 export class CentralBloodService {
   constructor(
     @InjectModel(CentralBlood.name)
-    private readonly centralBloodModel: Model<CentralBlood>,
+    private readonly centralBloodModel: BaseModel<CentralBlood>,
     @Inject(forwardRef(() => WorkingHoursService))
     private readonly workingService: WorkingHoursService,
     private readonly geoLocationService: GeocodingService
@@ -59,7 +60,7 @@ const query_address = removeVietnameseTones(dto.centralBlood_address);
         model: 'WorkingHours',
         localField: 'working_id',
         foreignField: 'working_id',
-        justOne: true,
+        // justOne: true,
       })
       .exec();
 
@@ -82,7 +83,7 @@ const query_address = removeVietnameseTones(dto.centralBlood_address);
       model: 'WorkingHours',
       localField: 'working_id',
       foreignField: 'working_id',
-      justOne: true,
+      //justOne: true,
     })
       .exec();
     if (!cb) throw new NotFoundException("Central blood not found");
@@ -133,5 +134,11 @@ const query_address = removeVietnameseTones(dto.centralBlood_address);
     const deleted = await this.centralBloodModel.deleteOne({centralBlood_id: num});
     if (!deleted) throw new NotFoundException("Central blood not found");
     return { deleted: deleted.deletedCount || 0 };
+  }
+
+  async softRemove(id: string) {
+    const deleted = await this.centralBloodModel.softDelete(id);
+    if (!deleted) throw new NotFoundException("Central blood not found");
+    return { deleted: deleted };
   }
 }

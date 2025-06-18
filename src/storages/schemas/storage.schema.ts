@@ -3,11 +3,13 @@ import { HydratedDocument } from "mongoose";
 import { Blood } from "src/bloods/schemas/blood.schema";
 import { DonateBlood } from "src/donate_bloods/schemas/donate_blood.schema";
 import { applySmartIdField } from "src/shared/middlewares/assign_custome_id.middleware";
+import { applySoftDeleteStatics } from "src/shared/plugins/soft-delete.plugin";
+import { BaseSchema } from "src/shared/schemas/baseSchema";
 
 export type StorageDocument = HydratedDocument<Storage>
 
 @Schema()
-export class Storage {
+export class Storage extends BaseSchema {
     @Prop({ unique: true })
     storage_id: string;
 
@@ -37,3 +39,4 @@ export const StorageSchema = SchemaFactory.createForClass(Storage);
 
 // middleware
 applySmartIdField(StorageSchema, Storage.name, 'storage_id');
+applySoftDeleteStatics(StorageSchema, 'storage_id');

@@ -3,12 +3,13 @@ import mongoose, { HydratedDocument } from "mongoose";
 import { Blood } from "src/bloods/schemas/blood.schema";
 import { InforHealth } from "src/InforHealths/schemas/inforhealth.schema";
 import { applySmartIdField } from "src/shared/middlewares/assign_custome_id.middleware";
-import { User } from "src/users/schemas/user.schema";
+import { applySoftDeleteStatics } from "src/shared/plugins/soft-delete.plugin";
+import { BaseSchema } from "src/shared/schemas/baseSchema";
 
 export type ReceiverBloodDocument = HydratedDocument<ReceiverBlood>
 
 @Schema()
-export class ReceiverBlood {
+export class ReceiverBlood extends BaseSchema {
     @Prop({unique: true})
     receiver_id: string;
 
@@ -45,3 +46,4 @@ export const ReceiverBloodSchema = SchemaFactory.createForClass(ReceiverBlood);
 
 // middleware
 applySmartIdField(ReceiverBloodSchema, ReceiverBlood.name,'receiver_id');
+applySoftDeleteStatics(ReceiverBloodSchema, 'receiver_id');

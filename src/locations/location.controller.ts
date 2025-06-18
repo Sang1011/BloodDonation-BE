@@ -6,7 +6,6 @@ import { ResponseMessage } from 'src/shared/decorators/message.decorator';
 import { UpdateLocationDto } from './dtos/requests/update.dto';
 import { Public } from 'src/shared/decorators/public.decorator';
 import { FindAllQueryDTO } from 'src/shared/dtos/requests/find-all-query.request';
-import { Role } from 'src/shared/decorators/role.decorator';
 import { UserRole } from 'src/shared/enums/user.enum';
 import { RoleGuard } from 'src/auth/guards/role.guard';
 
@@ -21,7 +20,6 @@ export class LocationController {
   @ApiOperation({ summary: 'Create new location' })
   @ApiResponse({ status: 201, description: 'Location created successfully' })
   @ResponseMessage('Location created successfully')
-  @Role(UserRole.ADMIN)
   async create(@Body() body: CreateLocationDto) {
     return this.locationService.create(body);
   }
