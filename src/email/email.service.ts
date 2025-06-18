@@ -19,7 +19,7 @@ export class EmailService {
             to: user.email,
             subject: `Verify your account`,
             template: './register',
-            context: { // ✏️ filling curly brackets with content
+            context: {
                 name: user.fullname,
                 url: "https://giotmauvang.org.vn/"
               },
@@ -35,18 +35,26 @@ export class EmailService {
     }
 
     async sendVerifyEmail(user: RegisterUserDTO) {
-        const token = crypto.randomUUID();
-        await this.userModel.updateOne({ email: user.email }, { $set: { verify_token: token, is_verified: false } });
-        await this.mailerService.sendMail({
-            to: user.email,
-            subject: `Verify your account`,
-            template: './verify-email',
-            context: {
-                name: user.fullname,
-                url: "http://localhost:3000/api/v1/auth/verify-email",
-                token: token
-            }
-        });
+  const token = crypto.randomUUID();
+
+  // Cập nhật token và trạng thái vào DB
+  await this.userModel.updateOne(
+    { email: user.email },
+    { $set: { verify_token: token, is_verified: false } }
+  );
+
+  // Gửi email
+  await this.mailerService.sendMail({
+    to: user.email,
+    subject: `Verify your account`,
+    template: './verify-email',
+    context: {
+      name: user.fullname,
+      url: `http://localhost:3000/api/v1/auth/verify-email?email=${encodeURIComponent(user.email)}&token=${token}`,
+      token: token,
+      email: user.email,
+    }
+  });
     }
 }
 

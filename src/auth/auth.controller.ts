@@ -83,16 +83,14 @@ export class AuthController {
     return this.authService.logout(user, response);
   }
 
-  @Post('/verify-email')
-  @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Verify email' })
-  @ApiResponse({ status: 200, description: 'Email verified successfully.' })
-  @ApiResponse({ status: 400, description: 'Bad request' })
-  @ApiResponse({ status: 401, description: 'Unauthorized - User must be logged in' })
-  @ApiBearerAuth('access-token')
-  async verifyEmail(@Query('token') token: string, @User() user: IUser) {
-    return this.authService.verifyEmail(user, token);
-  }
+ @Get('/verify-email')
+@Public()
+@ApiOperation({ summary: 'Verify email by link' })
+@ApiResponse({ status: 200, description: 'Email verified successfully.' })
+@ApiResponse({ status: 400, description: 'Bad request' })
+async verifyEmail(@Query('email') email: string, @Query('token') token: string) {
+  return this.authService.verifyEmail(email, token);
+}
 
   @Post('/resend-verification')
   @UseGuards(JwtAuthGuard)

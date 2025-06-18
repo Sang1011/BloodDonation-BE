@@ -18,10 +18,10 @@ export class EmailController {
     return this.emailService.sendSuccessDonateEmail(sendDonateInfo);
   }
 
-  @Public()
-  @ResponseMessage('Send email Register User success')
-  @Post('send-register-email')
-  async sendRegisterEmail(@Body() registerDTO: RegisterUserDTO) {
-    return this.emailService.sendRegisterEmail(registerDTO);
-  }
+  // @Public()
+  // @ResponseMessage('Send email Register User success')
+  // @Post('send-register-email')
+  // async sendRegisterEmail(@Body() registerDTO: RegisterUserDTO) {
+  //   return this.emailService.sendVerifyEmail(registerDTO);
+  // }
 }
