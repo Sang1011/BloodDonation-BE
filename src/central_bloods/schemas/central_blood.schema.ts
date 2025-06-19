@@ -33,7 +33,7 @@ export class CentralBlood extends BaseSchema {
         coordinates: [number, number];
     };
 
-    @Prop({ ref: WorkingHours.name, required: true })
+    @Prop({ ref: 'WorkingHours'})
     working_id: string[];
 }
 

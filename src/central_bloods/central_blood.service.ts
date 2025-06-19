@@ -9,14 +9,17 @@ import { WorkingHoursService } from "src/working_hours/working_hours.service";
 import { removeVietnameseTones } from "src/shared/utils/removeVNTones";
 import { GeocodingService } from "src/shared/services/geoLocation.service";
 import { BaseModel } from "src/shared/interfaces/soft-delete-model.interface";
+import { WorkingHours } from "src/working_hours/schemas/working_hours.schema";
 
 @Injectable()
 export class CentralBloodService {
   constructor(
     @InjectModel(CentralBlood.name)
     private readonly centralBloodModel: BaseModel<CentralBlood>,
-    @Inject(forwardRef(() => WorkingHoursService))
-    private readonly workingService: WorkingHoursService,
+    // @Inject(forwardRef(() => WorkingHoursService))
+    // private readonly workingService: WorkingHoursService,
+    @InjectModel(WorkingHours.name)
+    private readonly workingHoursModel: BaseModel<WorkingHours>,
     private readonly geoLocationService: GeocodingService
   ) {}
 
@@ -30,6 +33,9 @@ export class CentralBloodService {
   const counter = latest?.centralBlood_id ? latest.centralBlood_id + 1 : 1;
 const query_address = removeVietnameseTones(dto.centralBlood_address);
     const { lat, lng } = await this.geoLocationService.getLatLng(query_address);
+
+    
+
   const created = new this.centralBloodModel({
     ...dto,
     centralBlood_id: counter,
@@ -37,6 +43,14 @@ const query_address = removeVietnameseTones(dto.centralBlood_address);
         type: 'Point',
         coordinates: [lng, lat],
     },
+  });
+
+  // map central to working hours
+  dto.working_id.map(async working_id => {
+    const working = await this.workingHoursModel.findOne({ working_id });
+    if (!working) throw new NotFoundException("Working hours not found");
+    working.centralBlood_id.push(created.centralBlood_id);
+    await working.save();
   });
 
   return created.save();

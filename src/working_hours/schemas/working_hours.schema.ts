@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, HydratedDocument } from 'mongoose';
+import { CentralBlood } from 'src/central_bloods/schemas/central_blood.schema';
 import { DayOfWeek } from 'src/shared/enums/working_hours.enum';
 import { applySmartIdField } from 'src/shared/middlewares/assign_custome_id.middleware';
 import { applySoftDeleteStatics } from 'src/shared/plugins/soft-delete.plugin';
@@ -25,6 +26,9 @@ export class WorkingHours extends BaseSchema {
 
   @Prop({ required: true, default: true })
   is_open: boolean;
+
+  @Prop({ ref: 'CentralBlood' })
+  centralBlood_id: number[];
 }
 
 export const WorkingHoursSchema = SchemaFactory.createForClass(WorkingHours);

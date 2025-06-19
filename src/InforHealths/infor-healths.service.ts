@@ -270,9 +270,17 @@ export class InforHealthService {
         return { infor_health, blood_id };
     }
 
+    async findInfoHealthByUserId(user_id: string) {
+        const health = await this.inforHealthModel.findOne({ user_id: user_id });
+        if (!health) throw new BadRequestException("Health information not found");
+        return health;
+    }
+
     async findByListId(ids: string[]): Promise<InforHealth[]> {
     return this.inforHealthModel.find({
         infor_health: { $in: ids }
     });
+
+
 }
 }
