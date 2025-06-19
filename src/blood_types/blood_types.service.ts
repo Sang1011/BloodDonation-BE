@@ -1,15 +1,16 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { BloodType } from './schemas/blood_type.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { BloodTypeDto } from './dto/request/bloodtype.dto';
 import { MESSAGES } from 'src/shared/constants/messages.constants';
 import aqp, { AqpResult } from "api-query-params";
+import { BaseModel } from 'src/shared/interfaces/soft-delete-model.interface';
 
 @Injectable()
 export class BloodTypesService {
     constructor(
-        @InjectModel(BloodType.name) private bloodTypeModel: Model<BloodType>
+        @InjectModel(BloodType.name) private bloodTypeModel: BaseModel<BloodType>
     ) { }
 
 
@@ -61,8 +62,11 @@ export class BloodTypesService {
         return await this.bloodTypeModel.findByIdAndUpdate(id, bloodType, { new: true });
     }
 
-    async delete(id: string) {
-        const deleted = await this.bloodTypeModel.deleteOne({ blood_type_id: id });
-        return { deleted: deleted.deletedCount || 0 };
+    async softRemove(id: number) {
+        const deleted = await this.bloodTypeModel.softDelete(id);
+        if (!deleted) {
+            throw new NotFoundException("Blood type not found");
+        }
+        return { deleted: deleted.modifiedCount };
     }
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Body, Put, Query } from '@nestjs/common';
+import { Controller, Get, Param, Post, Body, Put, Query, Delete } from '@nestjs/common';
 import { BloodTypesService } from './blood_types.service';
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { BloodTypeDto } from './dto/request/bloodtype.dto';
@@ -57,4 +57,12 @@ export class BloodTypesController {
         return await this.bloodTypesService.update(id, bloodType);
     }
 
+    @Delete(":id")
+    @ApiBearerAuth('access-token')
+    @ApiSecurity('access-token')
+    @ResponseMessage("Delete blood type by id")
+    @ApiOperation({ summary: 'Delete blood type by id' })
+    deketeOne(@Param("id") id: string) {
+        return this.bloodTypesService.softRemove(+id);
+    }
 }

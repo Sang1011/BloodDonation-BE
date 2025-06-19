@@ -25,6 +25,7 @@ import { NewsModule } from './news/news.module';
 import { WorkingHoursModule } from './working_hours/working_hours.module';
 import { SearchModule } from './search/search.module';
 import { SharedModule } from './shared/modules/sharedModule.module';
+import { NotificationModule } from './notifications/notification.module';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -58,7 +59,8 @@ import { SharedModule } from './shared/modules/sharedModule.module';
     NewsModule,
     WorkingHoursModule,
     SharedModule,
-    SearchModule
+    SearchModule,
+    NotificationModule
   ],
   providers: [
     {

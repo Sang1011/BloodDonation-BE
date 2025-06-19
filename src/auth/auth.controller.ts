@@ -23,6 +23,9 @@ import { LoginFailedResponse } from "./dtos/responses/login.response";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 import { ChangeEmailDto } from "./dtos/requests/change-email.dto";
 import { ChangePasswordDto } from "./dtos/requests/change-password.dto";
+import { dropRightWhile } from "lodash";
+import { VerifyResetCodeDto } from "./dtos/requests/verify-reset-code.dto";
+import { SendResetCodeDto } from "./dtos/requests/send-reset-code.dto";
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -73,6 +76,23 @@ export class AuthController {
     return this.authService.processNewToken(refreshToken, response);
   }
 
+  @Public()
+  @Post('/send-reset-code')
+  @ApiOperation({ summary: 'Send reset code to reset password' })
+  @ApiResponse({ status: 200, description: 'Sent reset code successfully.' })
+  @ResponseMessage("Sent reset code successfully!")
+  sendResetCode(@Body() dto: SendResetCodeDto) {
+    return this.authService.sendResetCode(dto.email);
+  }
+
+  @Public()
+  @Post('/verify-reset-code')
+  @ApiOperation({ summary: 'Verify reset code to reset password' })
+  @ResponseMessage("Verify reset code successfully!")
+  verifyCode(@Body() dto: VerifyResetCodeDto) {
+    return this.authService.verifyResetCode(dto.email, dto.digit);
+  }
+
   @Post('/logout')
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')
@@ -83,14 +103,14 @@ export class AuthController {
     return this.authService.logout(user, response);
   }
 
- @Get('/verify-email')
-@Public()
-@ApiOperation({ summary: 'Verify email by link' })
-@ApiResponse({ status: 200, description: 'Email verified successfully.' })
-@ApiResponse({ status: 400, description: 'Bad request' })
-async verifyEmail(@Query('email') email: string, @Query('token') token: string) {
-  return this.authService.verifyEmail(email, token);
-}
+  @Get('/verify-email')
+  @Public()
+  @ApiOperation({ summary: 'Verify email by link' })
+  @ApiResponse({ status: 200, description: 'Email verified successfully.' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  async verifyEmail(@Query('email') email: string, @Query('token') token: string) {
+    return this.authService.verifyEmail(email, token);
+  }
 
   @Post('/resend-verification')
   @UseGuards(JwtAuthGuard)
@@ -111,7 +131,7 @@ async verifyEmail(@Query('email') email: string, @Query('token') token: string) 
     return this.authService.changeEmail(user.user_id, dto);
   }
 
-  
+
   @Patch('change-password')
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')

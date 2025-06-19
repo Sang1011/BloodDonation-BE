@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Param, Patch, Query, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, Patch, Query, UseGuards, Delete } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiOkResponse, ApiBearerAuth, ApiSecurity } from '@nestjs/swagger';
 import { LocationService } from './location.service';
 import { CreateLocationDto } from './dtos/requests/create.dto';
@@ -56,4 +56,12 @@ export class LocationController {
   async update(@Param('location_id') id: string, @Body() body: UpdateLocationDto) {
     return this.locationService.update(id, body);
   }
+
+  @Delete(":id")
+    @ApiBearerAuth('access-token')
+    @ApiSecurity('access-token')
+    @ResponseMessage("Delete location")
+    softRemove(@Param("id") id: string) {
+      return this.locationService.softRemove(id);
+    }
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Body, HttpCode, HttpStatus, Query } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, HttpCode, HttpStatus, Query, Delete } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth, ApiSecurity } from '@nestjs/swagger';
 import { RoleService } from './role.service';
 import { ResponseMessage } from 'src/shared/decorators/message.decorator';
@@ -28,8 +28,8 @@ export class RoleController {
   @ApiResponse({ status: 200, description: 'List of roles' })
   @ResponseMessage('Roles retrieved successfully')
   async findAll(@Query() query: FindAllQueryDTO) {
-      return this.roleService.findAll(+query.current, +query.pageSize, query.qs);
-    }
+    return this.roleService.findAll(+query.current, +query.pageSize, query.qs);
+  }
 
   @Get(':role_id')
   @ApiBearerAuth('access-token')
@@ -41,5 +41,14 @@ export class RoleController {
   @ResponseMessage('Role retrieved successfully')
   async findOne(@Param('role_id') role_id: string) {
     return this.roleService.findById(role_id);
+  }
+
+  @Delete(":id")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
+  @ResponseMessage("Delete role by id")
+  @ApiOperation({ summary: 'Delete role by id' })
+  deketeOne(@Param("id") id: string) {
+    return this.roleService.softRemove(id);
   }
 }

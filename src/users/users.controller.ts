@@ -17,11 +17,11 @@ import { Request } from "express";
 @ApiTags('Users')
 @Controller("users")
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
-  
+  constructor(private readonly usersService: UsersService) { }
+
   @ApiCreatedResponse({
-  description: 'User created successfully',
-  type: CreateUserResponseDTO,
+    description: 'User created successfully',
+    type: CreateUserResponseDTO,
   })
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')
@@ -36,18 +36,18 @@ export class UsersController {
   @ApiOkResponse({ type: GetAllUserResponseDto })
   @ResponseMessage("Fetch user by filter")
   findAll(@Query() query: FindAllQueryDTO) {
-  return this.usersService.findAll(+query.current, +query.pageSize, query.qs);
-}
+    return this.usersService.findAll(+query.current, +query.pageSize, query.qs);
+  }
 
-@Get("email")
-@ApiBearerAuth('access-token')
-@ApiSecurity('access-token')
-@ApiOkResponse({ type: GetUserByIdSwaggerResponse })
-@ResponseMessage("Fetch user by email")
-findUserByEmail(@Query("email") email: string) {
-  const decodedEmail = decodeURIComponent(email);
-  return this.usersService.findOneByEmail(decodedEmail);
-}
+  @Get("email")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
+  @ApiOkResponse({ type: GetUserByIdSwaggerResponse })
+  @ResponseMessage("Fetch user by email")
+  findUserByEmail(@Query("email") email: string) {
+    const decodedEmail = decodeURIComponent(email);
+    return this.usersService.findOneByEmail(decodedEmail);
+  }
 
   @Post("email")
   @ApiBearerAuth('access-token')
@@ -90,6 +90,6 @@ findUserByEmail(@Query("email") email: string) {
   findOne(@Param("id") id: string) {
     return this.usersService.findOne(id);
   }
-  
+
 
 }

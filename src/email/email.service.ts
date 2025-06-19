@@ -10,52 +10,63 @@ import * as crypto from 'crypto';
 
 @Injectable()
 export class EmailService {
-    constructor(private readonly mailerService: MailerService, 
-        @InjectModel(User.name) private userModel: Model<User>,
-    ) {}
+  constructor(private readonly mailerService: MailerService,
+    @InjectModel(User.name) private userModel: Model<User>,
+  ) { }
 
-    async sendRegisterEmail(user: RegisterUserDTO) {
-        await this.mailerService.sendMail({
-            to: user.email,
-            subject: `Verify your account`,
-            template: './register',
-            context: {
-                name: user.fullname,
-                url: "https://giotmauvang.org.vn/"
-              },
-        });
-    }
+  async sendRegisterEmail(user: RegisterUserDTO) {
+    await this.mailerService.sendMail({
+      to: user.email,
+      subject: `Verify your account`,
+      template: './register',
+      context: {
+        name: user.fullname,
+        url: "https://giotmauvang.org.vn/"
+      },
+    });
+  }
 
-    async sendSuccessDonateEmail(donateInfo: SendDonateBloodDTO) {
-        await this.mailerService.sendMail({
-            to: donateInfo.email,
-            subject: `Verify your account`,
-            template: './blood-donation',
-        });
-    }
+  async sendEmailToResetRequest(email: string, digitCode: number) {
+      await this.mailerService.sendMail({
+        to: email,
+        subject: 'Password Reset Request',
+        template: './send-reset-code',
+        context: {
+          digitCode: digitCode,
+        }
+      })
+  }
 
-    async sendVerifyEmail(user: RegisterUserDTO) {
-  const token = crypto.randomUUID();
+  async sendSuccessDonateEmail(donateInfo: SendDonateBloodDTO) {
+    await this.mailerService.sendMail({
+      to: donateInfo.email,
+      subject: `Verify your account`,
+      template: './blood-donation',
+    });
+  }
 
-  // Cập nhật token và trạng thái vào DB
-  await this.userModel.updateOne(
-    { email: user.email },
-    { $set: { verify_token: token, is_verified: false } }
-  );
+  async sendVerifyEmail(user: RegisterUserDTO) {
+    const token = crypto.randomUUID();
 
-  // Gửi email
-  await this.mailerService.sendMail({
-    to: user.email,
-    subject: `Verify your account`,
-    template: './verify-email',
-    context: {
-      name: user.fullname,
-      url: `http://localhost:3000/api/v1/auth/verify-email?email=${encodeURIComponent(user.email)}&token=${token}`,
-      token: token,
-      email: user.email,
-    }
-  });
-    }
+    // Cập nhật token và trạng thái vào DB
+    await this.userModel.updateOne(
+      { email: user.email },
+      { $set: { verify_token: token, is_verified: false } }
+    );
+
+    // Gửi email
+    await this.mailerService.sendMail({
+      to: user.email,
+      subject: `Verify your account`,
+      template: './verify-email',
+      context: {
+        name: user.fullname,
+        url: `http://localhost:3000/api/v1/auth/verify-email?email=${encodeURIComponent(user.email)}&token=${token}`,
+        token: token,
+        email: user.email,
+      }
+    });
+  }
 }
 
 

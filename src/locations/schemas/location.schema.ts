@@ -4,7 +4,12 @@ import { applySmartIdField } from 'src/shared/middlewares/assign_custome_id.midd
 
 export type LocationDocument = HydratedDocument<Location>;
 
-@Schema()
+@Schema({
+  timestamps: {
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+  },
+})
 export class Location {
   @Prop({ unique: true })
   location_id: string;

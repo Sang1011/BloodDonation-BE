@@ -10,7 +10,12 @@ import { BaseSchema } from "src/shared/schemas/baseSchema";
 
 export type DonateBloodDocument = HydratedDocument<DonateBlood>
 
-@Schema()
+@Schema({
+  timestamps: {
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+  },
+})
 export class DonateBlood extends BaseSchema {
     @Prop({ unique: true })
     donate_id: string;
@@ -29,12 +34,6 @@ export class DonateBlood extends BaseSchema {
 
     @Prop()
     unit: number;
-
-    // @Prop()
-    // status_regist: string;
-
-    // @Prop()
-    // status_donate: string;
 
     @Prop({ default: Status.PENDING })
     status_regist: Status;

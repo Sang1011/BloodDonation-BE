@@ -2,14 +2,15 @@ import { BadRequestException } from '@nestjs/common';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Role} from './schemas/role.schema';
+import { Role } from './schemas/role.schema';
 import { CreateRoleDto } from './dtos/requests/create.dto';
 import { MESSAGES } from 'src/shared/constants/messages.constants';
 import aqp, { AqpResult } from "api-query-params";
+import { BaseModel } from 'src/shared/interfaces/soft-delete-model.interface';
 
 @Injectable()
 export class RoleService {
-  constructor(@InjectModel(Role.name) private roleModel: Model<Role>) {}
+  constructor(@InjectModel(Role.name) private roleModel: BaseModel<Role>) { }
 
   async create(dto: CreateRoleDto): Promise<Role> {
     const existingRole = await this.roleModel.findOne({ role_name: dto.role_name });
@@ -21,7 +22,7 @@ export class RoleService {
     return {
       role_name: saved.role_name,
       role_id: saved.role_id
-    } 
+    }
   }
 
   async findByName(role_name: string) {
@@ -30,7 +31,7 @@ export class RoleService {
     return roleFound;
   }
 
-   async findAll(currentPage: number, limit: number, qs: string) {
+  async findAll(currentPage: number, limit: number, qs: string) {
     const { filter, sort }: AqpResult = aqp(qs);
     delete filter.current;
     delete filter.pageSize;
@@ -58,5 +59,13 @@ export class RoleService {
     const role = await this.roleModel.findOne({ role_id }).exec();
     if (!role) throw new NotFoundException(`Role with id ${role_id} not found`);
     return role;
+  }
+
+  async softRemove(id: string) {
+    const deleted = await this.roleModel.softDelete(id);
+    if (!deleted) {
+      throw new NotFoundException("Role not found");
+    }
+    return { deleted: deleted.modifiedCount };
   }
 }
