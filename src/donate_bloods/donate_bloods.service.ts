@@ -106,13 +106,17 @@ export class DonateBloodService {
   }
 
   async create(user: IUser, dto: CreateDonateBloodDto) {
-    console.log(user);
     const inforHealth = await this.inforHealthsService.findByUserId(user.user_id);
-    console.log(inforHealth);
+
     if (!inforHealth) {
       throw new NotFoundException("InforHealth not found");
     }
-    const blood_id = inforHealth.blood_id;
+
+    if (new Date(dto.date_donate) < new Date()) {
+      throw new BadRequestException("Date must be in the future");
+    }
+
+    // Chỉ được đăng kí 1 lần 
     const existingDonateBlood = await this.donateBloodModel.findOne({ infor_health: inforHealth.infor_health, date_donate: dto.date_donate });
     if (existingDonateBlood) {
       throw new BadRequestException("This user has already registered for blood donation on this date");
@@ -125,7 +129,7 @@ export class DonateBloodService {
     const created = new this.donateBloodModel({
       ...dto,
       infor_health: inforHealth.infor_health,
-      blood_id: blood_id,
+      blood_id: inforHealth.blood_id,
       date_register: new Date(),
     });
     return await created.save();

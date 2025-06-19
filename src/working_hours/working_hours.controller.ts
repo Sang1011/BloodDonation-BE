@@ -32,14 +32,15 @@ export class WorkingHoursController {
     return this.service.findAll(+query.current, +query.pageSize, query.qs);
   }
 
-  @Get(":id")
-  @ApiBearerAuth('access-token')
-  @ApiSecurity('access-token')
-  @ApiOkResponse({ type: GetWorkingHoursResponseDto })
-  @ResponseMessage("Get working hours by id")
-  findOne(@Param("id") id: string) {
-    return this.service.findOne(id);
+  @Get("schedule")
+  @Public()
+  @ApiOkResponse({ type: GetAllWorkingHoursResponseDto })
+  @ResponseMessage("List all working hours")
+  findSchedule(@Query("date") date: string) {
+    return this.service.findCentralByWorkingDay(new Date(date));
   }
+
+  
 
   @Patch(":id")
   @ApiBearerAuth('access-token')
@@ -76,6 +77,13 @@ export class WorkingHoursController {
   restore(@Param("id") id: string) {
     return this.service.restore(id);
   }
-
+  @Get(":id")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
+  @ApiOkResponse({ type: GetWorkingHoursResponseDto })
+  @ResponseMessage("Get working hours by id")
+  findOne(@Param("id") id: string) {
+    return this.service.findOne(id);
+  }
 
 }

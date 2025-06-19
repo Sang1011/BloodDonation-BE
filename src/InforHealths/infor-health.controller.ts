@@ -52,15 +52,15 @@ export class InforHealthController {
     return this.inforHealthService.findAll(+query.current, +query.pageSize, query.qs);
   }
 
-  @Get(":id")
+  @Get("user")
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')
   @ApiOkResponse({
-    description: "Get health info by ID"
+    description: "Get health info by user ID"
   })
-  @ResponseMessage("Fetch health info by id")
-  findOne(@Param("id") id: string) {
-    return this.inforHealthService.findOne(id);
+  @ResponseMessage("Fetch health info by user id")
+  findByUserId(@User() user: IUser) {
+    return this.inforHealthService.findInfoHealthByUserId(user.user_id);
   }
   
 
@@ -108,6 +108,17 @@ export class InforHealthController {
   @ResponseMessage("Delete a health info record")
   remove(@Param("id") id: string) {
     return this.inforHealthService.remove(id);
+  }
+
+  @Get(":id")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
+  @ApiOkResponse({
+    description: "Get health info by ID"
+  })
+  @ResponseMessage("Fetch health info by id")
+  findOne(@Param("id") id: string) {
+    return this.inforHealthService.findOne(id);
   }
 
  

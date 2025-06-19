@@ -5,6 +5,7 @@ import { WorkingHoursController } from "./working_hours.controller";
 import { WorkingHoursService } from "./working_hours.service";
 import { CentralBloodModule } from "src/central_bloods/central_blood.module";
 
+
 @Module({
   imports: [
     MongooseModule.forFeature([

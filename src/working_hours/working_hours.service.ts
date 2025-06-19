@@ -1,4 +1,4 @@
-import { ConflictException, forwardRef, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ConflictException, forwardRef, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { WorkingHours } from "./schemas/working_hours.schema";
@@ -102,5 +102,35 @@ async restore(id: string) {
   }
   return { restored: restored };
 }
+
+async findCentralByWorkingDay(date: Date) {
+  if (date < new Date() ) {
+    throw new BadRequestException("Date must be in the future");
+  }
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const dateOfWeek = date.getUTCDay() - 1;  // 0 is Sunday, 1 is Monday, etc.
+  const dayOfWeek = days[dateOfWeek];
+
+  const workingHours = await this.workingHoursModel
+    .findOne({ day_of_week: dayOfWeek })
+    .populate({
+      path: 'centralBlood_id',
+      model: 'CentralBlood',
+      localField: 'centralBlood_id',
+      foreignField: 'centralBlood_id',
+    });
+
+  if (!workingHours || !workingHours.centralBlood_id) {
+    throw new NotFoundException("There is no medical facility scheduled to be open on " + dayOfWeek);
+  }
+
+  return {
+    day_of_week: workingHours.day_of_week,
+    open_time: workingHours.open_time,
+    close_time: workingHours.close_time,
+    centralBlood: workingHours.centralBlood_id,
+  };
+}
+
 
 }
