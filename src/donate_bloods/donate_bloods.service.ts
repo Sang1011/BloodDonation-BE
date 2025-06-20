@@ -11,6 +11,10 @@ import { CentralBloodService } from 'src/central_bloods/central_blood.service';
 import { InforHealthService } from 'src/InforHealths/infor-healths.service';
 import { IUser } from 'src/shared/interfaces/user.interface';
 import { Status } from 'src/shared/enums/status.enum';
+import { UsersService } from 'src/users/users.service';
+import { StorageService } from 'src/storages/storage.service';
+import { CreateStorageDto } from 'src/storages/dtos/requests/create.dto';
+import e from 'express';
 
 @Injectable()
 export class DonateBloodService {
@@ -20,6 +24,8 @@ export class DonateBloodService {
     private inforHealthsService: InforHealthService,
     private bloodsService: BloodsService,
     private centralBloodService: CentralBloodService,
+    private usersService: UsersService,
+    private storageService: StorageService,
   ) { }
 
   async findAll(currentPage: number, limit: number, qs: string) {
@@ -46,13 +52,23 @@ export class DonateBloodService {
           localField: 'infor_health',
           foreignField: 'infor_health',
           justOne: true,
-        },
+          select: '-deleted_at -is_deleted',
+          populate: {
+            path: 'user_id',
+            model: 'User',
+            localField: 'user_id',
+            foreignField: 'user_id',
+            justOne: true,
+            select: 'fullname gender email ',
+          }
+        },  
         {
           path: 'blood_id',
           model: 'Blood',
           localField: 'blood_id',
           foreignField: 'blood_id',
           justOne: true,
+          select: 'blood_id',
         },
         {
           path: 'centralBlood_id',
@@ -60,9 +76,12 @@ export class DonateBloodService {
           localField: 'centralBlood_id',
           foreignField: 'centralBlood_id',
           justOne: true,
+          select: '-deleted_at -is_deleted',
         },
       ])
       .exec();
+
+      
 
     return {
       meta: {
@@ -76,29 +95,40 @@ export class DonateBloodService {
   }
 
   async findOne(id: string) {
-    const donateBlood = await this.donateBloodModel.findById(id).populate([
-      {
-        path: "infor_health",
-        model: 'InforHealth',
-        localField: 'infor_health',
-        foreignField: 'infor_health',
-        justOne: true,
-      },
-      {
-        path: 'blood_id',
-        model: 'Blood',
-        localField: 'blood_id',
-        foreignField: 'blood_id',
-        justOne: true,
-      },
-      {
-        path: 'centralBlood_id',
-        model: 'CentralBlood',
-        localField: 'centralBlood_id',
-        foreignField: 'centralBlood_id',
-        justOne: true,
-      },
-    ]);
+    const donateBlood = await (await this.donateBloodModel.findById(id)).populate([
+        {
+          path: "infor_health",
+          model: 'InforHealth',
+          localField: 'infor_health',
+          foreignField: 'infor_health',
+          justOne: true,
+          select: '-deleted_at -is_deleted',
+          populate: {
+            path: 'user_id',
+            model: 'User',
+            localField: 'user_id',
+            foreignField: 'user_id',
+            justOne: true,
+            select: 'fullname gender email ',
+          }
+        },  
+        {
+          path: 'blood_id',
+          model: 'Blood',
+          localField: 'blood_id',
+          foreignField: 'blood_id',
+          justOne: true,
+          select: 'blood_id',
+        },
+        {
+          path: 'centralBlood_id',
+          model: 'CentralBlood',
+          localField: 'centralBlood_id',
+          foreignField: 'centralBlood_id',
+          justOne: true,
+          select: '-deleted_at -is_deleted',
+        },
+    ])
     if (!donateBlood) {
       throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
     }
@@ -151,26 +181,39 @@ export class DonateBloodService {
     return true;
   }
 
+  /**
+   * Khi staff cập nhập thông tin hiến máu 
+   * Máu, số lượng, ngày hiến máu
+   * Donate Status là COMPLETED
+   * Đã hiến máu và cập nhập dữ liệu thành công
+   * Thì tạo hoặc cập nhật storage record
+   */
   async update(id: string, dto: UpdateDonateBloodDto) {
     const existingDonateBlood = await this.donateBloodModel.findOne({ donate_id: id });
     if (!existingDonateBlood) {
       throw new BadRequestException("Donate Blood record not found");
     }
-    // const inforHealth = await this.inforHealthsService.findOne(dto.infor_health);
-    // if (!inforHealth) {
-    //   throw new NotFoundException("InforHealth not found");
-    // }
-    // const blood = await this.bloodsService.findOne(+dto.blood_id);
-    // if (!blood) {
-    //   throw new NotFoundException("Blood not found");
-    // }
-    // const centralBlood = await this.centralBloodService.findOne(dto.centralBlood_id.toString());
-    // if (!centralBlood) {
-    //   throw new NotFoundException("CentralBlood not found");
-    // }
     const updated = await this.donateBloodModel.findOneAndUpdate({ donate_id: id }, dto, { new: true });
     if (!updated) {
       throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
+    }
+    if (dto.status_donate === Status.COMPLETED) {
+      const storage: CreateStorageDto = {
+        donate_id: id,
+        blood_id: updated.blood_id,
+        centralBlood_id: updated.centralBlood_id,
+        date: updated.date_donate,
+        ml: updated.ml,
+        unit: updated.unit,
+        expired_date: new Date(updated.date_donate.getTime() + 1000 * 60 * 60 * 24 * 30),
+        current_status: Status.STORAGE,
+      }
+      const existStorage = await this.storageService.existStorage(id);
+      if (existStorage.exist) {
+        await this.storageService.update(existStorage.storage_id, storage);
+      } else {
+        await this.storageService.create(storage);
+      }
     }
     return updated;
   }
@@ -192,7 +235,91 @@ export class DonateBloodService {
     if (!inforHealth) {
       throw new NotFoundException("InforHealth not found");
     }
-    const donateBlood = await this.donateBloodModel.find({ infor_health: inforHealth.infor_health });
+    const donateBlood = await this.donateBloodModel.find({ infor_health: inforHealth.infor_health }).select('-deleted_at -is_deleted')
+    .populate([
+      {
+        path: "infor_health",
+        model: 'InforHealth',
+        localField: 'infor_health',
+        foreignField: 'infor_health',
+        justOne: true,
+        select: '-deleted_at -is_deleted',
+        populate: {
+          path: 'user_id',
+          model: 'User',
+          localField: 'user_id',
+          foreignField: 'user_id',
+          justOne: true,
+          select: 'fullname gender email ',
+        }
+      },  
+      {
+        path: 'blood_id',
+        model: 'Blood',
+        localField: 'blood_id',
+        foreignField: 'blood_id',
+        justOne: true,
+        select: 'blood_id',
+      },
+      {
+        path: 'centralBlood_id',
+        model: 'CentralBlood',
+        localField: 'centralBlood_id',
+        foreignField: 'centralBlood_id',
+        justOne: true,
+        select: 'centralBlood_id centralBlood_name centralBlood_address ',
+      },
+    ]);
+    if (!donateBlood) {
+      throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
+    }
+    return donateBlood;
+  }
+
+  async getDonateBloodByEmail(email: string) {
+    const user = await this.usersService.findOneByEmail(email);
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+    const inforHealth = await this.inforHealthsService.findByUserId(user.user_id);
+    if (!inforHealth) {
+      throw new NotFoundException("InforHealth not found");
+    }
+    const donateBlood = await this.donateBloodModel.find({ infor_health: inforHealth.infor_health }).select('-deleted_at -is_deleted')
+    .populate([
+      {
+        path: "infor_health",
+        model: 'InforHealth',
+        localField: 'infor_health',
+        foreignField: 'infor_health',
+        justOne: true,
+        select: '-deleted_at -is_deleted',
+        populate: {
+          path: 'user_id',
+          model: 'User',
+          localField: 'user_id',
+          foreignField: 'user_id',
+          justOne: true,
+          select: 'fullname gender email ',
+        }
+      },  
+      {
+        path: 'blood_id',
+        model: 'Blood',
+        localField: 'blood_id',
+        foreignField: 'blood_id',
+        justOne: true,
+        select: 'blood_id',
+      },
+      {
+        path: 'centralBlood_id',
+        model: 'CentralBlood',
+        localField: 'centralBlood_id',
+        foreignField: 'centralBlood_id',
+        justOne: true,
+        select: 'centralBlood_id centralBlood_name centralBlood_address ',
+      },
+    ]);
     if (!donateBlood) {
       throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
     }

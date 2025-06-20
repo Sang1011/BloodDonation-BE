@@ -271,7 +271,24 @@ export class InforHealthService {
     }
 
     async findInfoHealthByUserId(user_id: string) {
-        const health = await this.inforHealthModel.findOne({ user_id: user_id });
+        const health = (await this.inforHealthModel.findOne({ user_id: user_id })).populate([
+            {
+                path: 'user_id',
+                model: 'User',
+                localField: 'user_id',
+                foreignField: 'user_id',
+                justOne: true,
+                select: 'fullname gender email ',
+            },
+            {
+                path: 'blood_id',
+                model: 'Blood',
+                localField: 'blood_id',
+                foreignField: 'blood_id',
+                justOne: true,
+                select: 'blood_id',
+            },
+        ]);
         if (!health) throw new BadRequestException("Health information not found");
         return health;
     }

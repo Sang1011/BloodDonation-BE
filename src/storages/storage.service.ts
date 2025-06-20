@@ -13,7 +13,13 @@ export class StorageService {
     private readonly storageModel: Model<Storage>
   ) {}
 
+  /**
+     * Get customer donate blood history by email
+     * Pick up donation_id from donate_blood table
+     * Update 
+  */
   async create(dto: CreateStorageDto) {
+    // 
     const created = new this.storageModel(dto);
     return created.save();
   }
@@ -38,14 +44,34 @@ export class StorageService {
           localField: 'donate_id',      
           foreignField: 'donate_id',  
           justOne: true,
+          select: 'infor_health status_donate date_donate',
+          populate: [
+            {
+              path: "infor_health",
+              model: 'InforHealth',
+              localField: 'infor_health',
+              foreignField: 'infor_health',
+              justOne: true,
+              select: 'user_id',
+              populate: {
+                path: 'user_id',
+                model: 'User',
+                localField: 'user_id',
+                foreignField: 'user_id',
+                justOne: true,
+                select: 'fullname gender email ',
+              }
+            }, 
+          ]
         },
         {
-          path: 'blood_id',
-          model: 'Blood',
-          localField: 'blood_id',      
-          foreignField: 'blood_id',  
-          justOne: true,
-        },
+              path: 'centralBlood_id',
+              model: 'CentralBlood',
+              localField: 'centralBlood_id',      
+              foreignField: 'centralBlood_id',  
+              justOne: true,
+              select: 'centralBlood_id centralBlood_name centralBlood_address',
+            },
       ])
       .exec();
     return {
@@ -67,13 +93,34 @@ export class StorageService {
           localField: 'donate_id',      
           foreignField: 'donate_id',  
           justOne: true,
+          select: 'infor_health status_donate date_donate',
+          populate: [
+            {
+              path: "infor_health",
+              model: 'InforHealth',
+              localField: 'infor_health',
+              foreignField: 'infor_health',
+              justOne: true,
+              select: 'user_id',
+              populate: {
+                path: 'user_id',
+                model: 'User',
+                localField: 'user_id',
+                foreignField: 'user_id',
+                justOne: true,
+                select: 'fullname gender email ',
+              }
+            },  
+
+          ]
         },
         {
-          path: 'blood_id',
-          model: 'Blood',
-          localField: 'blood_id',      
-          foreignField: 'blood_id',  
+          path: 'centralBlood_id',
+          model: 'CentralBlood',
+          localField: 'centralBlood_id',      
+          foreignField: 'centralBlood_id',  
           justOne: true,
+          select: 'centralBlood_id centralBlood_name centralBlood_address',
         },
       ])
     if (!cb) throw new NotFoundException("Storage not found");
@@ -98,5 +145,11 @@ export class StorageService {
     const deleted = await this.storageModel.deleteOne({storage_id: id});
     if (!deleted) throw new NotFoundException("Storage not found");
     return { deleted: deleted.deletedCount || 0 };
+  }
+
+  async existStorage(donate_id: string) {
+    const storage = await this.storageModel.findOne({donate_id: donate_id});
+    if (storage) return {exist: true, storage_id: storage.storage_id};
+    return {exist: false};
   }
 }

@@ -45,20 +45,7 @@ export class DonateBloodController {
     return this.donateBloodService.findAll(+query.current, +query.pageSize, query.qs);
   }
 
-  @ApiOperation({ summary: 'Get donate blood record by ID' })
-  @ApiResponse({
-    status: 200,
-    description: 'Fetched donate blood record successfully',
-    type: GetDonateBloodResponseDto,
-  })
-  @ApiResponse({ status: 404, description: 'Donate blood record not found' })
-  @ResponseMessage(MESSAGES.DONATE_BLOOD.RETRIEVE_ONE_SUCCESS)
-  @Get(':id')
-  @ApiBearerAuth('access-token')
-  @ApiSecurity('access-token')
-  async findOne(@Param('id') id: string) {
-    return await this.donateBloodService.findOne(id);
-  }
+
 
   @ApiOperation({ summary: 'Create a new donate blood record' })
   @ApiResponse({
@@ -98,10 +85,32 @@ export class DonateBloodController {
     await this.donateBloodService.remove(id);
   }
 
-  @Get('/user/history')
+  @Get('history/user')
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')
   async historyDonate(@User() user: IUser) {
     return await this.donateBloodService.getDonateBlood(user);
+  }
+
+  @Get('/history/email')
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
+  async findCustomerDonate(@Query('email') email: string) {
+    return await this.donateBloodService.getDonateBloodByEmail(email);
+  }
+
+  @ApiOperation({ summary: 'Get donate blood record by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Fetched donate blood record successfully',
+    type: GetDonateBloodResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Donate blood record not found' })
+  @ResponseMessage(MESSAGES.DONATE_BLOOD.RETRIEVE_ONE_SUCCESS)
+  @Get(':id')
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
+  async findOne(@Param('id') id: string) {
+    return await this.donateBloodService.findOne(id);
   }
 }
