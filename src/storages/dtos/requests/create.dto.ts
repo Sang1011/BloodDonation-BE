@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsNumber, IsDateString } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber, IsDateString, IsEnum } from 'class-validator';
+import { Status } from 'src/shared/enums/status.enum';
 
 export class CreateStorageDto {
   @ApiProperty()
@@ -34,6 +35,11 @@ export class CreateStorageDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsString()
-  current_status: string;
+  @IsEnum(Status)
+  current_status: Status;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsNumber()
+  centralBlood_id: number;
 }

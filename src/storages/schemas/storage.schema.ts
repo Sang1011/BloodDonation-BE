@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument } from "mongoose";
 import { Blood } from "src/bloods/schemas/blood.schema";
+import { CentralBlood } from "src/central_bloods/schemas/central_blood.schema";
 import { DonateBlood } from "src/donate_bloods/schemas/donate_blood.schema";
 import { applySmartIdField } from "src/shared/middlewares/assign_custome_id.middleware";
 import { applySoftDeleteStatics } from "src/shared/plugins/soft-delete.plugin";
@@ -33,6 +34,9 @@ export class Storage extends BaseSchema {
 
     @Prop({ required: true })
     current_status: string;
+
+    @Prop({ref: CentralBlood.name})
+    centralBlood_id: number;
 }
 
 export const StorageSchema = SchemaFactory.createForClass(Storage);
