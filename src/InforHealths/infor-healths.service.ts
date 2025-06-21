@@ -215,6 +215,9 @@ export class InforHealthService {
       }
 
       async updateByUser(user: IUser, updateHealthDTO: UpdateInforHealthDto, file?: Express.Multer.File) {
+        if (!updateHealthDTO.user_id || updateHealthDTO.user_id === null || updateHealthDTO.user_id === '') {
+            updateHealthDTO = { ...updateHealthDTO, user_id: user.user_id };
+        }
         const health = await this.findByUserId(user.user_id);
         console.log(health);
         if (!health) {
@@ -241,7 +244,6 @@ export class InforHealthService {
         const updatedHealth = await this.inforHealthModel.findOneAndUpdate(
           { infor_health: health.infor_health },
           { $set: updateHealthDTO },
-          { new: true }
         ).populate([
             {
                 path: 'user_id',
@@ -277,7 +279,8 @@ export class InforHealthService {
     }
 
     async findInfoHealthByUserId(user_id: string) {
-        const health = (await this.inforHealthModel.findOne({ user_id: user_id })).populate([
+        const health = (await this.inforHealthModel.findOne({ user_id: user_id }))
+            .populate([
             {
                 path: 'user_id',
                 model: 'User',
@@ -303,7 +306,13 @@ export class InforHealthService {
     return this.inforHealthModel.find({
         infor_health: { $in: ids }
     });
+    }
 
-
-}
+    async findByEmail(email: string) {
+        const user = await this.userServices.findOneByEmail(email);
+        if (!user) {
+            throw new BadRequestException(MESSAGES.USERS.USER_NOT_FOUND);
+        }
+        return this.findInfoHealthByUserId(user.user_id);
+    }
 }

@@ -156,13 +156,36 @@ export class DonateBloodService {
       throw new BadRequestException("Invalid data provided");
     }
     
-    const created = new this.donateBloodModel({
+    const created = await new this.donateBloodModel({
       ...dto,
       infor_health: inforHealth.infor_health,
       blood_id: inforHealth.blood_id,
       date_register: new Date(),
-    });
-    return await created.save();
+    }).populate([
+      {
+        path: 'infor_health',
+        model: 'InforHealth',
+        localField: 'infor_health',
+        foreignField: 'infor_health',
+        justOne: true,
+        populate: {
+          path: 'user_id',
+          model: 'User',
+          localField: 'user_id',
+          foreignField: 'user_id',
+          justOne: true,
+        }
+      }, 
+      {
+        path: 'centralBlood_id',
+        model: 'CentralBlood',
+        localField: 'centralBlood_id',
+        foreignField: 'centralBlood_id',
+        justOne: true,
+        select: 'centralBlood_id centralBlood_name centralBlood_address ',
+      },
+    ]);
+    return created.save();
   }
 
   async checkDuplicate(dto: CreateDonateBloodDto) {
