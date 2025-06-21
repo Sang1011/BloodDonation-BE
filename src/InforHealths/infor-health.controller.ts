@@ -95,7 +95,19 @@ export class InforHealthController {
     @Body() updateDto: UpdateInforHealthDto,
     @UploadedFile() file?: Express.Multer.File
   ) {
+    console.log(user);
     return this.inforHealthService.updateByUser(user, updateDto, file);
+  }
+
+  @Get("email")
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
+  @ApiOkResponse({
+    description: "Get health info by ID"
+  })
+  @ResponseMessage("Fetch health info by id")
+  findByEmail(@Query("email") email: string) {
+    return this.inforHealthService.findByEmail(email);
   }
 
 
