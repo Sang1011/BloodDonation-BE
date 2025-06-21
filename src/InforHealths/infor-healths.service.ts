@@ -32,6 +32,7 @@ export class InforHealthService {
             throw new BadRequestException("Blood not found");
         }
         const health = await this.inforHealthModel.findOne({ user_id: user_id });
+        
         if(health){
             throw new BadRequestException("Health information already exists for this user");
         }
@@ -59,11 +60,16 @@ export class InforHealthService {
 
     async createByUser(user: IUser, infoHealth: CreateInforHealthDto, file?: Express.Multer.File) {
        
+        const health = await this.inforHealthModel.findOne({ user_id: user.user_id });
+        if(health){
+            throw new BadRequestException("Health information already exists for this user");
+        }
         
         const blood = await this.bloodServices.findOne(+infoHealth.blood_id);
         if (!blood) {
             throw new BadRequestException("Blood not found");
         }
+        
         
         const latest_donate = infoHealth.latest_donate;
         
