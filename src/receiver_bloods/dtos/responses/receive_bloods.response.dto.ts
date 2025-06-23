@@ -25,8 +25,8 @@ export class ReceiveBloodResponseDto {
   @ApiProperty({ required: false })
   status_receiver?: string;
 
-  @ApiProperty()
-  infor_health: string;
+    @ApiProperty()
+    infor_health: string;
 
   @ApiProperty()
   createdAt: Date;

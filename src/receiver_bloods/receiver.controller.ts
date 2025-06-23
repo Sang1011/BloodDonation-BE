@@ -9,6 +9,7 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  Patch,
 } from '@nestjs/common';
 import { ApiTags, ApiResponse, ApiOperation, ApiOkResponse, ApiBearerAuth, ApiSecurity } from '@nestjs/swagger';
 import { MESSAGES } from 'src/shared/constants/messages.constants';
@@ -23,6 +24,8 @@ import { CreateReceiveBloodDto } from './dtos/requests/create_receive_bloods.dto
 import { UpdateReceiveBloodResponseDto } from './dtos/responses/update_receive_bloods.response';
 import { UpdateReceiveBloodDto } from './dtos/requests/update_receive_bloods.dto';
 import { DeleteByIdReceiveBloodDTO } from './dtos/responses/delete_receive_bloods.response';
+import { User } from 'src/shared/decorators/users.decorator';
+import { IUser } from 'src/shared/interfaces/user.interface';
 
 @ApiTags('Receiver Bloods')
 @Controller('receiver-bloods')
@@ -49,14 +52,7 @@ export class ReceiveBloodController {
     description: 'Fetched receive blood record successfully',
     type: GetReceiveBloodResponseDto,
   })
-  @ApiBearerAuth('access-token')
-  @ApiSecurity('access-token')
-  @ApiResponse({ status: 404, description: 'Receive blood record not found' })
-  @ResponseMessage(MESSAGES.DONATE_BLOOD.RETRIEVE_ONE_SUCCESS)
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return await this.receiveBloodService.findOne(id);
-  }
+  
 
   @ApiOperation({ summary: 'Create a new receive blood record' })
   @ApiResponse({
@@ -68,8 +64,8 @@ export class ReceiveBloodController {
   @ApiSecurity('access-token')
   @ResponseMessage(MESSAGES.DONATE_BLOOD.CREATE_SUCCESS)
   @Post()
-  async create(@Body() dto: CreateReceiveBloodDto) {
-    return await this.receiveBloodService.create(dto);
+  async create(@Body() dto: CreateReceiveBloodDto, @User() user: IUser) {
+    return await this.receiveBloodService.create(user.user_id, dto);
   }
 
   @ApiOperation({ summary: 'Update a receive blood record by ID' })
@@ -81,9 +77,9 @@ export class ReceiveBloodController {
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')
   @ResponseMessage(MESSAGES.DONATE_BLOOD.UPDATE_SUCCESS)
-  @Put(':id')
-  async update(@Param('id') id: string, @Body() dto: UpdateReceiveBloodDto) {
-    return await this.receiveBloodService.update(id, dto);
+  @Patch(':receiver_id')
+  async update(@Param('receiver_id') receiver_id: string, @Body() dto: UpdateReceiveBloodDto) {
+    return await this.receiveBloodService.update(receiver_id, dto);
   }
 
   @ApiOperation({ summary: 'Delete a receive blood record by ID' })
@@ -95,8 +91,33 @@ export class ReceiveBloodController {
   @ApiSecurity('access-token')
   @ApiOkResponse({type: DeleteByIdReceiveBloodDTO})
   @ResponseMessage("Receiver Blood record deleted successfully")
-  @Delete(':id')
-  async remove(@Param('id') id: string): Promise<void> {
-    await this.receiveBloodService.remove(id);
+  @Delete(':receiver_id')
+  async remove(@Param('receiver_id') receiver_id: string): Promise<void> {
+    await this.receiveBloodService.remove(receiver_id);
+  }
+
+  @ApiOperation({ summary: 'Get list receive blood by central blood ID' })
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
+  @Get('central-blood/:centralBlood_id')
+  async getListReceiveByCentralBlood(@Param('centralBlood_id') centralBlood_id: string) {
+    return await this.receiveBloodService.getListReceiveByCentralBlood(centralBlood_id);
+  }
+
+  @ApiOperation({ summary: 'Get list receive blood by user email' })
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
+  @Get('/:email')
+  async getListReceiveByUser(@Param('email') email: string) {
+    return await this.receiveBloodService.getListReceiveByUser(email);
+  }
+
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
+  @ApiResponse({ status: 404, description: 'Receive blood record not found' })
+  @ResponseMessage(MESSAGES.DONATE_BLOOD.RETRIEVE_ONE_SUCCESS)
+  @Get(':receiver_id')
+  async findOne(@Param('receiver_id') receiver_id: string) {
+    return await this.receiveBloodService.findOne(receiver_id);
   }
 }

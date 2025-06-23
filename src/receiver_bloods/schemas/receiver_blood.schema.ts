@@ -2,9 +2,12 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { HydratedDocument } from "mongoose";
 import { Blood } from "src/bloods/schemas/blood.schema";
 import { InforHealth } from "src/InforHealths/schemas/inforhealth.schema";
+import { Status } from "src/shared/enums/status.enum";
 import { applySmartIdField } from "src/shared/middlewares/assign_custome_id.middleware";
 import { applySoftDeleteStatics } from "src/shared/plugins/soft-delete.plugin";
 import { BaseSchema } from "src/shared/schemas/baseSchema";
+import { User } from "src/users/schemas/user.schema";
+import { CentralBlood } from "src/central_bloods/schemas/central_blood.schema";
 
 export type ReceiverBloodDocument = HydratedDocument<ReceiverBlood>
 
@@ -16,7 +19,7 @@ export class ReceiverBlood extends BaseSchema {
     @Prop({required: true, ref: Blood.name})
     blood_id: string;
 
-    @Prop({required: true})
+    @Prop({required: true, default: new Date()})
     date_register: Date;
 
     @Prop({required: true})
@@ -28,18 +31,23 @@ export class ReceiverBlood extends BaseSchema {
     @Prop({required: true})
     unit: number;
 
-    @Prop({ required: true, enum: ['EMERGENCY', 'DEFAULT'], default: 'DEFAULT' })
+    @Prop({ required: true, enum: ['EMERGENCY', 'DEFAULT'] })
     type: 'EMERGENCY' | 'DEFAULT';
 
-    @Prop()
-    status_regist: string;
+    @Prop({default: Status.PENDING})
+    status_regist: Status;
 
-    @Prop()
+    @Prop({default: Status.PENDING})
     status_receiver: string;
 
-    @Prop({required: true, ref: InforHealth.name})
-    infor_health: string;
-    
+    // @Prop({required: true, ref: InforHealth.name})
+    // infor_health: string;
+
+    @Prop({required: true, ref: User.name})
+    user_id: string;
+
+    @Prop({required: true, ref: CentralBlood.name})
+    centralBlood_id: number;
 }
 
 export const ReceiverBloodSchema = SchemaFactory.createForClass(ReceiverBlood);

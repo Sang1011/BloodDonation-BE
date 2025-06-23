@@ -6,11 +6,12 @@ import { CentralBloodModule } from 'src/central_bloods/central_blood.module';
 import { ReceiverBlood, ReceiverBloodSchema } from './schemas/receiver_blood.schema';
 import { ReceiverBloodService } from './receiver.service';
 import { ReceiveBloodController } from './receiver.controller';
+import { UsersModule } from 'src/users/users.module';
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: ReceiverBlood.name, schema: ReceiverBloodSchema },
-    ]), InforHealthsModule, BloodsModule
+    ]), InforHealthsModule, BloodsModule, UsersModule, CentralBloodModule
   ],
   controllers: [ReceiveBloodController],
   providers: [ReceiverBloodService],
