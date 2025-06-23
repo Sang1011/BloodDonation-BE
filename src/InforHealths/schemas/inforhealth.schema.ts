@@ -8,7 +8,12 @@ import { User } from "src/users/schemas/user.schema";
 
 export type InforHealthDocument = HydratedDocument<InforHealth>
 
-@Schema()
+@Schema({
+  timestamps: {
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+  },
+})
 export class InforHealth extends BaseSchema {
     @Prop({unique: true})
     infor_health: string;

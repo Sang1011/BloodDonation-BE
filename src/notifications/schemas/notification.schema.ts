@@ -4,7 +4,12 @@ import { applySmartIdField } from 'src/shared/middlewares/assign_custome_id.midd
 
 export type NotificationDocument = HydratedDocument<Notification>;
 
-@Schema()
+@Schema({
+  timestamps: {
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+  },
+})
 export class Notification {
   @Prop({ unique: true })
   notification_id: string;

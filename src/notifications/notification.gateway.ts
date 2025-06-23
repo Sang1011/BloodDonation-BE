@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { forwardRef, Inject, Logger } from '@nestjs/common';
 import {
   WebSocketGateway,
   WebSocketServer,
@@ -18,7 +18,10 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
 
   private readonly logger = new Logger(NotificationGateway.name);
 
-  constructor(private readonly notiService: NotificationService) { }
+  constructor(
+  @Inject(forwardRef(() => NotificationService))
+  private readonly notiService: NotificationService,
+) {}
 
   async handleConnection(client: Socket) {
       try {

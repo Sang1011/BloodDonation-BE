@@ -8,7 +8,12 @@ import { BaseSchema } from 'src/shared/schemas/baseSchema';
 
 export type UserDocument = HydratedDocument<User>;
 
-@Schema()
+@Schema({
+  timestamps: {
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+  },
+})
 export class User extends BaseSchema{
   @Prop({unique: true})
   user_id: string;
@@ -30,6 +35,7 @@ export class User extends BaseSchema{
 
   @Prop({required: true, ref: Role.name})
   role_id: string;
+  
   @Prop({required: true})
   gender: string;
 
@@ -44,6 +50,12 @@ export class User extends BaseSchema{
 
   @Prop()
   verify_token: string;
+
+  @Prop({default: null, select: false})
+  digit_code: string;
+
+  @Prop({ default: null, select: false })
+  digit_code_expire: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

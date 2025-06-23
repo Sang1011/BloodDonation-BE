@@ -180,8 +180,9 @@ export class UsersService {
       throw new BadRequestException(MESSAGES.USERS.CANNOT_DELETE_ADMIN);
     }
 
-    const removed = await this.userModel.deleteOne({ user_id: id });
-    return { deleted: removed.deletedCount || 0 };
+    const removed = await this.userModel.softDelete(id);
+    await this.locationService.softRemove(foundUser.location_id);
+    return { deleted: removed.modifiedCount};
   }
 
   async updateUserToken(refreshToken: string, user_id: string) {
@@ -208,5 +209,28 @@ export class UsersService {
 
   async findByListId(userIds: string[]){
     return await this.userModel.find({user_id: {$in: userIds}});
+  }
+  async findOneByEmailWithDigitCode(email: string) {
+    return this.userModel.findOne({ email: email })
+    .select('+digit_code +digit_code_expire');;
+  }
+
+  async updateDigitCode(id: string, objectDigit : {digitCodeHashed: string, expired : Date}){
+    return await this.userModel.updateOne({
+      user_id: id
+    }, {
+      $set: { digit_code: objectDigit.digitCodeHashed, digit_code_expire: objectDigit.expired }
+    })
+  }
+
+  async resetDigitCode(id: string){
+    return await this.userModel.updateOne({
+      user_id: id
+    }, {
+      $unset: {
+        digit_code: "",
+        digit_code_expire: ""
+      }
+    })
   }
 }

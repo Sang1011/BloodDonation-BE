@@ -11,6 +11,7 @@ import { EmailService } from 'src/email/email.service';
 import { ChangeEmailDto } from './dtos/requests/change-email.dto';
 import { ChangePasswordDto } from './dtos/requests/change-password.dto';
 import { getHashPassword } from 'src/shared/utils/getHashPassword';
+import { randomInt } from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -148,8 +149,8 @@ export class AuthService {
     return "LOGOUT SUCCESSFULLY"
   }
 
- async verifyEmail(user: IUser, token: string) {
-  const userVerify = await this.usersService.findOneByEmail(user.email);
+async verifyEmail(email: string, token: string) {
+  const userVerify = await this.usersService.findOneByEmail(email);
   if (!userVerify || !userVerify.verify_token || userVerify.is_verified) {
     throw new BadRequestException('Invalid or already verified');
   }
@@ -157,6 +158,7 @@ export class AuthService {
   if (userVerify.verify_token !== token) {
     throw new BadRequestException('Invalid verification token');
   }
+  
   await this.usersService.updateVerifyToken(userVerify.user_id);
   return "EMAIL VERIFIED SUCCESSFULLY";
 }
@@ -213,6 +215,46 @@ async changePassword(userId: string, dto: ChangePasswordDto) {
   return { message: 'Password updated' };
 }
 
+  async sendResetCode(email: string){
+    const exists = await this.usersService.findOneByEmail(email);
+    if(!exists){
+      throw new BadRequestException("This mail haven't register yet!")
+    }
+    const digitCode = randomInt(100000, 999999); 
+    const expire = new Date(Date.now() + 5 * 60 * 1000); 
 
+    await this.usersService.updateDigitCode(exists.user_id, {
+      digitCodeHashed: getHashPassword(digitCode.toString()),
+      expired: expire
+    });
+
+    await this.emailService.sendEmailToResetRequest(exists.email, digitCode);
+    return "Sent email to verify forget password request, please check your email!"
+  }
+
+  async verifyResetCode(email: string, digit: number) {
+  const exists = await this.usersService.findOneByEmailWithDigitCode(email);
+  if (!exists) {
+    throw new BadRequestException("This mail hasn't been registered yet!");
+  }
+
+  const storedHash = exists.digit_code;
+  if (!storedHash) {
+    throw new BadRequestException("No reset code was requested.");
+  }
+
+  // Thử kiểm tra mã hợp lệ trong thời hạn
+  const valid = this.usersService.isValidPassword(digit.toString(), storedHash);
+  const isCodeExpired = new Date() > new Date(exists.digit_code_expire);
+  if (!valid) {
+    throw new BadRequestException("Invalid reset code.");
+  }
+
+  if (isCodeExpired) {
+    throw new BadRequestException("Reset code expired.");
+  }
+  await this.usersService.resetDigitCode(exists.user_id);
+    return "Reset code verified successfully";
+  }
 }
 

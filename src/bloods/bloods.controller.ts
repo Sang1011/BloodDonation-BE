@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query } from '@nestjs/common';
 import { BloodsService } from './bloods.service';
 import { BloodDto } from './dto/request/blood.dto';
 import { ApiBadRequestResponse, ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
@@ -39,5 +39,14 @@ export class BloodsController {
     @ApiOkResponse()
     async findOne(@Param('id') id: string) {
         return this.bloodsService.findOne(+id);
+    }
+
+    @Delete(":id")
+    @ApiBearerAuth('access-token')
+    @ApiSecurity('access-token')
+    @ResponseMessage("Delete Rh by id")
+    @ApiOperation({ summary: 'Delete Rh by id' })
+    deketeOne(@Param("id") id: string) {
+        return this.bloodsService.softRemove(+id);
     }
 }

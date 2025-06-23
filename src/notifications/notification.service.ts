@@ -7,11 +7,12 @@ import { UpdateNotificationDto } from './dtos/requests/update-noti.request';
 import { CreateNotificationDto } from './dtos/requests/create-noti.request';
 import aqp, { AqpResult } from "api-query-params";
 import { NotificationGateway } from './notification.gateway';
+import { BaseModel } from 'src/shared/interfaces/soft-delete-model.interface';
 
 @Injectable()
 export class NotificationService {
   constructor(
-    @InjectModel(Notification.name) private notifyModel: Model<Notification>,
+    @InjectModel(Notification.name) private notifyModel: BaseModel<Notification>,
     private readonly gateway: NotificationGateway
   ) { }
 
@@ -96,8 +97,8 @@ export class NotificationService {
     }
 
   async remove(id: string) {
-    const deleted = await this.notifyModel.deleteOne({ notification_id: id });
+    const deleted = await this.notifyModel.softDelete(id);
     if (!deleted) throw new BadRequestException("Notification not found");
-    return { deleted: deleted.deletedCount || 0 };
+    return { deleted: deleted.modifiedCount };
   }
 }

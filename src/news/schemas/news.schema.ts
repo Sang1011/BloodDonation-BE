@@ -4,7 +4,12 @@ import { applySmartIdField } from 'src/shared/middlewares/assign_custome_id.midd
 
 export type NewsDocument = HydratedDocument<News>;
 
-@Schema()
+@Schema({
+  timestamps: {
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+  },
+})
 export class News {
   @Prop({unique: true})
   news_id: number;

@@ -8,12 +8,13 @@ import aqp, { AqpResult } from "api-query-params";
 import { haversineDistance } from 'src/shared/utils/calculateDistance';
 import { removeVietnameseTones } from 'src/shared/utils/removeVNTones';
 import { GeocodingService } from 'src/shared/services/geoLocation.service';
+import { BaseModel } from 'src/shared/interfaces/soft-delete-model.interface';
 
 @Injectable()
 export class LocationService {
   constructor(
     @InjectModel(Location.name)
-    private readonly locationModel: Model<Location>,
+    private readonly locationModel: BaseModel<Location>,
     private readonly geolocationService: GeocodingService
   ) { }
 
@@ -174,5 +175,11 @@ export class LocationService {
     return updated;
   }
 
-
+  async softRemove(id: string) {
+  const deleted = await this.locationModel.softDelete(id);
+  if (!deleted) {
+    throw new NotFoundException("Location not found");
+  }
+  return { deleted: deleted.modifiedCount };
+}
 }

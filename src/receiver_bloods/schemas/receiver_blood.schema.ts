@@ -11,7 +11,12 @@ import { CentralBlood } from "src/central_bloods/schemas/central_blood.schema";
 
 export type ReceiverBloodDocument = HydratedDocument<ReceiverBlood>
 
-@Schema()
+@Schema({
+  timestamps: {
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+  },
+})
 export class ReceiverBlood extends BaseSchema {
     @Prop({unique: true})
     receiver_id: string;
@@ -34,11 +39,11 @@ export class ReceiverBlood extends BaseSchema {
     @Prop({ required: true, enum: ['EMERGENCY', 'DEFAULT'] })
     type: 'EMERGENCY' | 'DEFAULT';
 
-    @Prop({default: Status.PENDING})
+    @Prop({ default: Status.PENDING })
     status_regist: Status;
-
-    @Prop({default: Status.PENDING})
-    status_receiver: string;
+    
+    @Prop({ default: Status.PENDING })
+    status_donate: Status;
 
     // @Prop({required: true, ref: InforHealth.name})
     // infor_health: string;

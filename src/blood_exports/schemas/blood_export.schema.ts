@@ -6,7 +6,12 @@ import { Storage } from "src/storages/schemas/storage.schema";
 
 export type BloodExportDocument = HydratedDocument<BloodExport>
 
-@Schema()
+@Schema({
+  timestamps: {
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+  },
+})
 export class BloodExport {
     @Prop({unique: true})
     export_id: string;

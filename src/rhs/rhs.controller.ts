@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Patch, Param, Get, Query } from '@nestjs/common';
+import { Controller, Post, Body, Patch, Param, Get, Query, Delete } from '@nestjs/common';
 import { RhsService } from './rhs.service';
 import { RhsDto } from './dto/rhs.dto';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
@@ -47,5 +47,14 @@ export class RhsController {
     @ApiOperation({ summary: 'Fetch Rh by id' })
     findOne(@Param("id") id: string) {
         return this.rhsService.findOne(+id);
+    }
+
+    @Delete(":id")
+    @ApiBearerAuth('access-token')
+    @ApiSecurity('access-token')
+    @ResponseMessage("Delete Rh by id")
+    @ApiOperation({ summary: 'Delete Rh by id' })
+    deketeOne(@Param("id") id: string) {
+        return this.rhsService.softRemove(+id);
     }
 }
