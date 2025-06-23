@@ -207,6 +207,9 @@ export class UsersService {
     return await this.userModel.findOne({location_id: location_id});
   }
 
+  async findByListId(userIds: string[]){
+    return await this.userModel.find({user_id: {$in: userIds}});
+  }
   async findOneByEmailWithDigitCode(email: string) {
     return this.userModel.findOne({ email: email })
     .select('+digit_code +digit_code_expire');;
