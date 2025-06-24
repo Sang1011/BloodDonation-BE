@@ -8,6 +8,9 @@ import { ReceiverBloodService } from 'src/receiver_bloods/receiver.service';
 import { BloodExport } from './schemas/blood_export.schema';
 import { CreateExportBloodDto } from './dtos/request/create_export.request';
 import { UpdateExportBloodDto } from './dtos/request/update_export.request';
+import { Status } from 'src/shared/enums/status.enum';
+import { UpdateStorageDto } from 'src/storages/dtos/requests/update.dto';
+import { UpdateReceiveBloodDto } from 'src/receiver_bloods/dto/request/update_receiver_blood.dto';
 
 @Injectable()
 export class BloodExportService {
@@ -72,6 +75,7 @@ export class BloodExportService {
           localField: 'storage_id',
           foreignField: 'storage_id',
           justOne: true,
+          
         },
         {
           path: 'receiver_id',
@@ -79,6 +83,28 @@ export class BloodExportService {
           localField: 'receiver_id',      
           foreignField: 'receiver_id',  
           justOne: true,
+          populate: [
+            {
+              path: 'user_id',
+              model: 'User',
+              localField: 'user_id',
+              foreignField: 'user_id',
+              justOne: true,
+            },
+            {
+              path: 'blood_id',
+              model: 'Blood',
+              localField: 'blood_id',
+              foreignField: 'blood_id',
+              justOne: true,
+            },
+            {
+              path: 'centralBlood_id',
+              model: 'CentralBlood',
+              localField: 'centralBlood_id',
+              foreignField: 'centralBlood_id',
+              justOne: true,
+            },
         },
     ]);
     if (!exportBlood) {
