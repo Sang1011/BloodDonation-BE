@@ -375,5 +375,38 @@ export class ReceiverBloodService {
 
     return getList;
   }
+
+  async getAllReceiveBloodByUser(user_id: string) {
+    const getList = await this.receiverBloodModel.find({
+      user_id: user_id
+    }).populate([
+      {
+        path: 'user_id',
+        model: 'User',
+        localField: 'user_id',
+        foreignField: 'user_id',
+        justOne: true,
+      }, 
+      {
+        path: 'blood_id',
+        model: 'Blood',
+        localField: 'blood_id',
+        foreignField: 'blood_id',
+        justOne: true,
+      },
+      {
+        path: 'centralBlood_id',
+        model: 'CentralBlood',
+        localField: 'centralBlood_id',
+        foreignField: 'centralBlood_id',
+        justOne: true,
+        select: 'centralBlood_id centralBlood_name centralBlood_address ',
+      },  
+    ]);
+    return getList;
+  }
+
+
+
 }
 

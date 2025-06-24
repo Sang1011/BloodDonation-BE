@@ -52,6 +52,15 @@ export class ReceiveBloodController {
     description: 'Fetched receive blood record successfully',
     type: GetReceiveBloodResponseDto,
   })
+
+  @ApiOperation({ summary: 'Get all receive blood by user ID' })
+  @ApiBearerAuth('access-token')
+  @ApiSecurity('access-token')
+  @Get('/history')
+  async getAllReceiveBloodByUser(@User() user: IUser) {
+    //console.log(user);
+    return await this.receiveBloodService.getAllReceiveBloodByUser(user.user_id);
+  }
   
 
   @ApiOperation({ summary: 'Create a new receive blood record' })
@@ -104,13 +113,15 @@ export class ReceiveBloodController {
     return await this.receiveBloodService.getListReceiveByCentralBlood(centralBlood_id);
   }
 
-  @ApiOperation({ summary: 'Get list receive blood by user email' })
-  @ApiBearerAuth('access-token')
-  @ApiSecurity('access-token')
-  @Get('/:email')
-  async getListReceiveByUser(@Param('email') email: string) {
-    return await this.receiveBloodService.getListReceiveByUser(email);
-  }
+    @ApiOperation({ summary: 'Get list receive blood by user email' })
+    @ApiBearerAuth('access-token')
+    @ApiSecurity('access-token')
+    @Get('/:email')
+    async getListReceiveByUser(@Param('email') email: string) {
+      return await this.receiveBloodService.getListReceiveByUser(email);
+    }
+
+  
 
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')
