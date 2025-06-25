@@ -75,7 +75,7 @@ export class AuthController {
     const refreshToken = request.cookies["refresh_token"]
     return this.authService.processNewToken(refreshToken, response);
   }
-
+  
   @Public()
   @Post('/send-reset-code')
   @ApiOperation({ summary: 'Send reset code to reset password' })

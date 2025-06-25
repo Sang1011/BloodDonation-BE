@@ -29,8 +29,8 @@ export class Notification {
   @Prop({ required: true })
   type: string; 
 
-  @Prop()
-  link: string; 
+  @Prop({ default: false })
+  is_read: boolean;
 }
 
 export const NotificationSchema = SchemaFactory.createForClass(Notification);

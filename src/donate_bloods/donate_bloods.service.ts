@@ -15,6 +15,8 @@ import { UsersService } from 'src/users/users.service';
 import { StorageService } from 'src/storages/storage.service';
 import { CreateStorageDto } from 'src/storages/dtos/requests/create.dto';
 import e from 'express';
+import { getDateRangeFor, getTomorrow } from 'src/shared/utils/getTime';
+import moment from 'moment';
 
 @Injectable()
 export class DonateBloodService {
@@ -347,6 +349,22 @@ export class DonateBloodService {
       throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
     }
     return donateBlood;
+  }
+
+  async getListScheduleTomorrow() {
+    const { from, to } = getDateRangeFor(1);
+    const tomorrowList = await this.donateBloodModel.find({
+      date_donate: { $gte: from, $lt: to },
+    });
+    return tomorrowList;
+  }
+
+  async getListScheduleToday() {
+    const { from, to } = getDateRangeFor(0);
+    const todayList = await this.donateBloodModel.find({
+      date_donate: { $gte: from, $lt: to },
+    });
+    return todayList;
   }
 
   async findListDonateActive() {
