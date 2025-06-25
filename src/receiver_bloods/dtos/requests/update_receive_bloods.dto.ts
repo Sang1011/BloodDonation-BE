@@ -13,5 +13,5 @@ export class UpdateReceiveBloodDto extends PartialType(CreateReceiveBloodDto) {
    @ApiProperty({ required: false, example: Status.COMPLETED })
    @IsOptional()
    @IsString()
-   status_receiver?: Status;   
+   status_receive?: Status;   
 }

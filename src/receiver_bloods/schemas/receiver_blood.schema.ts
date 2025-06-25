@@ -43,7 +43,7 @@ export class ReceiverBlood extends BaseSchema {
     status_regist: Status;
     
     @Prop({ default: Status.PENDING })
-    status_donate: Status;
+    status_receive: Status;
 
     // @Prop({required: true, ref: InforHealth.name})
     // infor_health: string;

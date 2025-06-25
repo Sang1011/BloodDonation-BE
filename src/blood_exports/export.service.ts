@@ -10,7 +10,7 @@ import { CreateExportBloodDto } from './dtos/request/create_export.request';
 import { UpdateExportBloodDto } from './dtos/request/update_export.request';
 import { Status } from 'src/shared/enums/status.enum';
 import { UpdateStorageDto } from 'src/storages/dtos/requests/update.dto';
-import { UpdateReceiveBloodDto } from 'src/receiver_bloods/dto/request/update_receiver_blood.dto';
+import { UpdateReceiveBloodDto } from 'src/receiver_bloods/dtos/requests/update_receive_bloods.dto';
 
 @Injectable()
 export class BloodExportService {
@@ -104,8 +104,9 @@ export class BloodExportService {
               localField: 'centralBlood_id',
               foreignField: 'centralBlood_id',
               justOne: true,
-            },
-        },
+            }
+          ]
+        }
     ]);
     if (!exportBlood) {
       throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);

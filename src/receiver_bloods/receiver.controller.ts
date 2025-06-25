@@ -116,7 +116,7 @@ export class ReceiveBloodController {
     @ApiOperation({ summary: 'Get list receive blood by user email' })
     @ApiBearerAuth('access-token')
     @ApiSecurity('access-token')
-    @Get('/:email')
+    @Get('user/:email')
     async getListReceiveByUser(@Param('email') email: string) {
       return await this.receiveBloodService.getListReceiveByUser(email);
     }
@@ -129,6 +129,7 @@ export class ReceiveBloodController {
   @ResponseMessage(MESSAGES.DONATE_BLOOD.RETRIEVE_ONE_SUCCESS)
   @Get(':receiver_id')
   async findOne(@Param('receiver_id') receiver_id: string) {
+    console.log(receiver_id);
     return await this.receiveBloodService.findOne(receiver_id);
   }
 }
