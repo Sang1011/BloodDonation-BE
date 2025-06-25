@@ -26,6 +26,7 @@ import { ChangePasswordDto } from "./dtos/requests/change-password.dto";
 import { dropRightWhile } from "lodash";
 import { VerifyResetCodeDto } from "./dtos/requests/verify-reset-code.dto";
 import { SendResetCodeDto } from "./dtos/requests/send-reset-code.dto";
+import { ResetPasswordDto } from "./dtos/requests/reset-password.dto";
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -142,4 +143,13 @@ export class AuthController {
   ) {
     return this.authService.changePassword(user.user_id, dto);
   }
+
+@Public()
+@Post('/reset-password')
+@ApiOperation({ summary: 'Reset password' })
+@ApiResponse({ status: 201, description: 'Password reset successfully.' })
+@ResponseMessage("Password reset successfully!")
+async resetPassword(@Body() dto: ResetPasswordDto) {
+  return this.authService.resetPassword(dto.email, dto.newPassword);
+}
 }
