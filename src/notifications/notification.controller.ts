@@ -7,6 +7,8 @@ import { FindAllQueryDTO } from 'src/shared/dtos/requests/find-all-query.request
 import { NotificationService } from './notification.service';
 import { CreateNotificationDto } from './dtos/requests/create-noti.request';
 import { UpdateNotificationDto } from './dtos/requests/update-noti.request';
+import { BroadcastNotiDto } from './dtos/requests/board-cast.request';
+import { Roles } from 'src/shared/decorators/role.decorator';
 
 @Controller('notifications')
 @ApiTags('Notification')
@@ -14,6 +16,7 @@ export class NotificationController {
     constructor(private readonly notificationService: NotificationService) { }
 
     @Post()
+    @Roles('ADMIN')
     @ApiBearerAuth('access-token')
     @ApiSecurity('access-token')
     @ApiOperation({ summary: 'Create a new Noti' })
@@ -23,12 +26,24 @@ export class NotificationController {
     }
 
     @Patch(':id')
+    @Roles('ADMIN')
     @ApiBearerAuth('access-token')
     @ApiSecurity('access-token')
     @ApiOperation({ summary: 'Update a notification' })
     @ResponseMessage("Update a notification")
     async update(@Param('id') id: string, @Body() updateNotiDto: UpdateNotificationDto) {
         return this.notificationService.update(id, updateNotiDto);
+    }
+   
+    @Post("/broadcast")
+    @Roles('ADMIN')
+    @ApiBearerAuth('access-token')
+    @ApiSecurity('access-token')
+    @ApiOperation({ summary: 'Broadcast notification to all users' })
+    @ResponseMessage("Broadcast notification sent")
+    async broadcast(@Body() body: BroadcastNotiDto) {
+    const { title, message, type } = body;
+    return this.notificationService.sendNotiAllUser(title, message, type);
     }
 
     @Get()
@@ -48,6 +63,7 @@ export class NotificationController {
         return this.notificationService.findOne(id);
     }
 
+    @Roles('ADMIN')
     @Delete(":id")
     @ApiBearerAuth('access-token')
     @ApiSecurity('access-token')

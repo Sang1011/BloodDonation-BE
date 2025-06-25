@@ -10,7 +10,7 @@ import { CreateExportBloodDto } from './dtos/request/create_export.request';
 import { UpdateExportBloodDto } from './dtos/request/update_export.request';
 import { Status } from 'src/shared/enums/status.enum';
 import { UpdateStorageDto } from 'src/storages/dtos/requests/update.dto';
-import { UpdateReceiveBloodDto } from 'src/receiver_bloods/dto/request/update_receiver_blood.dto';
+// import { UpdateReceiveBloodDto } from 'src/receiver_bloods/dto/request/update_receiver_blood.dto';
 
 @Injectable()
 export class BloodExportService {
@@ -19,10 +19,10 @@ export class BloodExportService {
     private bloodExportModel: Model<BloodExport>,
     private storageService: StorageService,
     private receiverBloodsService: ReceiverBloodService,
-  ) {}
+  ) { }
 
   async findAll(currentPage: number, limit: number, qs: string) {
-    const { filter, sort}: AqpResult = aqp(qs);
+    const { filter, sort }: AqpResult = aqp(qs);
     delete filter.current;
     delete filter.pageSize;
 
@@ -49,8 +49,8 @@ export class BloodExportService {
         {
           path: 'receiver_id',
           model: 'ReceiverBlood',
-          localField: 'receiver_id',      
-          foreignField: 'receiver_id',  
+          localField: 'receiver_id',
+          foreignField: 'receiver_id',
           justOne: true,
         },
       ])
@@ -70,42 +70,41 @@ export class BloodExportService {
   async findOne(id: string) {
     const exportBlood = await this.bloodExportModel.findOne({ export_id: id }).populate([
       {
-          path: "storage_id",
-          model: 'Storage',
-          localField: 'storage_id',
-          foreignField: 'storage_id',
-          justOne: true,
-          
-        },
-        {
-          path: 'receiver_id',
-          model: 'ReceiverBlood',
-          localField: 'receiver_id',      
-          foreignField: 'receiver_id',  
-          justOne: true,
-          populate: [
-            {
-              path: 'user_id',
-              model: 'User',
-              localField: 'user_id',
-              foreignField: 'user_id',
-              justOne: true,
-            },
-            {
-              path: 'blood_id',
-              model: 'Blood',
-              localField: 'blood_id',
-              foreignField: 'blood_id',
-              justOne: true,
-            },
-            {
-              path: 'centralBlood_id',
-              model: 'CentralBlood',
-              localField: 'centralBlood_id',
-              foreignField: 'centralBlood_id',
-              justOne: true,
-            },
-        },
+        path: "storage_id",
+        model: 'Storage',
+        localField: 'storage_id',
+        foreignField: 'storage_id',
+        justOne: true,
+      },
+      {
+        path: 'receiver_id',
+        model: 'ReceiverBlood',
+        localField: 'receiver_id',
+        foreignField: 'receiver_id',
+        justOne: true,
+        populate: [
+          {
+            path: 'user_id',
+            model: 'User',
+            localField: 'user_id',
+            foreignField: 'user_id',
+            justOne: true,
+          },
+          {
+            path: 'blood_id',
+            model: 'Blood',
+            localField: 'blood_id',
+            foreignField: 'blood_id',
+            justOne: true,
+          },
+          {
+            path: 'centralBlood_id',
+            model: 'CentralBlood',
+            localField: 'centralBlood_id',
+            foreignField: 'centralBlood_id',
+            justOne: true,
+          },
+      ]},
     ]);
     if (!exportBlood) {
       throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
@@ -127,39 +126,39 @@ export class BloodExportService {
   }
 
   async update(id: string, dto: UpdateExportBloodDto) {
-    const existingExportBlood = await this.bloodExportModel.findOne({ export_id: id});
-    if(!existingExportBlood){
+    const existingExportBlood = await this.bloodExportModel.findOne({ export_id: id });
+    if (!existingExportBlood) {
       throw new BadRequestException("Export Blood record not found");
     }
-    if(dto.storage_id){
+    if (dto.storage_id) {
       const storage = await this.storageService.findOne(dto.storage_id);
       if (!storage) {
         throw new NotFoundException("Storage not found");
       }
     }
-    if(dto.receiver_id){
+    if (dto.receiver_id) {
       const receiver = await this.receiverBloodsService.findOne(dto.receiver_id);
       if (!receiver) {
         throw new NotFoundException("Receiver not found");
       }
     }
-    const updated = await this.bloodExportModel.findOneAndUpdate({export_id: id}, dto, { new: true });
+    const updated = await this.bloodExportModel.findOneAndUpdate({ export_id: id }, dto, { new: true });
     if (!updated) {
       throw new NotFoundException("Export Blood record not found");
     }
     return updated;
   }
 
-    async remove(id: string){
-        const existingDonateBlood = await this.bloodExportModel.findOne({ export_id: id });
-        if (!existingDonateBlood) {
-            throw new NotFoundException("Export Blood record not found");
-        }
-        const deleted = await this.bloodExportModel.deleteOne({export_id: id});
-        if (!deleted) {
-            throw new NotFoundException("Export Blood record not found");
-        }
-        return { deleted: deleted.deletedCount || 0 };
+  async remove(id: string) {
+    const existingDonateBlood = await this.bloodExportModel.findOne({ export_id: id });
+    if (!existingDonateBlood) {
+      throw new NotFoundException("Export Blood record not found");
     }
+    const deleted = await this.bloodExportModel.deleteOne({ export_id: id });
+    if (!deleted) {
+      throw new NotFoundException("Export Blood record not found");
+    }
+    return { deleted: deleted.deletedCount || 0 };
+  }
 }
 

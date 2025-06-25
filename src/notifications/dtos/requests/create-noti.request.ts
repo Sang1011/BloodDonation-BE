@@ -20,9 +20,4 @@ export class CreateNotificationDto {
   @ApiPropertyOptional({ example: 'reminder' })
   @IsString()
   type: string;
-
-  @ApiPropertyOptional({ example: '/schedule/detail/abc123' })
-  @IsOptional()
-  @IsString()
-  link?: string;
 }

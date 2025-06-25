@@ -11,6 +11,7 @@ import { CreateReceiveBloodDto } from './dtos/requests/create_receive_bloods.dto
 import { UpdateReceiveBloodDto } from './dtos/requests/update_receive_bloods.dto';
 import { Status } from 'src/shared/enums/status.enum';
 import { UsersService } from 'src/users/users.service';
+import { getDateRangeFor } from 'src/shared/utils/getTime';
 
 @Injectable()
 export class ReceiverBloodService {
@@ -108,18 +109,21 @@ export class ReceiverBloodService {
     return receiverBlood;
   }
 
-  // async create(dto: CreateReceiveBloodDto) {
-  //   const existingReceiverBlood = await this.receiverBloodModel.findOne({ infor_health: dto.infor_health });
-  //   if (existingReceiverBlood) {
-  //     throw new BadRequestException("Receiver Blood record already exists for this InforHealth");
-  //   }
-  //   const checked = await this.checkDuplicate(dto);
-  //   if (!checked) {
-  //     throw new BadRequestException("Invalid data provided");
-  //   }
-  //   const created = new this.receiverBloodModel(dto);
-  //   return await created.save();
-  // }
+  async getListScheduleTomorrow() {
+    const { from, to } = getDateRangeFor(1);
+    const tomorrowList = await this.receiverBloodModel.find({
+      date_receiver: { $gte: from, $lt: to },
+    });
+    return tomorrowList;
+  }
+
+  async getListScheduleToday() {
+    const { from, to } = getDateRangeFor(0);
+    const todayList = await this.receiverBloodModel.find({
+      date_receiver: { $gte: from, $lt: to },
+    });
+    return todayList;
+  }
 
   async create(user_id: string, dto: CreateReceiveBloodDto) {
     const user = await this.usersService.findOne(user_id);
