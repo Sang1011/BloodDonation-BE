@@ -265,5 +265,28 @@ export class AuthService {
     await this.usersService.resetDigitCode(exists.user_id);
     return "Reset code verified successfully";
   }
+
+  async resetPassword(email: string, newPassword: string) {
+  const exists = await this.usersService.findOneByEmailWithDigitCode(email);
+  if (!exists) {
+    throw new BadRequestException("This mail hasn't been registered yet!");
+  }
+
+  // Chỉ kiểm tra còn mã code và còn hạn
+  // const storedHash = exists.digit_code;
+  // const isCodeExpired = new Date() > new Date(exists.digit_code_expire);
+  // if (!storedHash || isCodeExpired) {
+  //   throw new BadRequestException("Reset code expired or not requested.");
+  // }
+
+  // Đổi mật khẩu mới
+  exists.password = getHashPassword(newPassword);
+  // Xóa mã xác thực
+  exists.digit_code = null;
+  exists.digit_code_expire = null;
+  await exists.save();
+
+  return { message: "Password reset successfully" };
+}
 }
 
