@@ -255,4 +255,22 @@ export class NotificationService {
     if (!deleted) throw new BadRequestException("Notification not found");
     return { deleted: deleted.modifiedCount };
   }
+
+  async markAsRead(user_id: string, notification_id: string) {
+  const updated = await this.notifyModel.findOneAndUpdate(
+    { notification_id, user_id },
+    { is_read: true },
+    { new: true }
+  );
+  if (!updated) throw new BadRequestException("Notification not found or not yours");
+  return updated;
+}
+
+// async markAllAsRead(user_id: string) {
+//   const result = await this.notifyModel.updateMany(
+//     { user_id, is_read: false },
+//     { is_read: true }
+//   );
+//   return { updated: result.modifiedCount };
+// }
 }
