@@ -11,6 +11,7 @@ import { UpdateExportBloodDto } from './dtos/request/update_export.request';
 import { Status } from 'src/shared/enums/status.enum';
 import { UpdateStorageDto } from 'src/storages/dtos/requests/update.dto';
 import { UpdateReceiveBloodDto } from 'src/receiver_bloods/dtos/requests/update_receive_bloods.dto';
+import { BloodsService } from 'src/bloods/bloods.service';
 
 @Injectable()
 export class BloodExportService {
@@ -19,6 +20,7 @@ export class BloodExportService {
     private bloodExportModel: Model<BloodExport>,
     private storageService: StorageService,
     private receiverBloodsService: ReceiverBloodService,
+    private bloodService: BloodsService,
   ) {}
 
   async findAll(currentPage: number, limit: number, qs: string) {
@@ -115,16 +117,54 @@ export class BloodExportService {
   }
 
   async create(dto: CreateExportBloodDto) {
+
+    // check storage_id
+    // get storage
     const storageExists = await this.storageService.findOne(dto.storage_id);
     if (!storageExists) {
+      console.log(storageExists);
       throw new NotFoundException("Storage not found");
     }
+
+    // check if storage is not available
+    if (storageExists.ml === 0) {
+      console.log(storageExists.ml);
+      throw new BadRequestException("Storage is empty, cannot export");
+    }
+
+    // check if storage is already exported
+    if (storageExists.current_status === Status.EXPORTED) {
+      throw new BadRequestException("Storage is already exported, cannot export");
+    }
+    
+    // get receive_id
     const receiverExists = await this.receiverBloodsService.findOne(dto.receiver_id);
     if (!receiverExists) {
       throw new NotFoundException("Receiver Blood not found");
     }
-    const created = new this.bloodExportModel(dto);
-    return await created.save();
+
+    const bloodObject = receiverExists.blood_id as unknown as { blood_id: string };
+    const blood_id = bloodObject?.blood_id ?? '';
+
+    if(storageExists.blood_id !== blood_id){
+      throw new BadRequestException("Blood is not compatible with storage");
+    }
+    
+    // update storage and receiver blood status
+    await this.storageService.update(dto.storage_id, { current_status: Status.EXPORTED });
+    await this.receiverBloodsService.update(dto.receiver_id, { status_receive: Status.COMPLETED });
+
+    
+
+    // create
+    const created = new this.bloodExportModel({
+      storage_id: dto.storage_id,
+      receiver_id: dto.receiver_id,
+      export_date: new Date(),
+      status: Status.COMPLETED,
+    });
+    return created.save();
+   
   }
 
   async update(id: string, dto: UpdateExportBloodDto) {

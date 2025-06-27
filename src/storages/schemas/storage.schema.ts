@@ -3,6 +3,7 @@ import { HydratedDocument } from "mongoose";
 import { Blood } from "src/bloods/schemas/blood.schema";
 import { CentralBlood } from "src/central_bloods/schemas/central_blood.schema";
 import { DonateBlood } from "src/donate_bloods/schemas/donate_blood.schema";
+import { Status } from "src/shared/enums/status.enum";
 import { applySmartIdField } from "src/shared/middlewares/assign_custome_id.middleware";
 import { applySoftDeleteStatics } from "src/shared/plugins/soft-delete.plugin";
 import { BaseSchema } from "src/shared/schemas/baseSchema";
@@ -33,7 +34,7 @@ export class Storage extends BaseSchema {
     expired_date: Date;
 
     @Prop({ required: true })
-    current_status: string;
+    current_status: Status;
 
     @Prop({ref: CentralBlood.name})
     centralBlood_id: number;

@@ -12,11 +12,11 @@ export class CreateExportBloodDto {
   @IsNotEmpty()
   receiver_id: string
 
-  @ApiProperty()
-  @IsDateString()
-  export_date: Date;
+  // @ApiProperty()
+  // @IsOptional()
+  // export_date: Date;
 
-  @ApiProperty()
-  @IsString()
-  status: string;
+  // @ApiProperty()
+  // @IsOptional()
+  // status: string;
 }

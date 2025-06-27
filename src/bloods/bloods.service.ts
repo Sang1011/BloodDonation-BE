@@ -88,7 +88,7 @@ export class BloodsService {
     }
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     if (!id) {
       throw new BadRequestException('Blood ID is required');
     }
@@ -111,7 +111,7 @@ export class BloodsService {
 
   }
 
-  async softRemove(id: number) {
+  async softRemove(id: string) {
     const deleted = await this.bloodModel.softDelete(id);
     if (!deleted) {
       throw new NotFoundException("Blood not found");

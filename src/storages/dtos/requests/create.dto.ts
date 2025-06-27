@@ -1,45 +1,45 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsNumber, IsDateString, IsEnum } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber, IsDateString, IsEnum, IsOptional } from 'class-validator';
 import { Status } from 'src/shared/enums/status.enum';
 
 export class CreateStorageDto {
   @ApiProperty()
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   donate_id: string;
 
   @ApiProperty()
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   blood_id: string;
 
   @ApiProperty()
-  @IsNotEmpty()
+  @IsOptional()
   @IsDateString()
   date: Date;
 
   @ApiProperty()
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
   ml: number;
 
   @ApiProperty()
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
   unit: number;
 
   @ApiProperty()
-  @IsNotEmpty()
+  @IsOptional()
   @IsDateString()
   expired_date: Date;
 
   @ApiProperty()
-  @IsNotEmpty()
-  @IsEnum(Status)
+  @IsOptional()
+  
   current_status: Status;
 
   @ApiProperty()
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
   centralBlood_id: number;
 }
