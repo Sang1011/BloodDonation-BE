@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { InforHealthsModule } from 'src/InforHealths/infor-healths.module';
 import { BloodsModule } from 'src/bloods/bloods.module';
@@ -12,7 +12,12 @@ import { NotificationModule } from 'src/notifications/notification.module';
   imports: [
     MongooseModule.forFeature([
       { name: ReceiverBlood.name, schema: ReceiverBloodSchema },
-    ]), InforHealthsModule, BloodsModule, UsersModule, CentralBloodModule, NotificationModule
+    ]),
+    InforHealthsModule,
+    BloodsModule,
+    UsersModule,
+    CentralBloodModule,
+    forwardRef(() => NotificationModule), 
   ],
   controllers: [ReceiveBloodController],
   providers: [ReceiverBloodService],

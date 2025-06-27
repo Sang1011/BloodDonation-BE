@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { DonateBlood, DonateBloodDocument } from './schemas/donate_blood.schema';
@@ -26,7 +26,7 @@ export class DonateBloodService {
     @InjectModel(DonateBlood.name)
     private donateBloodModel: Model<DonateBlood>,
     private inforHealthsService: InforHealthService,
-
+    @Inject(forwardRef(() => NotificationService))
     private notifyService: NotificationService,
     private centralBloodService: CentralBloodService,
     private usersService: UsersService,

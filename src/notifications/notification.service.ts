@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Notification } from './schemas/notification.schema';
 import { Model } from 'mongoose';
@@ -19,7 +19,9 @@ export class NotificationService {
   constructor(
     @InjectModel(Notification.name) private notifyModel: BaseModel<Notification>,
     private readonly gateway: NotificationGateway,
+    @Inject(forwardRef(() => DonateBloodService))
     private readonly donateBloodService: DonateBloodService,
+    @Inject(forwardRef(() => ReceiverBloodService))
     private readonly receiveBloodService: ReceiverBloodService,
     private readonly inforHealthService: InforHealthService
   ) { }

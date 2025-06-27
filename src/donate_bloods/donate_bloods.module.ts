@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { DonateBloodController } from './donate_bloods.controller';
 import { DonateBloodService } from './donate_bloods.service';
@@ -8,12 +8,18 @@ import { BloodsModule } from 'src/bloods/bloods.module';
 import { CentralBloodModule } from 'src/central_bloods/central_blood.module';
 import { UsersModule } from 'src/users/users.module';
 import { StorageModule } from 'src/storages/storage.module';
-import { NotificationService } from 'src/notifications/notification.service';
+import { NotificationModule } from 'src/notifications/notification.module';
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: DonateBlood.name, schema: DonateBloodSchema },
-    ]), InforHealthsModule, BloodsModule, CentralBloodModule, UsersModule, StorageModule, NotificationService
+    ]),
+    InforHealthsModule,
+    BloodsModule,
+    CentralBloodModule,
+    UsersModule,
+    StorageModule,
+    forwardRef(() => NotificationModule), 
   ],
   controllers: [DonateBloodController],
   providers: [DonateBloodService],
