@@ -53,6 +53,8 @@ export class ReceiverBlood extends BaseSchema {
 
     @Prop({required: true, ref: CentralBlood.name})
     centralBlood_id: number;
+
+
 }
 
 export const ReceiverBloodSchema = SchemaFactory.createForClass(ReceiverBlood);

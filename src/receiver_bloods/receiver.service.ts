@@ -84,22 +84,19 @@ export class ReceiverBloodService {
         path: 'user_id',
         model: 'User',
         localField: 'user_id',
-        foreignField: 'user_id',
-        justOne: true,
+        foreignField: 'user_id',  
       }, 
       {
         path: 'blood_id',
         model: 'Blood',
         localField: 'blood_id',
         foreignField: 'blood_id',
-        justOne: true,
       },
       {
         path: 'centralBlood_id',
         model: 'CentralBlood',
         localField: 'centralBlood_id',
         foreignField: 'centralBlood_id',
-        justOne: true,
         select: 'centralBlood_id centralBlood_name centralBlood_address ',
       },
     ]);
@@ -166,7 +163,7 @@ export class ReceiverBloodService {
 
   async checkDuplicate(dto: CreateReceiveBloodDto) {
     
-    const blood = await this.bloodsService.findOne(+dto.blood_id);
+    const blood = await this.bloodsService.findOne(dto.blood_id);
     if (!blood) {
       throw new NotFoundException("Blood not found");
     }
@@ -183,7 +180,7 @@ export class ReceiverBloodService {
       throw new BadRequestException("Receiver Blood record not found");
     }
     if (dto.blood_id) {
-      const blood = await this.bloodsService.findOne(+dto.blood_id);
+      const blood = await this.bloodsService.findOne(dto.blood_id);
       if (!blood) {
         throw new NotFoundException("Blood not found");
       }
@@ -257,7 +254,7 @@ export class ReceiverBloodService {
     }
   }
 
-   return null;
+   return result;
 }
 
   // async findListReceiveComplete() {
@@ -284,6 +281,8 @@ export class ReceiverBloodService {
 
   //  return null;
   // }
+
+  
 
   async findListReceiveComplete() {
       const getList = await this.receiverBloodModel.find({

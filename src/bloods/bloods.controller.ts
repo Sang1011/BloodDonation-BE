@@ -38,7 +38,7 @@ export class BloodsController {
     @ApiOperation({ summary: 'Get a blood by id' })
     @ApiOkResponse()
     async findOne(@Param('id') id: string) {
-        return this.bloodsService.findOne(+id);
+        return this.bloodsService.findOne(id);
     }
 
     @Delete(":id")
@@ -47,6 +47,6 @@ export class BloodsController {
     @ResponseMessage("Delete Rh by id")
     @ApiOperation({ summary: 'Delete Rh by id' })
     deketeOne(@Param("id") id: string) {
-        return this.bloodsService.softRemove(+id);
+        return this.bloodsService.softRemove(id);
     }
 }

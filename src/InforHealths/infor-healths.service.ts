@@ -27,7 +27,7 @@ export class InforHealthService {
         if (!user) {
             throw new BadRequestException(MESSAGES.USERS.USER_NOT_FOUND);
         }
-        const blood = await this.bloodServices.findOne(+blood_id);
+        const blood = await this.bloodServices.findOne(blood_id);
         if (!blood) {
             throw new BadRequestException("Blood not found");
         }
@@ -65,7 +65,7 @@ export class InforHealthService {
             throw new BadRequestException("Health information already exists for this user");
         }
         
-        const blood = await this.bloodServices.findOne(+infoHealth.blood_id);
+        const blood = await this.bloodServices.findOne(infoHealth.blood_id);
         if (!blood) {
             throw new BadRequestException("Blood not found");
         }
@@ -180,7 +180,7 @@ export class InforHealthService {
           throw new BadRequestException(MESSAGES.USERS.USER_NOT_FOUND);
         }
       
-        const blood = await this.bloodServices.findOne(+blood_id);
+        const blood = await this.bloodServices.findOne(blood_id);
         if (!blood) {
           throw new BadRequestException("Blood not found");
         }
@@ -225,7 +225,7 @@ export class InforHealthService {
         }
 
         const { blood_id } = updateHealthDTO;      
-        const blood = await this.bloodServices.findOne(+blood_id);
+        const blood = await this.bloodServices.findOne(blood_id);
         if (!blood) {
           throw new BadRequestException("Blood not found");
         }

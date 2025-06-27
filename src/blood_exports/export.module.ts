@@ -12,7 +12,7 @@ import { ReceiverBloodModule } from 'src/receiver_bloods/receiver.module';
   imports: [
     MongooseModule.forFeature([
       { name: BloodExport.name, schema: BloodExportSchema },
-    ]), StorageModule, ReceiverBloodModule
+    ]), StorageModule, ReceiverBloodModule, BloodsModule
   ],
   controllers: [BloodExportController],
   providers: [BloodExportService],
