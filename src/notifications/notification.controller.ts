@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Patch, Param, Get, Query, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Patch, Param, Get, Query, Delete, UseGuards, Req, BadRequestException } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { ResponseMessage } from 'src/shared/decorators/message.decorator';
 import { MESSAGES } from 'src/shared/constants/messages.constants';
@@ -9,6 +9,9 @@ import { CreateNotificationDto } from './dtos/requests/create-noti.request';
 import { UpdateNotificationDto } from './dtos/requests/update-noti.request';
 import { BroadcastNotiDto } from './dtos/requests/board-cast.request';
 import { Roles } from 'src/shared/decorators/role.decorator';
+import { AuthGuard } from '@nestjs/passport';
+import { User } from 'src/shared/decorators/users.decorator';
+import { IUser } from 'src/shared/interfaces/user.interface';
 
 @Controller('notifications')
 @ApiTags('Notification')
@@ -72,4 +75,25 @@ export class NotificationController {
     deketeOne(@Param("id") id: string) {
         return this.notificationService.remove(id);
     }
+
+    @Patch('mark-read/:id')
+    @ApiBearerAuth('access-token')
+    @ApiSecurity('access-token')
+    // @UseGuards(AuthGuard('jwt'))
+    @ResponseMessage("Mark notification as read")
+    async markAsRead(@User() user: any, @Param('id') id: string) {
+        return this.notificationService.markAsRead(user.user_id, id);
+    }
+
+    // @Patch('mark-all-read')
+    // @ApiBearerAuth('access-token')
+    // @ApiSecurity('access-token')
+    // @UseGuards(AuthGuard('jwt'))
+    // @ResponseMessage("Mark all notifications as read")
+    // async markAllAsRead(@User() user: any, @Req() req: any) {
+    //     if (!user || !user.user_id) {
+    //     throw new BadRequestException('User not authenticated');
+    // }
+    //     return this.notificationService.markAllAsRead(user.user_id);
+    // }
 }
