@@ -7,11 +7,12 @@ import { ReceiverBlood, ReceiverBloodSchema } from './schemas/receiver_blood.sch
 import { ReceiverBloodService } from './receiver.service';
 import { ReceiveBloodController } from './receiver.controller';
 import { UsersModule } from 'src/users/users.module';
+import { NotificationModule } from 'src/notifications/notification.module';
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: ReceiverBlood.name, schema: ReceiverBloodSchema },
-    ]), InforHealthsModule, BloodsModule, UsersModule, CentralBloodModule
+    ]), InforHealthsModule, BloodsModule, UsersModule, CentralBloodModule, NotificationModule
   ],
   controllers: [ReceiveBloodController],
   providers: [ReceiverBloodService],

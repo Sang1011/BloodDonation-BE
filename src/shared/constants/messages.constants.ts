@@ -41,9 +41,19 @@ export const MESSAGES = {
       CREATE_SUCCESS: 'Donate blood record created successfully.',
       UPDATE_SUCCESS: 'Donate blood record updated successfully.',
       DELETE_SUCCESS: 'Donate blood record deleted successfully.',
+      CANCELLED_SUCESS: "Cancel donate schedule sucessfully",
       NOT_FOUND: 'Donate blood record not found.',
       RETRIEVE_ONE_SUCCESS: 'Donate blood record retrieved successfully.',
       RETRIEVE_ALL_SUCCESS: 'All donate blood records retrieved successfully.',
+    },
+    RECEIVE_BLOOD: {
+      CREATE_SUCCESS: 'Receive blood record created successfully.',
+      UPDATE_SUCCESS: 'Receive blood record updated successfully.',
+      DELETE_SUCCESS: 'Receive blood record deleted successfully.',
+      CANCELLED_SUCESS: "Cancel receive schedule sucessfully",
+      NOT_FOUND: 'Receive blood record not found.',
+      RETRIEVE_ONE_SUCCESS: 'Receive blood record retrieved successfully.',
+      RETRIEVE_ALL_SUCCESS: 'All receive blood records retrieved successfully.',
     },
   };
   

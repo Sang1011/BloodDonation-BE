@@ -12,6 +12,9 @@ import { UpdateReceiveBloodDto } from './dtos/requests/update_receive_bloods.dto
 import { Status } from 'src/shared/enums/status.enum';
 import { UsersService } from 'src/users/users.service';
 import { getDateRangeFor } from 'src/shared/utils/getTime';
+import { IUser } from 'src/shared/interfaces/user.interface';
+import { NotificationService } from 'src/notifications/notification.service';
+import { NotificationTemplates } from 'src/shared/enums/notification.enum';
 
 @Injectable()
 export class ReceiverBloodService {
@@ -20,6 +23,7 @@ export class ReceiverBloodService {
     private receiverBloodModel: Model<ReceiverBlood>,
     private inforHealthsService: InforHealthService,
     private bloodsService: BloodsService,
+    private notifyService: NotificationService,
     private usersService: UsersService,
     private centralBloodService: CentralBloodService
   ) { }
@@ -48,7 +52,7 @@ export class ReceiverBloodService {
           localField: 'user_id',
           foreignField: 'user_id',
           justOne: true,
-        }, 
+        },
         {
           path: 'blood_id',
           model: 'Blood',
@@ -84,8 +88,9 @@ export class ReceiverBloodService {
         path: 'user_id',
         model: 'User',
         localField: 'user_id',
-        foreignField: 'user_id',  
-      }, 
+        foreignField: 'user_id',
+        justOne: true,
+      },
       {
         path: 'blood_id',
         model: 'Blood',
@@ -122,9 +127,9 @@ export class ReceiverBloodService {
     return todayList;
   }
 
-  async create(user_id: string, dto: CreateReceiveBloodDto) {
-    const user = await this.usersService.findOne(user_id);
-    if (!user) {
+  async create(user: IUser, dto: CreateReceiveBloodDto) {
+    const userFound = await this.usersService.findOne(user.user_id);
+    if (!userFound) {
       throw new NotFoundException("User not found");
     }
     const checked = await this.checkDuplicate(dto);
@@ -134,14 +139,14 @@ export class ReceiverBloodService {
     if (new Date(dto.date_receiver) < new Date()) {
       throw new BadRequestException("Date must be in the future");
     }
-    const created = await new this.receiverBloodModel({...dto, user_id: user.user_id}).populate([
+    const created = await new this.receiverBloodModel({ ...dto, user_id: user.user_id }).populate([
       {
         path: 'user_id',
         model: 'User',
         localField: 'user_id',
         foreignField: 'user_id',
         justOne: true,
-      }, 
+      },
       {
         path: 'blood_id',
         model: 'Blood',
@@ -158,11 +163,18 @@ export class ReceiverBloodService {
         select: 'centralBlood_id centralBlood_name centralBlood_address ',
       },
     ]);
+    if (user.role = "MEMBER") {
+      await this.notifyService.create({
+        user_id: user.user_id,
+        title: NotificationTemplates.BOOKING_RECEIVE_SUCCESS.title,
+        message: NotificationTemplates.BOOKING_RECEIVE_SUCCESS.message,
+        type: NotificationTemplates.BOOKING_RECEIVE_SUCCESS.type,
+      });
+    }
     return await created.save();
   }
 
   async checkDuplicate(dto: CreateReceiveBloodDto) {
-    
     const blood = await this.bloodsService.findOne(dto.blood_id);
     if (!blood) {
       throw new NotFoundException("Blood not found");
@@ -195,7 +207,7 @@ export class ReceiverBloodService {
         localField: 'user_id',
         foreignField: 'user_id',
         justOne: true,
-      }, 
+      },
       {
         path: 'blood_id',
         model: 'Blood',
@@ -218,6 +230,29 @@ export class ReceiverBloodService {
     return updated.save();
   }
 
+  async cancelSchedule(user: IUser, id: string) {
+    const existingDonateBlood = await this.receiverBloodModel.findOne({ donate_id: id });
+    if (!existingDonateBlood) {
+      throw new BadRequestException("Donate Blood record not found");
+    }
+    const dto: Partial<UpdateReceiveBloodDto> = {
+      status_receive: Status.CANCELLED
+    }
+    const updated = await this.receiverBloodModel.findOneAndUpdate({ donate_id: id }, dto, { new: true });
+    if (!updated) {
+      throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
+    }
+    if (user.role = "MEMBER") {
+      await this.notifyService.create({
+        user_id: user.user_id,
+        title: NotificationTemplates.CANCELLED_RECEIVE_SCHEDULE.title,
+        message: NotificationTemplates.CANCELLED_RECEIVE_SCHEDULE.message,
+        type: NotificationTemplates.CANCELLED_RECEIVE_SCHEDULE.type,
+      });
+    }
+    return updated;
+  }
+
   async remove(id: string) {
     const existingReceiverBlood = await this.receiverBloodModel.findOne({ receiver_id: id });
     if (!existingReceiverBlood) {
@@ -232,31 +267,29 @@ export class ReceiverBloodService {
 
 
   async findListReceiveActive() {
-  const getList = await this.receiverBloodModel.find({
-    status_receiver: Status.PENDING,
-  });
+    const getList = await this.receiverBloodModel.find({
+      status_receiver: Status.PENDING,
+    });
 
-  const userIds = getList.map(d => d.user_id?.toString());
-  const users = await this.usersService.findByListId(userIds);
+    const userIds = getList.map(d => d.user_id?.toString());
+    const users = await this.usersService.findByListId(userIds);
 
-  const result = [];
+    const result = [];
 
-  for (const rv of getList) {
-    const matchedInfor = users.find(
-      user => user.user_id.toString() === rv.user_id?.toString()
-    );
+    for (const rv of getList) {
+      const matchedInfor = users.find(
+        user => user.user_id.toString() === rv.user_id?.toString()
+      );
 
-    if (matchedInfor) {
-      result.push({
-        user_id: matchedInfor.user_id,
-        requestType: rv.type || 'DEFAULT',
-      });
+      if (matchedInfor) {
+        result.push({
+          user_id: matchedInfor.user_id,
+          requestType: rv.type || 'DEFAULT',
+        });
+      }
     }
+    return result;
   }
-
-   return result;
-}
-
   // async findListReceiveComplete() {
   //   const getList = await this.receiverBloodModel.find({
   //     status_receiver: Status.COMPLETED
@@ -282,36 +315,36 @@ export class ReceiverBloodService {
   //  return null;
   // }
 
-  
+
 
   async findListReceiveComplete() {
-      const getList = await this.receiverBloodModel.find({
-        status_receiver: Status.COMPLETED
-      })
-      const userIds = getList.map(d => d.user_id?.toString());
+    const getList = await this.receiverBloodModel.find({
+      status_receiver: Status.COMPLETED
+    })
+    const userIds = getList.map(d => d.user_id?.toString());
     const users = await this.usersService.findByListId(userIds);
-  
+
     const result = [];
-  
+
     // for (const rv of getList) {
     //   const matchedInfor = inforHealths.find(
     //     infor => infor.infor_health.toString() === rv.infor_health?.toString()
     //   );
-  
-      for (const rv of getList) {
-        const matchedInfor = users.find(
-          user => user.user_id.toString() === rv.user_id?.toString()
-        );
-  
-        if (matchedInfor) {
-          result.push({
-            user_id: matchedInfor.user_id,
-            requestType: rv.type || 'DEFAULT',
-          });
-        }
+
+    for (const rv of getList) {
+      const matchedInfor = users.find(
+        user => user.user_id.toString() === rv.user_id?.toString()
+      );
+
+      if (matchedInfor) {
+        result.push({
+          user_id: matchedInfor.user_id,
+          requestType: rv.type || 'DEFAULT',
+        });
+      }
     }
     return result;
-}
+  }
 
   async getListReceiveByCentralBlood(centralBlood_id: string) {
     const getList = await this.receiverBloodModel.find({
@@ -323,7 +356,7 @@ export class ReceiverBloodService {
         localField: 'user_id',
         foreignField: 'user_id',
         justOne: true,
-      }, 
+      },
       {
         path: 'blood_id',
         model: 'Blood',
@@ -358,7 +391,7 @@ export class ReceiverBloodService {
         localField: 'user_id',
         foreignField: 'user_id',
         justOne: true,
-      }, 
+      },
       {
         path: 'blood_id',
         model: 'Blood',
@@ -389,7 +422,7 @@ export class ReceiverBloodService {
         localField: 'user_id',
         foreignField: 'user_id',
         justOne: true,
-      }, 
+      },
       {
         path: 'blood_id',
         model: 'Blood',
@@ -404,7 +437,7 @@ export class ReceiverBloodService {
         foreignField: 'centralBlood_id',
         justOne: true,
         select: 'centralBlood_id centralBlood_name centralBlood_address ',
-      },  
+      },
     ]);
     return getList;
   }

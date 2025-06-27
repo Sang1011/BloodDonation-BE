@@ -8,11 +8,12 @@ import { BloodsModule } from 'src/bloods/bloods.module';
 import { CentralBloodModule } from 'src/central_bloods/central_blood.module';
 import { UsersModule } from 'src/users/users.module';
 import { StorageModule } from 'src/storages/storage.module';
+import { NotificationService } from 'src/notifications/notification.service';
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: DonateBlood.name, schema: DonateBloodSchema },
-    ]), InforHealthsModule, BloodsModule, CentralBloodModule, UsersModule, StorageModule
+    ]), InforHealthsModule, BloodsModule, CentralBloodModule, UsersModule, StorageModule, NotificationService
   ],
   controllers: [DonateBloodController],
   providers: [DonateBloodService],
