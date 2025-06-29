@@ -19,6 +19,7 @@ import { getDateRangeFor, getTomorrow } from 'src/shared/utils/getTime';
 import moment from 'moment';
 import { NotificationService } from 'src/notifications/notification.service';
 import { NotificationTemplates } from 'src/shared/enums/notification.enum';
+import { checkDonateInterval } from 'src/shared/helpers/calculateDateIntervals.helper';
 
 @Injectable()
 export class DonateBloodService {
@@ -156,6 +157,13 @@ export class DonateBloodService {
     if (existingDonateBlood) {
       throw new BadRequestException("This user has already registered for blood donation on this date");
     }
+
+    // check thời gian nghỉ là 3 tháng (12 tuần) 
+    const isRestCompleted = checkDonateInterval(inforHealth.latest_donate, dto.date_donate);
+    if(!isRestCompleted){
+      throw new BadRequestException(`You must wait at least 3 months between donations`);
+    }
+
     const checked = await this.checkDuplicate(dto);
     if (!checked) {
       throw new BadRequestException("Invalid data provided");

@@ -158,16 +158,6 @@ export class NotificationService {
   }
 
   async create(createNotiDTO: CreateNotificationDto) {
-    const isExist = await this.notifyModel.findOne({
-      user_id: createNotiDTO.user_id,
-      title: createNotiDTO.title,
-    });
-    this.logger.log("Before check");
-
-    if (isExist) {
-      throw new BadRequestException("Notification already existed");
-    }
-
     const noti = new this.notifyModel(createNotiDTO);
     const saved = await noti.save();
 
@@ -257,20 +247,21 @@ export class NotificationService {
   }
 
   async markAsRead(user_id: string, notification_id: string) {
-  const updated = await this.notifyModel.findOneAndUpdate(
-    { notification_id, user_id },
-    { is_read: true },
-    { new: true }
-  );
-  if (!updated) throw new BadRequestException("Notification not found or not yours");
-  return updated;
-}
+    const updated = await this.notifyModel.findOneAndUpdate(
+      { notification_id, user_id },
+      { is_read: true },
+      { new: true }
+    );
+    if (!updated) throw new BadRequestException("Notification not found or not yours");
+    return updated;
+  }
 
-// async markAllAsRead(user_id: string) {
-//   const result = await this.notifyModel.updateMany(
-//     { user_id, is_read: false },
-//     { is_read: true }
-//   );
-//   return { updated: result.modifiedCount };
-// }
+  // thêm controller đi
+  async markAllAsRead(user_id: string) {
+    const result = await this.notifyModel.updateMany(
+      { user_id, is_read: false },
+      { is_read: true }
+    );
+    return { updated: result.modifiedCount };
+  }
 }

@@ -232,14 +232,14 @@ export class ReceiverBloodService {
   }
 
   async cancelSchedule(user: IUser, id: string) {
-    const existingDonateBlood = await this.receiverBloodModel.findOne({ donate_id: id });
+    const existingDonateBlood = await this.receiverBloodModel.findOne({ receiver_id: id });
     if (!existingDonateBlood) {
       throw new BadRequestException("Donate Blood record not found");
     }
     const dto: Partial<UpdateReceiveBloodDto> = {
       status_receive: Status.CANCELLED
     }
-    const updated = await this.receiverBloodModel.findOneAndUpdate({ donate_id: id }, dto, { new: true });
+    const updated = await this.receiverBloodModel.findOneAndUpdate({ receiver_id: id }, dto, { new: true });
     if (!updated) {
       throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
     }

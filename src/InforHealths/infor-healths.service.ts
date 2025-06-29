@@ -274,8 +274,8 @@ export class InforHealthService {
     async findByUserId(user_id: string) {
         const health = await this.inforHealthModel.findOne({ user_id: user_id });
         if (!health) throw new BadRequestException("Health information not found");
-        const { infor_health, blood_id } = health;
-        return { infor_health, blood_id };
+        const { infor_health, blood_id, latest_donate } = health;
+        return { infor_health, blood_id, latest_donate };
     }
 
     async findInfoHealthByUserId(user_id: string) {
