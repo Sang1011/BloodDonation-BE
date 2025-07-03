@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import aqp, { AqpResult } from "api-query-params";
 import { Model } from "mongoose";
-import { News } from "./schemas/News.schema";
+import { News } from "./schemas/news.schema";
 import { CreateNewsDto } from "./dtos/requests/create.request";
 import { UpdateNewsDto } from "./dtos/requests/update.request";
 
