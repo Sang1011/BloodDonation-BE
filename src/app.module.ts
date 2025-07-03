@@ -49,7 +49,7 @@ import { RoleGuard } from './auth/guards/role.guard';
     InforHealthsModule,
     CentralBloodModule,
     StorageModule,
-    CentralStorageModule,
+    // CentralStorageModule,
     ReceiverBloodModule, 
     BloodExportModule,
     DonateBloodModule,
