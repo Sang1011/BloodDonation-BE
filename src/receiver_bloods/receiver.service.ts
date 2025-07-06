@@ -137,9 +137,25 @@ export class ReceiverBloodService {
     if (!checked) {
       throw new BadRequestException("Invalid data provided");
     }
-    if (new Date(dto.date_receiver) < new Date()) {
+    if (new Date(dto.date_receiver) <= new Date()) {
       throw new BadRequestException("Date must be in the future");
     }
+
+    const inforHealth = await this.inforHealthsService.findByUserId(user.user_id);
+
+    if (!inforHealth) {
+      throw new NotFoundException("InforHealth not found");
+    }
+    // nếu đang có đơn hiến máu thì không được đăng ký nhận
+    if (inforHealth.is_regist_donate) {
+      throw new BadRequestException("You cannot register for blood reception while you have an active blood request");
+    }
+
+    // nếu đang có đơn nhận máu thì không được đăng ký nhận
+    if (inforHealth.is_regist_receive) {
+      throw new BadRequestException("You cannot register for blood reception while you have an active blood request");
+    }
+
     const created = await new this.receiverBloodModel({ ...dto, user_id: user.user_id }).populate([
       {
         path: 'user_id',
@@ -172,6 +188,7 @@ export class ReceiverBloodService {
         type: NotificationTemplates.BOOKING_RECEIVE_SUCCESS.type,
       });
     }
+    await this.inforHealthsService.updateForReceive(user.user_id, true);
     return await created.save();
   }
 
@@ -228,7 +245,10 @@ export class ReceiverBloodService {
     if (!updated) {
       throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
     }
-    return updated.save();
+    if (updated.status_receive === Status.COMPLETED || updated.status_receive === Status.CANCELLED) {
+      await this.inforHealthsService.updateForReceive(existingReceiverBlood.user_id, false);
+      return updated.save();
+    }
   }
 
   async cancelSchedule(user: IUser, id: string) {
@@ -243,6 +263,7 @@ export class ReceiverBloodService {
     if (!updated) {
       throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
     }
+    await this.inforHealthsService.updateForDonate(user.user_id, false);
     if (user.role = "MEMBER") {
       await this.notifyService.create({
         user_id: user.user_id,

@@ -44,6 +44,12 @@ export class InforHealth extends BaseSchema {
 
     @Prop()
     img_health: string;
+
+    @Prop({default: false})
+    is_regist_donate: boolean;
+
+    @Prop({default: false})
+    is_regist_receive: boolean;
 }
 
 export const InforHealthSchema = SchemaFactory.createForClass(InforHealth);

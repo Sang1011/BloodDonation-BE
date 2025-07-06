@@ -148,7 +148,7 @@ export class DonateBloodService {
       throw new NotFoundException("InforHealth not found");
     }
 
-    if (new Date(dto.date_donate) < new Date()) {
+    if (new Date(dto.date_donate) <= new Date()) {
       throw new BadRequestException("Date must be in the future");
     }
 
@@ -159,9 +159,20 @@ export class DonateBloodService {
     }
 
     // check thời gian nghỉ là 3 tháng (12 tuần) 
+    dto.date_donate = new Date(dto.date_donate);
     const isRestCompleted = checkDonateInterval(inforHealth.latest_donate, dto.date_donate);
-    if(!isRestCompleted){
+    if (!isRestCompleted) {
       throw new BadRequestException(`You must wait at least 3 months between donations`);
+    }
+
+    // nếu đang có đơn hiến máu thì không được đăng ký hiến
+    if (inforHealth.is_regist_donate) {
+      throw new BadRequestException("You cannot register for blood donation while you have an active blood request");
+    }
+
+    // nếu đang có đơn nhận máu thì không được đăng ký hiến
+    if (inforHealth.is_regist_receive) {
+      throw new BadRequestException("You cannot register for blood donation while you have an active blood request");
     }
 
     const checked = await this.checkDuplicate(dto);
@@ -206,6 +217,7 @@ export class DonateBloodService {
         type: NotificationTemplates.BOOKING_DONATE_SUCCESS.type,
       });
     }
+    await this.inforHealthsService.updateForDonate(user.user_id, true);
     return created.save();
   }
 
@@ -241,6 +253,10 @@ export class DonateBloodService {
     if (!updated) {
       throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
     }
+    const inforHealth = await this.inforHealthsService.findById(updated.infor_health);
+    if (!inforHealth) {
+      throw new NotFoundException("InforHealth not found");
+    }
     if (dto.status_donate === Status.COMPLETED) {
       const storage: CreateStorageDto = {
         donate_id: id,
@@ -258,6 +274,9 @@ export class DonateBloodService {
       } else {
         await this.storageService.create(storage);
       }
+      await this.inforHealthsService.updateForDonate(inforHealth.user_id, false);
+    } else if (dto.status_donate === Status.CANCELLED) {
+      await this.inforHealthsService.updateForDonate(inforHealth.user_id, false);
     }
     return updated;
   }
@@ -270,6 +289,10 @@ export class DonateBloodService {
     const updated = await this.donateBloodModel.findOneAndUpdate({ donate_id: id }, dto, { new: true });
     if (!updated) {
       throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
+    }
+    const inforHealth = await this.inforHealthsService.findById(updated.infor_health);
+    if (!inforHealth) {
+      throw new NotFoundException("InforHealth not found");
     }
     if (dto.status_donate === Status.COMPLETED) {
       const storage: CreateStorageDto = {
@@ -288,6 +311,9 @@ export class DonateBloodService {
       } else {
         await this.storageService.create(storage);
       }
+      await this.inforHealthsService.updateForDonate(inforHealth.user_id, false);
+    } else if (dto.status_donate === Status.CANCELLED) {
+      await this.inforHealthsService.updateForDonate(inforHealth.user_id, false);
     }
     return updated;
   }
@@ -304,6 +330,7 @@ export class DonateBloodService {
     if (!updated) {
       throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
     }
+    await this.inforHealthsService.updateForDonate(user.user_id, false);
     if (user.role = "MEMBER") {
       await this.notifyService.create({
         user_id: user.user_id,
