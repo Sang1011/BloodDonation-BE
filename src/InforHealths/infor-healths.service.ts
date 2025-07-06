@@ -275,7 +275,7 @@ export class InforHealthService {
         const health = await this.inforHealthModel.findOne({ user_id: user_id });
         if (!health) throw new BadRequestException("Health information not found");
         const { infor_health, blood_id, latest_donate } = health;
-        return { infor_health, blood_id, latest_donate };
+        return { infor_health, blood_id, latest_donate, is_regist_donate: health.is_regist_donate, is_regist_receive: health.is_regist_receive };
     }
 
     async findInfoHealthByUserId(user_id: string) {
@@ -308,6 +308,23 @@ export class InforHealthService {
     });
     }
 
+    async updateForDonate(user_id: string, is_regist_donate: boolean) {
+        const health = await this.inforHealthModel.findOne({ user_id: user_id });
+        if (!health) {
+            throw new BadRequestException(MESSAGES.USERS.USER_NOT_FOUND);
+        }
+        health.is_regist_donate = is_regist_donate;
+        return health.save();
+    }
+
+    async updateForReceive(user_id: string, is_regist_receive: boolean) {
+        const health = await this.inforHealthModel.findOne({ user_id: user_id });
+        if (!health) {
+            throw new BadRequestException(MESSAGES.USERS.USER_NOT_FOUND);
+        }
+        health.is_regist_receive = is_regist_receive;
+        return health.save();
+    }
     async findByEmail(email: string) {
         const user = await this.userServices.findOneByEmail(email);
         if (!user) {
