@@ -25,21 +25,21 @@ export class InforHealthService {
         const { user_id, blood_id } = infoHealth;
         const user = await this.userServices.findOne(user_id);
         if (!user) {
-            throw new BadRequestException(MESSAGES.USERS.USER_NOT_FOUND);
+            throw new BadRequestException("Không tìm thấy người dùng");
         }
         const blood = await this.bloodServices.findOne(blood_id);
         if (!blood) {
-            throw new BadRequestException("Blood not found");
+            throw new BadRequestException("Không tìm thấy nhóm máu");
         }
         const health = await this.inforHealthModel.findOne({ user_id: user_id });
         
         if(health){
-            throw new BadRequestException("Health information already exists for this user");
+            throw new BadRequestException("Người dùng này đã có thông tin sức khỏe");
         }
         const latest_donate = infoHealth.latest_donate;
         
         if (new Date(latest_donate) > new Date()) {
-            throw new BadRequestException("Not choose day in the future");
+            throw new BadRequestException("Không được chọn ngày trong tương lai");
         }
 
         let imgUrl = null;
@@ -62,19 +62,19 @@ export class InforHealthService {
        
         const health = await this.inforHealthModel.findOne({ user_id: user.user_id });
         if(health){
-            throw new BadRequestException("Health information already exists for this user");
+            throw new BadRequestException("Người dùng này đã có thông tin sức khỏe");
         }
         
         const blood = await this.bloodServices.findOne(infoHealth.blood_id);
         if (!blood) {
-            throw new BadRequestException("Blood not found");
+            throw new BadRequestException("Không tìm thấy nhóm máu");
         }
         
         
         const latest_donate = infoHealth.latest_donate;
         
         if (new Date(latest_donate) > new Date()) {
-            throw new BadRequestException("Not choose day in the future");
+            throw new BadRequestException("Không được chọn ngày trong tương lai");
         }
 
         let imgUrl = null;
@@ -154,7 +154,7 @@ export class InforHealthService {
                 },
             ]);
 
-        if (!health) throw new BadRequestException("Health information not found");
+        if (!health) throw new BadRequestException("Không tìm thấy thông tin sức khỏe");
 
         return health;
     }
@@ -162,7 +162,7 @@ export class InforHealthService {
     async findById(id: string) {
         const health = await this.inforHealthModel
             .findOne({ infor_health: id })
-        if (!health) throw new BadRequestException("Health information not found");
+        if (!health) throw new BadRequestException("Không tìm thấy thông tin sức khỏe");
 
         return health;
     }
@@ -170,24 +170,24 @@ export class InforHealthService {
       async update(id: string, updateHealthDTO: UpdateInforHealthDto, file?: Express.Multer.File) {
         const health = await this.inforHealthModel.findOne({ infor_health: id });
         if (!health) {
-          throw new BadRequestException("Health information not found");
+          throw new BadRequestException("Không tìm thấy thông tin sức khỏe");
         }
       
         const { user_id, blood_id } = updateHealthDTO;
       
         const user = await this.userServices.findOne(user_id);
         if (!user) {
-          throw new BadRequestException(MESSAGES.USERS.USER_NOT_FOUND);
+          throw new BadRequestException("Không tìm thấy người dùng");
         }
       
         const blood = await this.bloodServices.findOne(blood_id);
         if (!blood) {
-          throw new BadRequestException("Blood not found");
+          throw new BadRequestException("Không tìm thấy nhóm máu");
         }
 
         const latest_donate = updateHealthDTO.latest_donate;
         if (new Date(latest_donate) > new Date()) {
-            throw new BadRequestException("Not choose day in the future");
+            throw new BadRequestException("Không được chọn ngày trong tương lai");
         }
         let imgUrl = null;
         if (file) {
@@ -221,18 +221,18 @@ export class InforHealthService {
         const health = await this.findByUserId(user.user_id);
         console.log(health);
         if (!health) {
-          throw new BadRequestException("Health information not found");
+          throw new BadRequestException("Không tìm thấy thông tin sức khỏe");
         }
 
         const { blood_id } = updateHealthDTO;      
         const blood = await this.bloodServices.findOne(blood_id);
         if (!blood) {
-          throw new BadRequestException("Blood not found");
+          throw new BadRequestException("Không tìm thấy nhóm máu");
         }
 
         const latest_donate = updateHealthDTO.latest_donate;
         if (new Date(latest_donate) > new Date()) {
-            throw new BadRequestException("Not choose day in the future");
+            throw new BadRequestException("Không được chọn ngày trong tương lai");
         }
         let imgUrl = null;
         if (file) {
@@ -267,13 +267,13 @@ export class InforHealthService {
 
     async remove(id: string) {
         const deleted = await this.inforHealthModel.softDelete(id);
-        if (!deleted) throw new BadRequestException("Health information not found");
+        if (!deleted) throw new BadRequestException("Không tìm thấy thông tin sức khỏe");
         return { deleted: deleted.deletedCount || 0 };
     }
 
     async findByUserId(user_id: string) {
         const health = await this.inforHealthModel.findOne({ user_id: user_id });
-        if (!health) throw new BadRequestException("Health information not found");
+        if (!health) throw new BadRequestException("Không tìm thấy thông tin sức khỏe");
         const { infor_health, blood_id, latest_donate } = health;
         return { infor_health, blood_id, latest_donate, is_regist_donate: health.is_regist_donate, is_regist_receive: health.is_regist_receive };
     }
@@ -298,7 +298,7 @@ export class InforHealthService {
                 select: 'blood_id',
             },
         ]);
-        if (!health) throw new BadRequestException("Health information not found");
+        if (!health) throw new BadRequestException("Không tìm thấy thông tin sức khỏe");
         return health;
     }
 
@@ -311,7 +311,7 @@ export class InforHealthService {
     async updateForDonate(user_id: string, is_regist_donate: boolean) {
         const health = await this.inforHealthModel.findOne({ user_id: user_id });
         if (!health) {
-            throw new BadRequestException(MESSAGES.USERS.USER_NOT_FOUND);
+            throw new BadRequestException("Không tìm thấy người dùng");
         }
         health.is_regist_donate = is_regist_donate;
         return health.save();
@@ -320,7 +320,7 @@ export class InforHealthService {
     async updateForReceive(user_id: string, is_regist_receive: boolean) {
         const health = await this.inforHealthModel.findOne({ user_id: user_id });
         if (!health) {
-            throw new BadRequestException(MESSAGES.USERS.USER_NOT_FOUND);
+            throw new BadRequestException("Không tìm thấy người dùng");
         }
         health.is_regist_receive = is_regist_receive;
         return health.save();
@@ -328,7 +328,7 @@ export class InforHealthService {
     async findByEmail(email: string) {
         const user = await this.userServices.findOneByEmail(email);
         if (!user) {
-            throw new BadRequestException(MESSAGES.USERS.USER_NOT_FOUND);
+            throw new BadRequestException("Không tìm thấy người dùng");
         }
         return this.findInfoHealthByUserId(user.user_id);
     }

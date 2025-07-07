@@ -19,12 +19,12 @@ export class BloodsService {
   async create(blood: BloodDto) {
     const { blood_type, rh } = blood;
     if (!blood_type || !rh) {
-    throw new BadRequestException('Blood type and Rh factor are required');
+    throw new BadRequestException('Cần nhập nhóm máu và yếu tố Rh');
   }
     const bloodTypeExists = await this.bloodTypesService.findByType(blood_type);
     const rhExists = await this.rhsService.findByType(rh);
     if (!bloodTypeExists || !rhExists) {
-      throw new NotFoundException('Invalid blood type or Rh factor');
+      throw new NotFoundException('Nhóm máu hoặc yếu tố Rh không hợp lệ');
     }
     const existingBlood = await this.bloodModel.findOne({
       blood_type_id: bloodTypeExists.blood_type_id,
@@ -32,7 +32,7 @@ export class BloodsService {
     });
 
     if (existingBlood !== null) {
-      throw new BadRequestException('This blood already exists');
+      throw new BadRequestException('Nhóm máu này đã tồn tại');
     }
     let count = 1;
     const countDocuments = await this.bloodModel.countDocuments();
@@ -90,7 +90,7 @@ export class BloodsService {
 
   async findOne(id: string) {
     if (!id) {
-      throw new BadRequestException('Blood ID is required');
+      throw new BadRequestException('Cần nhập mã nhóm máu');
     }
     return this.bloodModel.findOne({ blood_id: id }).populate([
       {
@@ -114,7 +114,7 @@ export class BloodsService {
   async softRemove(id: string) {
     const deleted = await this.bloodModel.softDelete(id);
     if (!deleted) {
-      throw new NotFoundException("Blood not found");
+      throw new NotFoundException("Không tìm thấy nhóm máu");
     }
     return { deleted: deleted.modifiedCount };
   }
