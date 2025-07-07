@@ -17,7 +17,7 @@ export class BloodTypesService {
     async create(bloodType: BloodTypeDto) {
         const findBloodType = await this.bloodTypeModel.findOne({ blood_name: bloodType.blood_name });
         if (findBloodType) {
-            throw new BadRequestException(MESSAGES.BLOOD_TYPE.BLOOD_TYPE_EXIST);
+            throw new BadRequestException("Nhóm máu đã tồn tại");
         }
         const countDocument = await this.bloodTypeModel.countDocuments();
 
@@ -65,7 +65,7 @@ export class BloodTypesService {
     async softRemove(id: number) {
         const deleted = await this.bloodTypeModel.softDelete(id);
         if (!deleted) {
-            throw new NotFoundException("Blood type not found");
+            throw new NotFoundException("Không tìm thấy nhóm máu");
         }
         return { deleted: deleted.modifiedCount };
     }
