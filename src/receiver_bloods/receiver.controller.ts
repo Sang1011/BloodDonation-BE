@@ -32,10 +32,10 @@ import { IUser } from 'src/shared/interfaces/user.interface';
 export class ReceiveBloodController {
   constructor(private readonly receiveBloodService: ReceiverBloodService) { }
 
-  @ApiOperation({ summary: 'Get all receive blood records with pagination and filters' })
+  @ApiOperation({ summary: 'Lấy danh sách tất cả các bản ghi nhận máu' })
   @ApiResponse({
     status: 200,
-    description: 'Fetched receive blood records successfully',
+    description: 'Lấy danh sách tất cả các bản ghi nhận máu thành công',
     type: GetAllReceiveBloodResponseDto,
   })
   @ResponseMessage(MESSAGES.RECEIVE_BLOOD.RETRIEVE_ALL_SUCCESS)
@@ -46,10 +46,10 @@ export class ReceiveBloodController {
     return await this.receiveBloodService.findAll(+query.current, +query.pageSize, query.qs);
   }
 
-  @ApiOperation({ summary: 'Get receive blood record by ID' })
+  @ApiOperation({ summary: 'Lấy thông tin chi tiết một bản ghi nhận máu' })
   @ApiResponse({
     status: 200,
-    description: 'Fetched receive blood record successfully',
+    description: 'Lấy thông tin chi tiết một bản ghi nhận máu thành công',
     type: GetReceiveBloodResponseDto,
   })
 

@@ -53,7 +53,7 @@ export class WorkingHoursService {
 
   async findOne(id: string) {
     const workingHours = await this.workingHoursModel.findOne({working_id: id})
-    if (!workingHours) throw new NotFoundException("Working hours not found");
+    if (!workingHours) throw new NotFoundException("Giờ làm việc không tồn tại");
     return workingHours;
   }
 
@@ -65,7 +65,7 @@ export class WorkingHoursService {
     );
 
     if (!updated) {
-      throw new NotFoundException('Working hours not found');
+      throw new NotFoundException('Giờ làm việc không tồn tại');
     }
 
     return updated;
@@ -74,12 +74,12 @@ export class WorkingHoursService {
   async remove(id: string) {
   const relatedCount = await this.centralBloodModel.countDocuments({ working_id: id });
   if (relatedCount > 0) {
-    throw new ConflictException('Cannot delete working hours because it is referenced in central blood records.');
+    throw new ConflictException('Không thể xóa giờ làm việc vì nó đang được tham chiếu trong các bản ghi trung tâm máu.');
   }
 
   const deleted = await this.workingHoursModel.deleteOne({ working_id: id });
   if (deleted.deletedCount === 0) {
-    throw new NotFoundException("Working hours not found");
+    throw new NotFoundException("Giờ làm việc không tồn tại");
   }
 
   return { deleted: deleted.deletedCount };
@@ -89,7 +89,7 @@ async softRemove(id: string) {
   const deleted = await this.workingHoursModel.softDelete(id);
   await this.workingHoursModel.findOneAndUpdate({ working_id: id }, { is_open: false });
   if (!deleted) {
-    throw new NotFoundException("Working hours not found");
+    throw new NotFoundException("Giờ làm việc không tồn tại");
   }
   return { deleted: deleted };
 }
@@ -98,14 +98,14 @@ async restore(id: string) {
   const restored = await this.workingHoursModel.restore(id);
   await this.workingHoursModel.findOneAndUpdate({ working_id: id }, { is_open: true });
   if (!restored) {
-    throw new NotFoundException("Working hours not found");
+    throw new NotFoundException("Giờ làm việc không tồn tại");
   }
   return { restored: restored };
 }
 
 async findCentralByWorkingDay(date: Date) {
   if (date < new Date() ) {
-    throw new BadRequestException("Date must be in the future");
+    throw new BadRequestException("Ngày phải ở tương lai");
   }
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const dateOfWeek = date.getUTCDay() - 1;  // 0 is Sunday, 1 is Monday, etc.
@@ -121,7 +121,7 @@ async findCentralByWorkingDay(date: Date) {
     });
 
   if (!workingHours || !workingHours.centralBlood_id) {
-    throw new NotFoundException("There is no medical facility scheduled to be open on " + dayOfWeek);
+    throw new NotFoundException("Không tìm thấy giờ làm việc cho " + dayOfWeek);
   }
 
   return {

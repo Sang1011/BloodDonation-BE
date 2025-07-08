@@ -76,7 +76,7 @@ export class RhsService {
     async softRemove(id: number) {
         const deleted = await this.rhModel.softDelete(id);
         if (!deleted) {
-            throw new NotFoundException("Rh not found");
+            throw new NotFoundException(MESSAGES.RH.RH_NOT_FOUND);
         }
         return { deleted: deleted.modifiedCount };
     }

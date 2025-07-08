@@ -27,7 +27,7 @@ export class RoleService {
 
   async findByName(role_name: string) {
     const roleFound = await this.roleModel.findOne({ role_name: role_name }).exec();
-    if (!roleFound) throw new NotFoundException(`Role with name ${role_name} not found`);
+    if (!roleFound) throw new NotFoundException(`Vai trò với tên ${role_name} không tồn tại`);
     return roleFound;
   }
 
@@ -57,14 +57,14 @@ export class RoleService {
   }
   async findById(role_id: string): Promise<Role> {
     const role = await this.roleModel.findOne({ role_id }).exec();
-    if (!role) throw new NotFoundException(`Role with id ${role_id} not found`);
+    if (!role) throw new NotFoundException(`Vai trò với id ${role_id} không tồn tại`);
     return role;
   }
 
   async softRemove(id: string) {
     const deleted = await this.roleModel.softDelete(id);
     if (!deleted) {
-      throw new NotFoundException("Role not found");
+      throw new NotFoundException(MESSAGES.ROLE.ROLE_NOT_FOUND);
     }
     return { deleted: deleted.modifiedCount };
   }
