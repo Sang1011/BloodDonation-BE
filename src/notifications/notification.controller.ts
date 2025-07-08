@@ -57,15 +57,6 @@ export class NotificationController {
         return this.notificationService.findAll(+query.current, +query.pageSize, query.qs);
     }
 
-    @Get(":id")
-    @ApiBearerAuth('access-token')
-    @ApiSecurity('access-token')
-    @ResponseMessage("Fetch a Noti by id")
-    @ApiOperation({ summary: 'Fetch a Noti by id' })
-    findOne(@Param("id") id: string) {
-        return this.notificationService.findOne(id);
-    }
-
     @Roles('ADMIN')
     @Delete(":id")
     @ApiBearerAuth('access-token')
@@ -79,21 +70,28 @@ export class NotificationController {
     @Patch('mark-read/:id')
     @ApiBearerAuth('access-token')
     @ApiSecurity('access-token')
-    // @UseGuards(AuthGuard('jwt'))
     @ResponseMessage("Mark notification as read")
     async markAsRead(@User() user: any, @Param('id') id: string) {
         return this.notificationService.markAsRead(user.user_id, id);
     }
 
-    // @Patch('mark-all-read')
-    // @ApiBearerAuth('access-token')
-    // @ApiSecurity('access-token')
-    // @UseGuards(AuthGuard('jwt'))
-    // @ResponseMessage("Mark all notifications as read")
-    // async markAllAsRead(@User() user: any, @Req() req: any) {
-    //     if (!user || !user.user_id) {
-    //     throw new BadRequestException('User not authenticated');
-    // }
-    //     return this.notificationService.markAllAsRead(user.user_id);
-    // }
+    @Patch('mark-all-read')
+    @ApiBearerAuth('access-token')
+    @ApiSecurity('access-token')
+    @ResponseMessage("Mark all notifications as read")
+    async markAllAsRead(@User() user: any, @Req() req: any) {
+        if (!user || !user.user_id) {
+        throw new BadRequestException('User not authenticated');
+    }
+        return this.notificationService.markAllAsRead(user.user_id);
+    }
+
+    @Get(":id")
+    @ApiBearerAuth('access-token')
+    @ApiSecurity('access-token')
+    @ResponseMessage("Fetch a Noti by id")
+    @ApiOperation({ summary: 'Fetch a Noti by id' })
+    findOne(@Param("id") id: string) {
+        return this.notificationService.findOne(id);
+    }
 }
