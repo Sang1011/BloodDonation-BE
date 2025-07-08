@@ -19,7 +19,6 @@ export class StorageService {
      * Update 
   */
   async create(dto: CreateStorageDto) {
-    // 
     const created = new this.storageModel(dto);
     return created.save();
   }
@@ -123,7 +122,7 @@ export class StorageService {
           select: 'centralBlood_id centralBlood_name centralBlood_address',
         },
       ])
-    if (!cb) throw new NotFoundException("Storage not found");
+    if (!cb) throw new NotFoundException("Không tìm thấy storage");
     return cb;
   }
 
@@ -135,7 +134,7 @@ export class StorageService {
       );
   
       if (!updated) {
-        throw new NotFoundException('Storage not found');
+        throw new NotFoundException('Không tìm thấy storage');
       }
   
       return updated;
@@ -143,7 +142,7 @@ export class StorageService {
 
   async remove(id: string) {
     const deleted = await this.storageModel.deleteOne({storage_id: id});
-    if (!deleted) throw new NotFoundException("Storage not found");
+    if (!deleted) throw new NotFoundException("Không tìm thấy storage");
     return { deleted: deleted.deletedCount || 0 };
   }
 

@@ -107,7 +107,7 @@ export class ReceiverBloodService {
       },
     ]);
     if (!receiverBlood) {
-      throw new NotFoundException("Receiver Blood record not found");
+      throw new NotFoundException("Không tìm thấy bản ghi nhận máu với ID đã cung cấp");
     }
     return receiverBlood;
   }
@@ -131,29 +131,29 @@ export class ReceiverBloodService {
   async create(user: IUser, dto: CreateReceiveBloodDto) {
     const userFound = await this.usersService.findOne(user.user_id);
     if (!userFound) {
-      throw new NotFoundException("User not found");
+      throw new NotFoundException("Người dùng không tồn tại");
     }
     const checked = await this.checkDuplicate(dto);
     if (!checked) {
-      throw new BadRequestException("Invalid data provided");
+      throw new BadRequestException("Dữ liệu không hợp lệ");
     }
     if (new Date(dto.date_receiver) <= new Date()) {
-      throw new BadRequestException("Date must be in the future");
+      throw new BadRequestException("Ngày phải ở tương lai");
     }
 
     const inforHealth = await this.inforHealthsService.findByUserId(user.user_id);
 
     if (!inforHealth) {
-      throw new NotFoundException("InforHealth not found");
+      throw new NotFoundException("Không tìm thấy thông tin sức khỏe");
     }
     // nếu đang có đơn hiến máu thì không được đăng ký nhận
     if (inforHealth.is_regist_donate) {
-      throw new BadRequestException("You cannot register for blood reception while you have an active blood request");
+      throw new BadRequestException("Bạn không thể đăng ký nhận máu khi đang có đơn hiến máu");
     }
 
     // nếu đang có đơn nhận máu thì không được đăng ký nhận
     if (inforHealth.is_regist_receive) {
-      throw new BadRequestException("You cannot register for blood reception while you have an active blood request");
+      throw new BadRequestException("Bạn không thể đăng ký nhận máu khi đang có đơn nhận máu");
     }
 
     const created = await new this.receiverBloodModel({ ...dto, user_id: user.user_id }).populate([
@@ -195,11 +195,11 @@ export class ReceiverBloodService {
   async checkDuplicate(dto: CreateReceiveBloodDto) {
     const blood = await this.bloodsService.findOne(dto.blood_id);
     if (!blood) {
-      throw new NotFoundException("Blood not found");
+      throw new NotFoundException("Không tìm thấy máu với ID đã cung cấp");
     }
     const centralBlood = await this.centralBloodService.findOne(dto.centralBlood_id);
     if (!centralBlood) {
-      throw new NotFoundException("Central Blood not found");
+      throw new NotFoundException("Không tìm thấy trung tâm máu với ID đã cung cấp");
     }
     return true;
   }
@@ -207,16 +207,16 @@ export class ReceiverBloodService {
   async update(id: string, dto: UpdateReceiveBloodDto) {
     const existingReceiverBlood = await this.receiverBloodModel.findOne({ receiver_id: id });
     if (!existingReceiverBlood) {
-      throw new BadRequestException("Receiver Blood record not found");
+      throw new BadRequestException("Không tìm thấy bản ghi nhận máu với ID đã cung cấp");
     }
     if (dto.blood_id) {
       const blood = await this.bloodsService.findOne(dto.blood_id);
       if (!blood) {
-        throw new NotFoundException("Blood not found");
+        throw new NotFoundException("Không tìm thấy máu với ID đã cung cấp");
       }
     }
-    if (new Date(dto.date_receiver) < new Date()) {
-      throw new BadRequestException("Date must be in the future");
+    if (new Date(dto.date_receiver) <= new Date()) {
+      throw new BadRequestException("Ngày phải ở tương lai");
     }
     const updated = await this.receiverBloodModel.findOneAndUpdate({ receiver_id: id }, dto).populate([
       {
@@ -254,7 +254,7 @@ export class ReceiverBloodService {
   async cancelSchedule(user: IUser, id: string) {
     const existingDonateBlood = await this.receiverBloodModel.findOne({ receiver_id: id });
     if (!existingDonateBlood) {
-      throw new BadRequestException("Donate Blood record not found");
+      throw new BadRequestException("Không tìm thấy bản ghi nhận máu với ID đã cung cấp");
     }
     const dto: Partial<UpdateReceiveBloodDto> = {
       status_receive: Status.CANCELLED
@@ -278,7 +278,7 @@ export class ReceiverBloodService {
   async remove(id: string) {
     const existingReceiverBlood = await this.receiverBloodModel.findOne({ receiver_id: id });
     if (!existingReceiverBlood) {
-      throw new NotFoundException("Receiver Blood record not found");
+      throw new NotFoundException("Không tìm thấy bản ghi nhận máu với ID đã cung cấp");
     }
     const deleted = await this.receiverBloodModel.deleteOne({ receiver_id: id });
     if (!deleted) {
@@ -312,32 +312,6 @@ export class ReceiverBloodService {
     }
     return result;
   }
-  // async findListReceiveComplete() {
-  //   const getList = await this.receiverBloodModel.find({
-  //     status_receiver: Status.COMPLETED
-  //   })
-  //   const inforHealthIds = getList.map(d => d.infor_health?.toString());
-  // const inforHealths = await this.inforHealthsService.findByListId(inforHealthIds);
-
-  // const result = [];
-
-  // // for (const rv of getList) {
-  // //   const matchedInfor = inforHealths.find(
-  // //     infor => infor.infor_health.toString() === rv.infor_health?.toString()
-  // //   );
-
-  //   if (matchedInfor) {
-  //     result.push({
-  //       user_id: matchedInfor.user_id,
-  //       requestType: rv.type || 'DEFAULT',
-  //     });
-  //   }
-  // }
-
-  //  return null;
-  // }
-
-
 
   async findListReceiveComplete() {
     const getList = await this.receiverBloodModel.find({
@@ -347,11 +321,6 @@ export class ReceiverBloodService {
     const users = await this.usersService.findByListId(userIds);
 
     const result = [];
-
-    // for (const rv of getList) {
-    //   const matchedInfor = inforHealths.find(
-    //     infor => infor.infor_health.toString() === rv.infor_health?.toString()
-    //   );
 
     for (const rv of getList) {
       const matchedInfor = users.find(
@@ -463,8 +432,5 @@ export class ReceiverBloodService {
     ]);
     return getList;
   }
-
-
-
 }
 

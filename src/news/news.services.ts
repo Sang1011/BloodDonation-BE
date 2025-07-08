@@ -14,7 +14,7 @@ export class NewsService {
     async create(news: CreateNewsDto) {
         const findNews = await this.newsModel.findOne({ title: news.title });
         if (findNews) {
-            throw new BadRequestException("Bản tin với tiêu đề này đã tồn tại");
+            throw new BadRequestException("Tin tức này đã tồn tại");
         }
         const countDocument = await this.newsModel.countDocuments();
 
@@ -52,6 +52,7 @@ export class NewsService {
         const findNews = await this.newsModel.findOne({ news_id: id });
         if (!findNews) {
             throw new BadRequestException("Không tìm thấy bản tin");
+            throw new BadRequestException("Tin tức không tồn tại");
         }
         return findNews;
     }
@@ -65,6 +66,7 @@ export class NewsService {
 
         if (!updated) {
             throw new BadRequestException("Không tìm thấy bản tin");
+            throw new BadRequestException("Tin tức không tồn tại");
         }
 
         return updated;
@@ -74,6 +76,7 @@ export class NewsService {
     async remove(id: string) {
         const deleted = await this.newsModel.deleteOne({ news_id: id });
         if (!deleted) throw new BadRequestException("Không tìm thấy bản tin");
+        if (!deleted) throw new BadRequestException("Tin tức không tồn tại");
         return { deleted: deleted.deletedCount || 0 };
     }
 }

@@ -10,7 +10,7 @@ export class UploadService {
 
   async uploadToCloudinary(userId: string, file: Express.Multer.File): Promise<UploadApiResponse> {
     if (!file || !file.buffer) {
-      throw new Error('File is required for upload');
+      throw new Error('Bắt buộc phải cung cấp tệp để tải lên');
     }
 
     return new Promise((resolve, reject) => {
