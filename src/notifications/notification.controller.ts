@@ -27,16 +27,6 @@ export class NotificationController {
     async create(@Body() createNotiDto: CreateNotificationDto) {
         return this.notificationService.create(createNotiDto);
     }
-
-    @Patch(':id')
-    @Roles('ADMIN')
-    @ApiBearerAuth('access-token')
-    @ApiSecurity('access-token')
-    @ApiOperation({ summary: 'Update a notification' })
-    @ResponseMessage("Update a notification")
-    async update(@Param('id') id: string, @Body() updateNotiDto: UpdateNotificationDto) {
-        return this.notificationService.update(id, updateNotiDto);
-    }
    
     @Post("/broadcast")
     @Roles('ADMIN')
@@ -56,6 +46,15 @@ export class NotificationController {
     findAll(@Query() query: FindAllQueryDTO) {
         return this.notificationService.findAll(+query.current, +query.pageSize, query.qs);
     }
+    
+    @Get(":id")
+    @ApiBearerAuth('access-token')
+    @ApiSecurity('access-token')
+    @ResponseMessage("Fetch a Noti by id")
+    @ApiOperation({ summary: 'Fetch a Noti by id' })
+    findOne(@Param("id") id: string) {
+        return this.notificationService.findOne(id);
+    }
 
     @Roles('ADMIN')
     @Delete(":id")
@@ -67,31 +66,34 @@ export class NotificationController {
         return this.notificationService.remove(id);
     }
 
-    @Patch('mark-read/:id')
-    @ApiBearerAuth('access-token')
-    @ApiSecurity('access-token')
-    @ResponseMessage("Mark notification as read")
-    async markAsRead(@User() user: any, @Param('id') id: string) {
-        return this.notificationService.markAsRead(user.user_id, id);
-    }
-
     @Patch('mark-read-all')
     @ApiBearerAuth('access-token')
     @ApiSecurity('access-token')
     @ResponseMessage("Mark all notifications as read")
-    async markAllAsRead(@User() user: any, @Req() req: any) {
+    async markAllAsRead(@User() user: IUser) {
+        console.log("Mark all");
         if (!user || !user.user_id) {
         throw new BadRequestException('User not authenticated');
     }
         return this.notificationService.markAllAsRead(user.user_id);
     }
 
-    @Get(":id")
+    @Patch('mark-read/:id')
     @ApiBearerAuth('access-token')
     @ApiSecurity('access-token')
-    @ResponseMessage("Fetch a Noti by id")
-    @ApiOperation({ summary: 'Fetch a Noti by id' })
-    findOne(@Param("id") id: string) {
-        return this.notificationService.findOne(id);
+    @ResponseMessage("Mark notification as read")
+    async markAsRead(@User() user: IUser, @Param('id') id: string) {
+        console.log("Mark read");
+        return this.notificationService.markAsRead(user.user_id, id);
+    }
+
+    @Patch(':id')
+    @Roles('ADMIN')
+    @ApiBearerAuth('access-token')
+    @ApiSecurity('access-token')
+    @ApiOperation({ summary: 'Update a notification' })
+    @ResponseMessage("Update a notification")
+    async update(@Param('id') id: string, @Body() updateNotiDto: UpdateNotificationDto) {
+        return this.notificationService.update(id, updateNotiDto);
     }
 }
