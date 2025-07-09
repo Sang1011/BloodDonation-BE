@@ -75,7 +75,7 @@ export class NotificationController {
         return this.notificationService.markAsRead(user.user_id, id);
     }
 
-    @Patch('mark-all-read')
+    @Patch('mark-read-all')
     @ApiBearerAuth('access-token')
     @ApiSecurity('access-token')
     @ResponseMessage("Mark all notifications as read")
