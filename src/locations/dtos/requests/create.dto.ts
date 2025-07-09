@@ -22,13 +22,13 @@ export class CreateLocationDto {
   @IsNotEmpty()
   ward: string;
 
-  @ApiProperty({ example: 'Nguyễn Huệ' })
-  @IsString()
-  @IsNotEmpty()
-  road: string;
+  // @ApiProperty({ example: 'Nguyễn Huệ' })
+  // @IsString()
+  // @IsNotEmpty()
+  // road: string;
 
-  @ApiPropertyOptional({ example: '86' })
-  @IsString()
-  @IsOptional()
-  house_number?: string;
+  // @ApiPropertyOptional({ example: '86' })
+  // @IsString()
+  // @IsOptional()
+  // house_number?: string;
 }

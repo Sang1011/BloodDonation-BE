@@ -23,14 +23,14 @@ export class Location {
   @Prop({ required: true })
   district: string;
 
-  @Prop({ required: true })
-  road: string;
+  // @Prop({ required: true })
+  // road: string;
 
   @Prop({ required: true })
   ward: string;
 
-  @Prop()
-  house_number?: string;
+  // @Prop()
+  // house_number?: string;
 
   @Prop({ index: 'text' })
   full_address: string;
