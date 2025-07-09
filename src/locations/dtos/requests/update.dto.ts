@@ -2,15 +2,15 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsOptional } from 'class-validator';
 
 export class UpdateLocationDto {
-  @ApiPropertyOptional({ example: '86' })
-  @IsString()
-  @IsOptional()
-  house_number?: string;
+  // @ApiPropertyOptional({ example: '86' })
+  // @IsString()
+  // @IsOptional()
+  // house_number?: string;
 
-  @ApiPropertyOptional({ example: 'Nguyễn Huệ' })
-  @IsString()
-  @IsOptional()
-  road?: string;
+  // @ApiPropertyOptional({ example: 'Nguyễn Huệ' })
+  // @IsString()
+  // @IsOptional()
+  // road?: string;
 
   @ApiPropertyOptional({ example: 'Phường Bến Nghé' })
   @IsString()
