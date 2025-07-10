@@ -27,11 +27,6 @@ export class NotificationController {
     async create(@Body() createNotiDto: CreateNotificationDto) {
         return this.notificationService.create(createNotiDto);
     }
-<<<<<<< Updated upstream
-   
-=======
-
->>>>>>> Stashed changes
     @Post("/broadcast")
     @Roles('ADMIN')
     @ApiBearerAuth('access-token')
@@ -66,30 +61,15 @@ export class NotificationController {
     @ApiSecurity('access-token')
     @ResponseMessage("Delete a Noti by id")
     @ApiOperation({ summary: 'Delete a Noti by id' })
-    deketeOne(@Param("id") id: string) {
+    deleteOne(@Param("id") id: string) {
         return this.notificationService.remove(id);
     }
 
-<<<<<<< Updated upstream
-=======
-    @Patch('mark-read/:id')
-    @ApiBearerAuth('access-token')
-    @ApiSecurity('access-token')
-    @ResponseMessage("Mark notification as read")
-    async markAsRead(@User() user: IUser, @Param('id') id: string) {
-        return this.notificationService.markAsRead(user.user_id, id);
-    }
-
->>>>>>> Stashed changes
     @Patch('mark-read-all')
     @ApiBearerAuth('access-token')
     @ApiSecurity('access-token')
     @ResponseMessage("Mark all notifications as read")
     async markAllAsRead(@User() user: IUser) {
-<<<<<<< Updated upstream
-        console.log("Mark all");
-=======
->>>>>>> Stashed changes
         if (!user || !user.user_id) {
             throw new BadRequestException('User not authenticated');
         }
@@ -103,16 +83,6 @@ export class NotificationController {
     async markAsRead(@User() user: IUser, @Param('id') id: string) {
         console.log("Mark read");
         return this.notificationService.markAsRead(user.user_id, id);
-    }
-
-    @Patch(':id')
-    @Roles('ADMIN')
-    @ApiBearerAuth('access-token')
-    @ApiSecurity('access-token')
-    @ApiOperation({ summary: 'Update a notification' })
-    @ResponseMessage("Update a notification")
-    async update(@Param('id') id: string, @Body() updateNotiDto: UpdateNotificationDto) {
-        return this.notificationService.update(id, updateNotiDto);
     }
 
     @Patch(':id')
