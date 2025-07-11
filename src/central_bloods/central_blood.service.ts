@@ -10,6 +10,7 @@ import { removeVietnameseTones } from "src/shared/utils/removeVNTones";
 import { GeocodingService } from "src/shared/services/geoLocation.service";
 import { BaseModel } from "src/shared/interfaces/soft-delete-model.interface";
 import { WorkingHours } from "src/working_hours/schemas/working_hours.schema";
+import { haversineDistance } from "src/shared/utils/calculateDistance";
 
 @Injectable()
 export class CentralBloodService {
@@ -155,4 +156,37 @@ const query_address = removeVietnameseTones(dto.centralBlood_address);
     if (!deleted) throw new NotFoundException("Không tìm thấy trung tâm máu");
     return { deleted: deleted };
   }
+
+  async findNearbyfindNearbyCentralWithUserDistance(
+    userLat: number,
+    userLng: number,
+    radiusInKm: number
+  ): Promise<(CentralBlood & { distance: number })[]> {
+    const locations = await this.centralBloodModel.find({
+      position: {
+        $near: {
+          $geometry: {
+            type: 'Point',
+            coordinates: [userLng, userLat],
+          },
+          $maxDistance: radiusInKm * 1000,
+        },
+      },
+    });
+
+    return locations.map((loc) => {
+      const [lng, lat] = loc.position.coordinates;
+
+      const isSameCoords =
+        Math.abs(lat - userLat) < 0.00001 &&
+        Math.abs(lng - userLng) < 0.00001;
+
+      const dist = haversineDistance(userLat, userLng, lat, lng);
+
+      return {
+        ...loc.toObject(),
+        distance: isSameCoords || dist < 1 ? 1 : Math.round(dist),
+      };
+    });
+  } 
 }

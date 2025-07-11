@@ -180,7 +180,16 @@ export class SearchService {
         return resolvedResults.filter(Boolean);
     }
 
-
+    async searchCenterNearestFromUserAddress(user_id: string, radiusInKm: number){
+        const getUser = await this.userService.findOneNoPopulate(user_id);
+        const userLocation = await this.locationService.findById(getUser.location_id);
+        const [lat, lng] = [
+            userLocation.position.coordinates[1],
+            userLocation.position.coordinates[0],
+        ];
+        const centerListNearby = await this.centralService.findNearbyfindNearbyCentralWithUserDistance(lat,lng,radiusInKm);
+        return centerListNearby || [];
+    }
 
 
 }

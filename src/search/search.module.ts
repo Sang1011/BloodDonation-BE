@@ -17,5 +17,6 @@ import { CentralBloodModule } from 'src/central_bloods/central_blood.module';
   ],
   controllers: [SearchController],
   providers: [SearchService],
+  exports: [SearchService]
 })
 export class SearchModule {}

@@ -27,7 +27,7 @@ export class NotificationController {
     async create(@Body() createNotiDto: CreateNotificationDto) {
         return this.notificationService.create(createNotiDto);
     }
-
+    
     @Post("/broadcast")
     @Roles('ADMIN')
     @ApiBearerAuth('access-token')
@@ -62,7 +62,7 @@ export class NotificationController {
     @ApiSecurity('access-token')
     @ResponseMessage("Delete a Noti by id")
     @ApiOperation({ summary: 'Delete a Noti by id' })
-    deketeOne(@Param("id") id: string) {
+    deleteOne(@Param("id") id: string) {
         return this.notificationService.remove(id);
     }
 
