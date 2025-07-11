@@ -251,6 +251,7 @@ export class InforHealthService {
         const updatedHealth = await this.inforHealthModel.findOneAndUpdate(
           { infor_health: health.infor_health },
           { $set: updateHealthDTO },
+          { new: true }
         ).populate([
             {
                 path: 'user_id',
