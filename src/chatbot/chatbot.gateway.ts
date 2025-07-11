@@ -15,17 +15,19 @@ import { Logger } from '@nestjs/common';
 export class ChatbotGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
+  
 
   private readonly logger = new Logger(ChatbotGateway.name);
+  private userID: string = "";
 
   constructor(private readonly chatbotService: ChatbotService) {}
 
   async handleConnection(client: Socket) {
   try {
-    const userID = client.handshake.auth.userID as string;
-    this.logger.log(`Client connected: ${client.id} (userID: ${userID})`);
+    this.userID = client.handshake.auth.userID as string;
+    this.logger.log(`Client connected: ${client.id} (userID: ${this.userID})`);
     
-    client.data.userID = userID;
+    client.data.userID = this.userID;
   } catch (error) {
     this.logger.log('Socket connection error:', error.message);
     client.disconnect();
@@ -41,7 +43,7 @@ export class ChatbotGateway implements OnGatewayConnection, OnGatewayDisconnect 
     @MessageBody() data: { message: string },
     @ConnectedSocket() client: Socket,
   ) {
-    const reply = await this.chatbotService.askAI(data.message);
+    const reply = await this.chatbotService.askAI(this.userID, data.message);
     client.emit('aiReply', { message: reply });
   }
 }

@@ -167,6 +167,13 @@ export class InforHealthService {
         return health;
     }
 
+    async findOneByUserId(id: string) {
+        const health = await this.inforHealthModel
+            .findOne({ user_id: id })
+        if (!health) throw new BadRequestException("Không tìm thấy thông tin sức khỏe");
+        return health;
+    }
+
       async update(id: string, updateHealthDTO: UpdateInforHealthDto, file?: Express.Multer.File) {
         const health = await this.inforHealthModel.findOne({ infor_health: id });
         if (!health) {

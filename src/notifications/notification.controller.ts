@@ -27,6 +27,7 @@ export class NotificationController {
     async create(@Body() createNotiDto: CreateNotificationDto) {
         return this.notificationService.create(createNotiDto);
     }
+    
     @Post("/broadcast")
     @Roles('ADMIN')
     @ApiBearerAuth('access-token')
