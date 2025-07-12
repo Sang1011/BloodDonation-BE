@@ -52,7 +52,7 @@ export class NotificationService {
     }
 
     this.gateway.broadcast({
-      event: 'Broadcast Notification',
+      event: 'Thông báo cho toàn bộ người dùng',
       data: notiList,
     });
   }
@@ -221,7 +221,7 @@ export class NotificationService {
       },
     );
     if (!findNews) {
-      throw new BadRequestException("Notification not found");
+      throw new BadRequestException("Không tìm thấy thông báo");
     }
     return findNews;
   }
@@ -234,7 +234,7 @@ export class NotificationService {
     );
 
     if (!updated) {
-      throw new BadRequestException("Notification not found");
+      throw new BadRequestException("Không tìm thấy thông báo");
     }
 
     return updated;
@@ -242,7 +242,7 @@ export class NotificationService {
 
   async remove(id: string) {
     const deleted = await this.notifyModel.softDelete(id);
-    if (!deleted) throw new BadRequestException("Notification not found");
+    if (!deleted) throw new BadRequestException("Không tìm thấy thông báo");
     return { deleted: deleted.modifiedCount };
   }
 
@@ -252,11 +252,10 @@ export class NotificationService {
       { is_read: true },
       { new: true }
     );
-    if (!updated) throw new BadRequestException("Notification not found or not yours");
+    if (!updated) throw new BadRequestException("Không tìm thấy thông báo hoặc không phải của bạn");
     return updated;
   }
 
-  // thêm controller đi
   async markAllAsRead(user_id: string) {
     const result = await this.notifyModel.updateMany(
       { user_id, is_read: false },

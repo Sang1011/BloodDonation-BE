@@ -29,7 +29,6 @@ lerna-debug.log*
 .env
 .eslintrc.js
 .prettierrc
-
 # IDE - VSCode
 .vscode/*
 !.vscode/settings.json

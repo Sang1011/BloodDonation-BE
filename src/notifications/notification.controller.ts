@@ -19,7 +19,7 @@ export class NotificationController {
     constructor(private readonly notificationService: NotificationService) { }
 
     @Post()
-    @Roles('ADMIN')
+    @Roles('ADMIN','STAFF')
     @ApiBearerAuth('access-token')
     @ApiSecurity('access-token')
     @ApiOperation({ summary: 'Create a new Noti' })
@@ -27,17 +27,7 @@ export class NotificationController {
     async create(@Body() createNotiDto: CreateNotificationDto) {
         return this.notificationService.create(createNotiDto);
     }
-
-    @Patch(':id')
-    @Roles('ADMIN')
-    @ApiBearerAuth('access-token')
-    @ApiSecurity('access-token')
-    @ApiOperation({ summary: 'Update a notification' })
-    @ResponseMessage("Update a notification")
-    async update(@Param('id') id: string, @Body() updateNotiDto: UpdateNotificationDto) {
-        return this.notificationService.update(id, updateNotiDto);
-    }
-   
+    
     @Post("/broadcast")
     @Roles('ADMIN')
     @ApiBearerAuth('access-token')
@@ -45,8 +35,8 @@ export class NotificationController {
     @ApiOperation({ summary: 'Broadcast notification to all users' })
     @ResponseMessage("Broadcast notification sent")
     async broadcast(@Body() body: BroadcastNotiDto) {
-    const { title, message, type } = body;
-    return this.notificationService.sendNotiAllUser(title, message, type);
+        const { title, message, type } = body;
+        return this.notificationService.sendNotiAllUser(title, message, type);
     }
 
     @Get()
@@ -56,7 +46,7 @@ export class NotificationController {
     findAll(@Query() query: FindAllQueryDTO) {
         return this.notificationService.findAll(+query.current, +query.pageSize, query.qs);
     }
-
+    
     @Get(":id")
     @ApiBearerAuth('access-token')
     @ApiSecurity('access-token')
@@ -66,34 +56,43 @@ export class NotificationController {
         return this.notificationService.findOne(id);
     }
 
-    @Roles('ADMIN')
+    @Roles('ADMIN','STAFF')
     @Delete(":id")
     @ApiBearerAuth('access-token')
     @ApiSecurity('access-token')
     @ResponseMessage("Delete a Noti by id")
     @ApiOperation({ summary: 'Delete a Noti by id' })
-    deketeOne(@Param("id") id: string) {
+    deleteOne(@Param("id") id: string) {
         return this.notificationService.remove(id);
+    }
+
+    @Patch('mark-read-all')
+    @ApiBearerAuth('access-token')
+    @ApiSecurity('access-token')
+    @ResponseMessage("Mark all notifications as read")
+    async markAllAsRead(@User() user: IUser) {
+        if (!user || !user.user_id) {
+            throw new BadRequestException('User not authenticated');
+        }
+        return this.notificationService.markAllAsRead(user.user_id);
     }
 
     @Patch('mark-read/:id')
     @ApiBearerAuth('access-token')
     @ApiSecurity('access-token')
-    // @UseGuards(AuthGuard('jwt'))
     @ResponseMessage("Mark notification as read")
-    async markAsRead(@User() user: any, @Param('id') id: string) {
+    async markAsRead(@User() user: IUser, @Param('id') id: string) {
+        console.log("Mark read");
         return this.notificationService.markAsRead(user.user_id, id);
     }
 
-    // @Patch('mark-all-read')
-    // @ApiBearerAuth('access-token')
-    // @ApiSecurity('access-token')
-    // @UseGuards(AuthGuard('jwt'))
-    // @ResponseMessage("Mark all notifications as read")
-    // async markAllAsRead(@User() user: any, @Req() req: any) {
-    //     if (!user || !user.user_id) {
-    //     throw new BadRequestException('User not authenticated');
-    // }
-    //     return this.notificationService.markAllAsRead(user.user_id);
-    // }
+    @Patch(':id')
+    @Roles('ADMIN','STAFF')
+    @ApiBearerAuth('access-token')
+    @ApiSecurity('access-token')
+    @ApiOperation({ summary: 'Update a notification' })
+    @ResponseMessage("Update a notification")
+    async update(@Param('id') id: string, @Body() updateNotiDto: UpdateNotificationDto) {
+        return this.notificationService.update(id, updateNotiDto);
+    }
 }

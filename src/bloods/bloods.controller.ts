@@ -7,12 +7,14 @@ import { Blood } from './schemas/blood.schema';
 import { MESSAGES } from 'src/shared/constants/messages.constants';
 import { Public } from 'src/shared/decorators/public.decorator';
 import { FindAllQueryDTO } from 'src/shared/dtos/requests/find-all-query.request';
+import { Roles } from 'src/shared/decorators/role.decorator';
 
 @Controller('bloods')
 @ApiTags('Bloods')
 export class BloodsController {
     constructor(private readonly bloodsService: BloodsService) { }
 
+    @Roles('ADMIN', 'STAFF')
     @Post()
     @ApiBearerAuth('access-token')
     @ApiSecurity('access-token')
@@ -41,6 +43,7 @@ export class BloodsController {
         return this.bloodsService.findOne(id);
     }
 
+    @Roles('ADMIN', 'STAFF')
     @Delete(":id")
     @ApiBearerAuth('access-token')
     @ApiSecurity('access-token')

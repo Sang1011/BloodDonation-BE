@@ -161,11 +161,11 @@ export class AuthService {
   async verifyEmail(email: string, token: string) {
     const userVerify = await this.usersService.findOneByEmail(email);
     if (!userVerify || !userVerify.verify_token || userVerify.is_verified) {
-      throw new BadRequestException('Invalid or already verified');
+      throw new BadRequestException('Không hợp lệ hoặc đã xác minh rồi');
     }
 
     if (userVerify.verify_token !== token) {
-      throw new BadRequestException('Invalid verification token');
+      throw new BadRequestException('Mã xác minh không hợp lệ');
     }
 
     await this.usersService.updateVerifyToken(userVerify.user_id);
@@ -175,11 +175,11 @@ export class AuthService {
   async resendVerificationEmail(user: IUser) {
     const userToVerify = await this.usersService.findOneByEmail(user.email);
     if (!userToVerify) {
-      throw new BadRequestException('User not found');
+      throw new BadRequestException('Không tìm thấy người dùng');
     }
 
     if (userToVerify.is_verified) {
-      throw new BadRequestException('Email already verified');
+      throw new BadRequestException('Email đã được xác minh');
     }
 
     const { email, fullname } = user;
@@ -200,10 +200,10 @@ export class AuthService {
 
   async changeEmail(userId: string, dto: ChangeEmailDto) {
     const user = await this.usersService.findOne(userId);
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) throw new NotFoundException('Không tìm thấy người dùng');
 
     const exists = await this.usersService.findOneByEmail(dto.newEmail);
-    if (exists) throw new BadRequestException('Email already in use');
+    if (exists) throw new BadRequestException('Email đã được sử dụng');
 
     user.email = dto.newEmail;
     await user.save();
@@ -213,10 +213,10 @@ export class AuthService {
 
   async changePassword(userId: string, dto: ChangePasswordDto) {
     const user = await this.usersService.findOneWithPass(userId);
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) throw new NotFoundException('Không tìm thấy người dùng');
 
     const isMatch = await this.usersService.isValidPassword(dto.newPassword, dto.oldPassword);
-    if (!isMatch) throw new BadRequestException('Old password is incorrect');
+    if (!isMatch) throw new BadRequestException('Mật khẩu cũ không đúng');
 
     const hashed = getHashPassword(dto.newPassword);
     user.password = hashed;
@@ -227,7 +227,7 @@ export class AuthService {
   async sendResetCode(email: string) {
     const exists = await this.usersService.findOneByEmail(email);
     if (!exists) {
-      throw new BadRequestException("This mail haven't register yet!")
+      throw new BadRequestException("Email này chưa được đăng ký!")
     }
     const digitCode = randomInt(100000, 999999);
     const expire = new Date(Date.now() + 5 * 60 * 1000);
@@ -238,38 +238,38 @@ export class AuthService {
     });
 
     await this.emailService.sendEmailToResetRequest(exists.email, digitCode);
-    return "Sent email to verify forget password request, please check your email!"
+    return "Đã gửi email để xác thực yêu cầu đặt lại mật khẩu, vui lòng kiểm tra email của bạn!"
   }
 
   async verifyResetCode(email: string, digit: number) {
     const exists = await this.usersService.findOneByEmailWithDigitCode(email);
     if (!exists) {
-      throw new BadRequestException("This mail hasn't been registered yet!");
+      throw new BadRequestException("Email này chưa được đăng ký!");
     }
 
     const storedHash = exists.digit_code;
     if (!storedHash) {
-      throw new BadRequestException("No reset code was requested.");
+      throw new BadRequestException("Chưa yêu cầu mã đặt lại mật khẩu.");
     }
 
     // Thử kiểm tra mã hợp lệ trong thời hạn
     const valid = this.usersService.isValidPassword(digit.toString(), storedHash);
     const isCodeExpired = new Date() > new Date(exists.digit_code_expire);
     if (!valid) {
-      throw new BadRequestException("Invalid reset code.");
+      throw new BadRequestException("Mã đặt lại mật khẩu không hợp lệ.");
     }
 
     if (isCodeExpired) {
-      throw new BadRequestException("Reset code expired.");
+      throw new BadRequestException("Mã đặt lại mật khẩu đã hết hạn.");
     }
     await this.usersService.resetDigitCode(exists.user_id);
-    return "Reset code verified successfully";
+    return "Mã đặt lại mật khẩu đã được xác thực thành công";
   }
 
   async resetPassword(email: string, newPassword: string) {
   const exists = await this.usersService.findOneByEmailWithDigitCode(email);
   if (!exists) {
-    throw new BadRequestException("This mail hasn't been registered yet!");
+    throw new BadRequestException("Email này chưa được đăng ký!");
   }
 
   // Chỉ kiểm tra còn mã code và còn hạn
@@ -286,7 +286,7 @@ export class AuthService {
   exists.digit_code_expire = null;
   await exists.save();
 
-  return { message: "Password reset successfully" };
+  return { message: "Đặt lại mật khẩu thành công" };
 }
 }
 

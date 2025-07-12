@@ -111,7 +111,7 @@ export class BloodExportService {
         }
     ]);
     if (!exportBlood) {
-      throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
+      throw new NotFoundException("Không tìm thấy thông tin xuất máu");
     }
     return exportBlood;
   }
@@ -123,31 +123,31 @@ export class BloodExportService {
     const storageExists = await this.storageService.findOne(dto.storage_id);
     if (!storageExists) {
       console.log(storageExists);
-      throw new NotFoundException("Storage not found");
+      throw new NotFoundException("Không tìm thấy kho máu");
     }
 
     // check if storage is not available
     if (storageExists.ml === 0) {
       console.log(storageExists.ml);
-      throw new BadRequestException("Storage is empty, cannot export");
+      throw new BadRequestException("Kho máu đã hết, không thể xuất kho");
     }
 
     // check if storage is already exported
     if (storageExists.current_status === Status.EXPORTED) {
-      throw new BadRequestException("Storage is already exported, cannot export");
+      throw new BadRequestException("Kho máu đã được xuất, không thể xuất tiếp");
     }
     
     // get receive_id
     const receiverExists = await this.receiverBloodsService.findOne(dto.receiver_id);
     if (!receiverExists) {
-      throw new NotFoundException("Receiver Blood not found");
+      throw new NotFoundException("Không tìm thấy thông tin người nhận máu");
     }
 
     const bloodObject = receiverExists.blood_id as unknown as { blood_id: string };
     const blood_id = bloodObject?.blood_id ?? '';
 
     if(storageExists.blood_id !== blood_id){
-      throw new BadRequestException("Blood is not compatible with storage");
+      throw new BadRequestException("Nhóm máu không phù hợp với kho máu");
     }
     
     // update storage and receiver blood status
@@ -170,23 +170,23 @@ export class BloodExportService {
   async update(id: string, dto: UpdateExportBloodDto) {
     const existingExportBlood = await this.bloodExportModel.findOne({ export_id: id});
     if(!existingExportBlood){
-      throw new BadRequestException("Export Blood record not found");
+      throw new BadRequestException("Không tìm thấy thông tin xuất máu");
     }
     if(dto.storage_id){
       const storage = await this.storageService.findOne(dto.storage_id);
       if (!storage) {
-        throw new NotFoundException("Storage not found");
+        throw new NotFoundException("Không tìm thấy kho máu");
       }
     }
     if(dto.receiver_id){
       const receiver = await this.receiverBloodsService.findOne(dto.receiver_id);
       if (!receiver) {
-        throw new NotFoundException("Receiver not found");
+        throw new NotFoundException("Không tìm thấy người nhận máu");
       }
     }
     const updated = await this.bloodExportModel.findOneAndUpdate({export_id: id}, dto, { new: true });
     if (!updated) {
-      throw new NotFoundException("Export Blood record not found");
+      throw new NotFoundException("Không tìm thấy thông tin xuất máu");
     }
     return updated;
   }
@@ -194,11 +194,11 @@ export class BloodExportService {
     async remove(id: string){
         const existingDonateBlood = await this.bloodExportModel.findOne({ export_id: id });
         if (!existingDonateBlood) {
-            throw new NotFoundException("Export Blood record not found");
+            throw new NotFoundException("Không tìm thấy thông tin xuất máu");
         }
         const deleted = await this.bloodExportModel.deleteOne({export_id: id});
         if (!deleted) {
-            throw new NotFoundException("Export Blood record not found");
+            throw new NotFoundException("Không tìm thấy thông tin xuất máu");
         }
         return { deleted: deleted.deletedCount || 0 };
     }

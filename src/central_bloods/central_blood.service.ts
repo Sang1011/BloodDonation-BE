@@ -10,6 +10,7 @@ import { removeVietnameseTones } from "src/shared/utils/removeVNTones";
 import { GeocodingService } from "src/shared/services/geoLocation.service";
 import { BaseModel } from "src/shared/interfaces/soft-delete-model.interface";
 import { WorkingHours } from "src/working_hours/schemas/working_hours.schema";
+import { haversineDistance } from "src/shared/utils/calculateDistance";
 
 @Injectable()
 export class CentralBloodService {
@@ -48,7 +49,7 @@ const query_address = removeVietnameseTones(dto.centralBlood_address);
   // map central to working hours
   dto.working_id.map(async working_id => {
     const working = await this.workingHoursModel.findOne({ working_id });
-    if (!working) throw new NotFoundException("Working hours not found");
+    if (!working) throw new NotFoundException("Không tìm thấy khung giờ làm việc");
     working.centralBlood_id.push(created.centralBlood_id);
     await working.save();
   });
@@ -100,7 +101,7 @@ const query_address = removeVietnameseTones(dto.centralBlood_address);
       //justOne: true,
     })
       .exec();
-    if (!cb) throw new NotFoundException("Central blood not found");
+    if (!cb) throw new NotFoundException("Không tìm thấy trung tâm máu");
     return cb;
   }
 
@@ -109,7 +110,7 @@ const query_address = removeVietnameseTones(dto.centralBlood_address);
   const current = await this.centralBloodModel.findOne({ centralBlood_id: numId });
 
   if (!current) {
-    throw new NotFoundException('Central not found');
+    throw new NotFoundException('Không tìm thấy trung tâm máu');
   }
 
   let position = current.position;
@@ -137,7 +138,7 @@ const query_address = removeVietnameseTones(dto.centralBlood_address);
   );
 
   if (!updated) {
-    throw new NotFoundException('Central not found after update');
+    throw new NotFoundException('Không tìm thấy trung tâm máu sau khi cập nhật');
   }
 
   return updated;
@@ -146,13 +147,46 @@ const query_address = removeVietnameseTones(dto.centralBlood_address);
   async remove(id: string) {
     const num = Number.parseInt(id);
     const deleted = await this.centralBloodModel.deleteOne({centralBlood_id: num});
-    if (!deleted) throw new NotFoundException("Central blood not found");
+    if (!deleted) throw new NotFoundException("Không tìm thấy trung tâm máu");
     return { deleted: deleted.deletedCount || 0 };
   }
 
   async softRemove(id: string) {
     const deleted = await this.centralBloodModel.softDelete(id);
-    if (!deleted) throw new NotFoundException("Central blood not found");
+    if (!deleted) throw new NotFoundException("Không tìm thấy trung tâm máu");
     return { deleted: deleted };
   }
+
+  async findNearbyfindNearbyCentralWithUserDistance(
+    userLat: number,
+    userLng: number,
+    radiusInKm: number
+  ): Promise<(CentralBlood & { distance: number })[]> {
+    const locations = await this.centralBloodModel.find({
+      position: {
+        $near: {
+          $geometry: {
+            type: 'Point',
+            coordinates: [userLng, userLat],
+          },
+          $maxDistance: radiusInKm * 1000,
+        },
+      },
+    });
+
+    return locations.map((loc) => {
+      const [lng, lat] = loc.position.coordinates;
+
+      const isSameCoords =
+        Math.abs(lat - userLat) < 0.00001 &&
+        Math.abs(lng - userLng) < 0.00001;
+
+      const dist = haversineDistance(userLat, userLng, lat, lng);
+
+      return {
+        ...loc.toObject(),
+        distance: isSameCoords || dist < 1 ? 1 : Math.round(dist),
+      };
+    });
+  } 
 }

@@ -5,12 +5,14 @@ import { ResponseMessage } from 'src/shared/decorators/message.decorator';
 import { CreateRoleDto } from './dtos/requests/create.dto';
 import { Public } from 'src/shared/decorators/public.decorator';
 import { FindAllQueryDTO } from 'src/shared/dtos/requests/find-all-query.request';
+import { Roles } from 'src/shared/decorators/role.decorator';
 
 @ApiTags('Roles')
 @Controller('roles')
 export class RoleController {
   constructor(private readonly roleService: RoleService) { }
 
+  @Roles('ADMIN')
   @Post()
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')
@@ -43,6 +45,7 @@ export class RoleController {
     return this.roleService.findById(role_id);
   }
 
+  @Roles('ADMIN')
   @Delete(":id")
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')

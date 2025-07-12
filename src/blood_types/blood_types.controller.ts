@@ -6,13 +6,14 @@ import { ResponseMessage } from 'src/shared/decorators/message.decorator';
 import { MESSAGES } from 'src/shared/constants/messages.constants';
 import { FindAllQueryDTO } from 'src/shared/dtos/requests/find-all-query.request';
 import { Public } from 'src/shared/decorators/public.decorator';
+import { Roles } from 'src/shared/decorators/role.decorator';
 
 @ApiTags('Blood Types')
 @Controller('blood-types')
 export class BloodTypesController {
     constructor(private readonly bloodTypesService: BloodTypesService) { }
 
-
+    @Roles('ADMIN', 'STAFF')
     @Post()
     @ApiBearerAuth('access-token')
     @ApiSecurity('access-token')
@@ -43,7 +44,7 @@ export class BloodTypesController {
         return await this.bloodTypesService.findOne(id);
     }
 
-
+    @Roles('ADMIN', 'STAFF')
     @Put(':id')
     @ApiBearerAuth('access-token')
     @ApiSecurity('access-token')
@@ -57,6 +58,7 @@ export class BloodTypesController {
         return await this.bloodTypesService.update(id, bloodType);
     }
 
+    @Roles('ADMIN', 'STAFF')
     @Delete(":id")
     @ApiBearerAuth('access-token')
     @ApiSecurity('access-token')

@@ -12,6 +12,7 @@ import { GetAllUserResponseDto } from "./dto/responses/find-all.response";
 import { FindAllQueryDTO } from "src/shared/dtos/requests/find-all-query.request";
 import { Public } from "src/shared/decorators/public.decorator";
 import { Request } from "express";
+import { Roles } from "src/shared/decorators/role.decorator";
 
 
 @ApiTags('Users')
@@ -19,6 +20,7 @@ import { Request } from "express";
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
+  @Roles('ADMIN')
   @ApiCreatedResponse({
     description: 'User created successfully',
     type: CreateUserResponseDTO,
@@ -70,6 +72,7 @@ export class UsersController {
     return this.usersService.update(id, updateUserDto);
   }
 
+  @Roles('ADMIN')
   @Delete(":id")
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')

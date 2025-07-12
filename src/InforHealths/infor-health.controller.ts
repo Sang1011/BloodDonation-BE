@@ -9,6 +9,7 @@ import { InforHealthService } from "./infor-healths.service";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { IUser } from "src/shared/interfaces/user.interface";
 import { User } from "src/shared/decorators/users.decorator";
+import { Roles } from "src/shared/decorators/role.decorator";
 
 
 @ApiTags("Infor Health")  
@@ -16,6 +17,7 @@ import { User } from "src/shared/decorators/users.decorator";
 export class InforHealthController {
   constructor(private readonly inforHealthService: InforHealthService) { }
 
+  @Roles('ADMIN', 'STAFF')
   @Post("/admin")
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')
@@ -63,7 +65,7 @@ export class InforHealthController {
     return this.inforHealthService.findInfoHealthByUserId(user.user_id);
   }
   
-
+  @Roles('ADMIN', 'STAFF')
   @Patch(":id/admin")
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')

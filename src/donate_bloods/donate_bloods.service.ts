@@ -136,7 +136,7 @@ export class DonateBloodService {
       },
     ])
     if (!donateBlood) {
-      throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
+      throw new NotFoundException("Không tìm thấy thông tin hiến máu");
     }
     return donateBlood;
   }
@@ -145,28 +145,39 @@ export class DonateBloodService {
     const inforHealth = await this.inforHealthsService.findByUserId(user.user_id);
 
     if (!inforHealth) {
-      throw new NotFoundException("InforHealth not found");
+      throw new NotFoundException("Không tìm thấy thông tin sức khỏe");
     }
 
-    if (new Date(dto.date_donate) < new Date()) {
-      throw new BadRequestException("Date must be in the future");
+    if (new Date(dto.date_donate) <= new Date()) {
+      throw new BadRequestException("Ngày hiến máu phải ở tương lai");
     }
 
     // Chỉ được đăng kí 1 lần 
     const existingDonateBlood = await this.donateBloodModel.findOne({ infor_health: inforHealth.infor_health, date_donate: dto.date_donate });
     if (existingDonateBlood) {
-      throw new BadRequestException("This user has already registered for blood donation on this date");
+      throw new BadRequestException("Bạn đã đăng ký hiến máu vào ngày này");
     }
 
     // check thời gian nghỉ là 3 tháng (12 tuần) 
+    dto.date_donate = new Date(dto.date_donate);
     const isRestCompleted = checkDonateInterval(inforHealth.latest_donate, dto.date_donate);
-    if(!isRestCompleted){
-      throw new BadRequestException(`You must wait at least 3 months between donations`);
+    if (!isRestCompleted) {
+      throw new BadRequestException(`Bạn phải chờ ít nhất 3 tháng giữa các lần hiến máu`);
+    }
+
+    // nếu đang có đơn hiến máu thì không được đăng ký hiến
+    if (inforHealth.is_regist_donate) {
+      throw new BadRequestException("Bạn không thể đăng ký hiến máu khi đang có đơn hiến máu hoạt động");
+    }
+
+    // nếu đang có đơn nhận máu thì không được đăng ký hiến
+    if (inforHealth.is_regist_receive) {
+      throw new BadRequestException("Bạn không thể đăng ký hiến máu khi đang có đơn nhận máu hoạt động");
     }
 
     const checked = await this.checkDuplicate(dto);
     if (!checked) {
-      throw new BadRequestException("Invalid data provided");
+      throw new BadRequestException("Dữ liệu không hợp lệ");
     }
 
     const created = await new this.donateBloodModel({
@@ -206,6 +217,7 @@ export class DonateBloodService {
         type: NotificationTemplates.BOOKING_DONATE_SUCCESS.type,
       });
     }
+    await this.inforHealthsService.updateForDonate(user.user_id, true);
     return created.save();
   }
 
@@ -220,7 +232,7 @@ export class DonateBloodService {
     // }
     const centralBlood = await this.centralBloodService.findOne(dto.centralBlood_id.toString());
     if (!centralBlood) {
-      throw new NotFoundException("CentralBlood not found");
+      throw new NotFoundException("Không tìm thấy trung tâm máu");
     }
     return true;
   }
@@ -235,11 +247,15 @@ export class DonateBloodService {
   async updateForStaff(id: string, dto: UpdateDonateBloodDto) {
     const existingDonateBlood = await this.donateBloodModel.findOne({ donate_id: id });
     if (!existingDonateBlood) {
-      throw new BadRequestException("Donate Blood record not found");
+      throw new BadRequestException("Không tìm thấy thông tin hiến máu");
     }
     const updated = await this.donateBloodModel.findOneAndUpdate({ donate_id: id }, dto, { new: true });
     if (!updated) {
-      throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
+      throw new NotFoundException("Không tìm thấy thông tin hiến máu");
+    }
+    const inforHealth = await this.inforHealthsService.findById(updated.infor_health);
+    if (!inforHealth) {
+      throw new NotFoundException("Không tìm thấy thông tin sức khỏe");
     }
     if (dto.status_donate === Status.COMPLETED) {
       const storage: CreateStorageDto = {
@@ -258,6 +274,9 @@ export class DonateBloodService {
       } else {
         await this.storageService.create(storage);
       }
+      await this.inforHealthsService.updateForDonate(inforHealth.user_id, false);
+    } else if (dto.status_donate === Status.CANCELLED) {
+      await this.inforHealthsService.updateForDonate(inforHealth.user_id, false);
     }
     return updated;
   }
@@ -265,11 +284,15 @@ export class DonateBloodService {
   async update(id: string, dto: UpdateDonateBloodDto) {
     const existingDonateBlood = await this.donateBloodModel.findOne({ donate_id: id });
     if (!existingDonateBlood) {
-      throw new BadRequestException("Donate Blood record not found");
+      throw new BadRequestException("Không tìm thấy thông tin hiến máu");
     }
     const updated = await this.donateBloodModel.findOneAndUpdate({ donate_id: id }, dto, { new: true });
     if (!updated) {
-      throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
+      throw new NotFoundException("Không tìm thấy thông tin hiến máu");
+    }
+    const inforHealth = await this.inforHealthsService.findById(updated.infor_health);
+    if (!inforHealth) {
+      throw new NotFoundException("Không tìm thấy thông tin sức khỏe");
     }
     if (dto.status_donate === Status.COMPLETED) {
       const storage: CreateStorageDto = {
@@ -288,6 +311,9 @@ export class DonateBloodService {
       } else {
         await this.storageService.create(storage);
       }
+      await this.inforHealthsService.updateForDonate(inforHealth.user_id, false);
+    } else if (dto.status_donate === Status.CANCELLED) {
+      await this.inforHealthsService.updateForDonate(inforHealth.user_id, false);
     }
     return updated;
   }
@@ -295,15 +321,16 @@ export class DonateBloodService {
   async cancelSchedule(user: IUser, id: string) {
     const existingDonateBlood = await this.donateBloodModel.findOne({ donate_id: id });
     if (!existingDonateBlood) {
-      throw new BadRequestException("Donate Blood record not found");
+      throw new BadRequestException("Không tìm thấy thông tin hiến máu");
     }
     const dto: Partial<UpdateDonateBloodDto> = {
       status_donate: Status.CANCELLED
     }
     const updated = await this.donateBloodModel.findOneAndUpdate({ donate_id: id }, dto, { new: true });
     if (!updated) {
-      throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
+      throw new NotFoundException("Không tìm thấy thông tin hiến máu");
     }
+    await this.inforHealthsService.updateForDonate(user.user_id, false);
     if (user.role = "MEMBER") {
       await this.notifyService.create({
         user_id: user.user_id,
@@ -318,11 +345,11 @@ export class DonateBloodService {
   async remove(id: string) {
     const existingDonateBlood = await this.donateBloodModel.findOne({ donate_id: id });
     if (!existingDonateBlood) {
-      throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
+      throw new NotFoundException("Không tìm thấy thông tin hiến máu");
     }
     const deleted = await this.donateBloodModel.deleteOne({ donate_id: id });
     if (!deleted) {
-      throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
+      throw new NotFoundException("Không tìm thấy thông tin hiến máu");
     }
     return { deleted: deleted.deletedCount || 0 };
   }
@@ -330,7 +357,7 @@ export class DonateBloodService {
   async getDonateBlood(user: IUser) {
     const inforHealth = await this.inforHealthsService.findByUserId(user.user_id);
     if (!inforHealth) {
-      throw new NotFoundException("InforHealth not found");
+      throw new NotFoundException("Không tìm thấy thông tin sức khỏe");
     }
     const donateBlood = await this.donateBloodModel.find({ infor_health: inforHealth.infor_health }).select('-deleted_at -is_deleted')
       .populate([
@@ -368,7 +395,7 @@ export class DonateBloodService {
         },
       ]);
     if (!donateBlood) {
-      throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
+      throw new NotFoundException("Không tìm thấy thông tin hiến máu");
     }
     return donateBlood;
   }
@@ -376,11 +403,11 @@ export class DonateBloodService {
   async getDonateBloodByEmail(email: string) {
     const user = await this.usersService.findOneByEmail(email);
     if (!user) {
-      throw new NotFoundException("User not found");
+      throw new NotFoundException("Không tìm thấy người dùng");
     }
     const inforHealth = await this.inforHealthsService.findByUserId(user.user_id);
     if (!inforHealth) {
-      throw new NotFoundException("InforHealth not found");
+      throw new NotFoundException("Không tìm thấy thông tin sức khỏe");
     }
     const donateBlood = await this.donateBloodModel.find({ infor_health: inforHealth.infor_health }).select('-deleted_at -is_deleted')
       .populate([
@@ -418,7 +445,7 @@ export class DonateBloodService {
         },
       ]);
     if (!donateBlood) {
-      throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
+      throw new NotFoundException("Không tìm thấy thông tin hiến máu");
     }
     return donateBlood;
   }
