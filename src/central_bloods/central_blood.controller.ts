@@ -10,12 +10,14 @@ import { GetAllCentralResponseDto } from "./dtos/responses/getAll.response";
 import { GetByIdCentralDTO, GetCentralResponse } from "./dtos/responses/get.response";
 import { FindAllQueryDTO } from "src/shared/dtos/requests/find-all-query.request";
 import { DeleteByIdCentralDTO } from "./dtos/responses/delete.response";
+import { Roles } from "src/shared/decorators/role.decorator";
 
 @ApiTags('Central Blood')
 @Controller('central-blood')
 export class CentralBloodController {
   constructor(private readonly service: CentralBloodService) { }
 
+  @Roles('ADMIN', 'STAFF')
   @Post()
   @ApiCreatedResponse({ type: CreateCentralDTO })
   @ResponseMessage("Created central blood")
@@ -42,6 +44,7 @@ export class CentralBloodController {
     return this.service.findOne(id);
   }
 
+  @Roles('ADMIN', 'STAFF')
   @Patch(":id")
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')
@@ -51,6 +54,7 @@ export class CentralBloodController {
     return this.service.update(id, dto);
   }
 
+  @Roles('ADMIN', 'STAFF')
   @Delete(":id")
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')

@@ -19,7 +19,7 @@ export class NotificationController {
     constructor(private readonly notificationService: NotificationService) { }
 
     @Post()
-    @Roles('ADMIN')
+    @Roles('ADMIN','STAFF')
     @ApiBearerAuth('access-token')
     @ApiSecurity('access-token')
     @ApiOperation({ summary: 'Create a new Noti' })
@@ -56,7 +56,7 @@ export class NotificationController {
         return this.notificationService.findOne(id);
     }
 
-    @Roles('ADMIN')
+    @Roles('ADMIN','STAFF')
     @Delete(":id")
     @ApiBearerAuth('access-token')
     @ApiSecurity('access-token')
@@ -87,7 +87,7 @@ export class NotificationController {
     }
 
     @Patch(':id')
-    @Roles('ADMIN')
+    @Roles('ADMIN','STAFF')
     @ApiBearerAuth('access-token')
     @ApiSecurity('access-token')
     @ApiOperation({ summary: 'Update a notification' })

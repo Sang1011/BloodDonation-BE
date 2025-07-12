@@ -10,12 +10,14 @@ import { GetByIdStorageDTO } from "./dtos/responses/get.response";
 import { UpdateStorageDto } from "./dtos/requests/update.dto";
 import { DeleteByIdStorageDTO } from "./dtos/responses/delete.response";
 import { StorageService } from "./storage.service";
+import { Roles } from "src/shared/decorators/role.decorator";
 
 @ApiTags('Storages')
 @Controller('storages')
 export class StorageController {
   constructor(private readonly service: StorageService) { }
 
+  @Roles('ADMIN','STAFF')
   @Post()
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')
@@ -42,6 +44,7 @@ export class StorageController {
     return this.service.findOne(id);
   }
 
+  @Roles('ADMIN','STAFF')
   @Patch(":id")
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')
@@ -51,6 +54,7 @@ export class StorageController {
     return this.service.update(id, dto);
   }
 
+  @Roles('ADMIN','STAFF')
   @Delete(":id")
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')

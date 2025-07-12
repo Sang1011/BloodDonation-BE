@@ -8,12 +8,14 @@ import { Public } from 'src/shared/decorators/public.decorator';
 import { FindAllQueryDTO } from 'src/shared/dtos/requests/find-all-query.request';
 import { UserRole } from 'src/shared/enums/user.enum';
 import { RoleGuard } from 'src/auth/guards/role.guard';
+import { Roles } from 'src/shared/decorators/role.decorator';
 
 @ApiTags('Locations')
 @Controller('locations')
 export class LocationController {
   constructor(private readonly locationService: LocationService) { }
 
+  @Roles('ADMIN')
   @Post()
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')
@@ -57,6 +59,7 @@ export class LocationController {
     return this.locationService.update(id, body);
   }
 
+  @Roles('ADMIN')
   @Delete(":id")
     @ApiBearerAuth('access-token')
     @ApiSecurity('access-token')
