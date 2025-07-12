@@ -6,12 +6,14 @@ import { ResponseMessage } from 'src/shared/decorators/message.decorator';
 import { MESSAGES } from 'src/shared/constants/messages.constants';
 import { Public } from 'src/shared/decorators/public.decorator';
 import { FindAllQueryDTO } from 'src/shared/dtos/requests/find-all-query.request';
+import { Roles } from 'src/shared/decorators/role.decorator';
 
 @Controller('rhs')
 @ApiTags('Rhs')
 export class RhsController {
     constructor(private readonly rhsService: RhsService) { }
 
+    @Roles('ADMIN','STAFF')
     @Post()
     @ApiBearerAuth('access-token')
     @ApiSecurity('access-token')
@@ -22,6 +24,7 @@ export class RhsController {
         return this.rhsService.create(createRhDto);
     }
 
+    @Roles('ADMIN','STAFF')
     @Patch(':id')
     @ApiBearerAuth('access-token')
     @ApiSecurity('access-token')
@@ -49,6 +52,7 @@ export class RhsController {
         return this.rhsService.findOne(+id);
     }
 
+    @Roles('ADMIN','STAFF')
     @Delete(":id")
     @ApiBearerAuth('access-token')
     @ApiSecurity('access-token')

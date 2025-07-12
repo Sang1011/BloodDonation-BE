@@ -11,6 +11,7 @@ import { GetAllNewsResponse } from "./dtos/responses/getAll.response";
 import { CreateNewsDto } from "./dtos/requests/create.request";
 import { CreateNewsResponse } from "./dtos/responses/create.response";
 import { NewsService } from "./news.services";
+import { Roles } from "src/shared/decorators/role.decorator";
 
 
 @ApiTags('News')
@@ -18,6 +19,7 @@ import { NewsService } from "./news.services";
 export class NewsController {
   constructor(private readonly newsService: NewsService) {}
 
+  @Roles('ADMIN', 'STAFF')
   @ApiCreatedResponse({
     description: 'News created successfully',
     type: CreateNewsResponse,
@@ -47,6 +49,7 @@ export class NewsController {
     return this.newsService.findOne(id);
   }
 
+  @Roles('ADMIN', 'STAFF')
   @Patch(":id")
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')
@@ -59,6 +62,7 @@ export class NewsController {
     return this.newsService.update(id, updateNewsDto);
   }
 
+  @Roles('ADMIN', 'STAFF')
   @Delete(":id")
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')

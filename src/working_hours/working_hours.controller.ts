@@ -9,12 +9,14 @@ import { GetWorkingHoursResponseDto } from "./dto/response/get_working_hours.res
 import { UpdateWorkingHoursDto } from "./dto/request/update_working_hours.dto";
 import { DeleteByIdWorkingHoursDTO } from "./dto/response/delete_working_hours.response";
 import { WorkingHoursService } from "./working_hours.service";
+import { Roles } from "src/shared/decorators/role.decorator";
 
 @ApiTags('Working Hours')
 @Controller('working-hours')
 export class WorkingHoursController {
   constructor(private readonly service: WorkingHoursService) { }
 
+  @Roles('ADMIN','STAFF')
   @Post()
   @ApiCreatedResponse({ type: CreateWorkingHoursDto })
   @ResponseMessage("Created working hours")
@@ -41,7 +43,7 @@ export class WorkingHoursController {
   }
 
   
-
+  @Roles('ADMIN','STAFF')
   @Patch(":id")
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')
@@ -60,6 +62,7 @@ export class WorkingHoursController {
   //   return this.service.remove(id);
   // }
 
+  @Roles('ADMIN','STAFF')
   @Delete(":id")
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')
@@ -69,6 +72,7 @@ export class WorkingHoursController {
     return this.service.softRemove(id);
   }
 
+  @Roles('ADMIN','STAFF')
   @Patch(":id/restore")
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')
@@ -77,6 +81,7 @@ export class WorkingHoursController {
   restore(@Param("id") id: string) {
     return this.service.restore(id);
   }
+
   @Get(":id")
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')
