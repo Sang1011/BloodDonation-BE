@@ -61,7 +61,7 @@ export class EmailService {
       template: './verify-email',
       context: {
         name: user.fullname,
-        url: `http://localhost:3000/api/v1/auth/verify-email?email=${encodeURIComponent(user.email)}&token=${token}`,
+        url: `https://blooddonation-be-production.up.railway.app/api/v1/auth/verify-email?email=${encodeURIComponent(user.email)}&token=${token}`,
         token: token,
         email: user.email,
       }
