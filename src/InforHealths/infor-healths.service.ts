@@ -20,7 +20,7 @@ export class InforHealthService {
         private readonly bloodServices: BloodsService,
         private readonly uploadService: UploadService
     ) { }
-    
+
     async create(infoHealth: CreateInforHealthDto, file?: Express.Multer.File) {
         const { user_id, blood_id } = infoHealth;
         const user = await this.userServices.findOne(user_id);
@@ -32,12 +32,12 @@ export class InforHealthService {
             throw new BadRequestException("Không tìm thấy nhóm máu");
         }
         const health = await this.inforHealthModel.findOne({ user_id: user_id });
-        
-        if(health){
+
+        if (health) {
             throw new BadRequestException("Người dùng này đã có thông tin sức khỏe");
         }
         const latest_donate = infoHealth.latest_donate;
-        
+
         if (new Date(latest_donate) > new Date()) {
             throw new BadRequestException("Không được chọn ngày trong tương lai");
         }
@@ -48,7 +48,7 @@ export class InforHealthService {
             imgUrl = result.secure_url;
             infoHealth.img_health = imgUrl;
         }
-        
+
 
         const createdHealth = await this.inforHealthModel.create({
             ...infoHealth,
@@ -59,20 +59,20 @@ export class InforHealthService {
     }
 
     async createByUser(user: IUser, infoHealth: CreateInforHealthDto, file?: Express.Multer.File) {
-       
+
         const health = await this.inforHealthModel.findOne({ user_id: user.user_id });
-        if(health){
+        if (health) {
             throw new BadRequestException("Người dùng này đã có thông tin sức khỏe");
         }
-        
+
         const blood = await this.bloodServices.findOne(infoHealth.blood_id);
         if (!blood) {
             throw new BadRequestException("Không tìm thấy nhóm máu");
         }
-        
-        
+
+
         const latest_donate = infoHealth.latest_donate;
-        
+
         if (new Date(latest_donate) > new Date()) {
             throw new BadRequestException("Không được chọn ngày trong tương lai");
         }
@@ -83,7 +83,7 @@ export class InforHealthService {
             imgUrl = result.secure_url;
             infoHealth.img_health = imgUrl;
         }
-        
+
         const createdHealth = await this.inforHealthModel.create({
             ...infoHealth,
             user_id: user.user_id,
@@ -117,8 +117,8 @@ export class InforHealthService {
                 {
                     path: 'blood_id',
                     model: 'Blood',
-                    localField: 'blood_id',      
-                    foreignField: 'blood_id',  
+                    localField: 'blood_id',
+                    foreignField: 'blood_id',
                     justOne: true,
                 },
             ])
@@ -148,8 +148,8 @@ export class InforHealthService {
                 {
                     path: 'blood_id',
                     model: 'Blood',
-                    localField: 'blood_id',      
-                    foreignField: 'blood_id',  
+                    localField: 'blood_id',
+                    foreignField: 'blood_id',
                     justOne: true,
                 },
             ]);
@@ -174,22 +174,22 @@ export class InforHealthService {
         return health;
     }
 
-      async update(id: string, updateHealthDTO: UpdateInforHealthDto, file?: Express.Multer.File) {
+    async update(id: string, updateHealthDTO: UpdateInforHealthDto, file?: Express.Multer.File) {
         const health = await this.inforHealthModel.findOne({ infor_health: id });
         if (!health) {
-          throw new BadRequestException("Không tìm thấy thông tin sức khỏe");
+            throw new BadRequestException("Không tìm thấy thông tin sức khỏe");
         }
-      
+
         const { user_id, blood_id } = updateHealthDTO;
-      
+
         const user = await this.userServices.findOne(user_id);
         if (!user) {
-          throw new BadRequestException("Không tìm thấy người dùng");
+            throw new BadRequestException("Không tìm thấy người dùng");
         }
-      
+
         const blood = await this.bloodServices.findOne(blood_id);
         if (!blood) {
-          throw new BadRequestException("Không tìm thấy nhóm máu");
+            throw new BadRequestException("Không tìm thấy nhóm máu");
         }
 
         const latest_donate = updateHealthDTO.latest_donate;
@@ -202,39 +202,39 @@ export class InforHealthService {
             imgUrl = result.secure_url;
             updateHealthDTO.img_health = imgUrl;
         }
-       
+
         const updatedHealth = await this.inforHealthModel.findOneAndUpdate(
-          { infor_health: id },
-          { $set: updateHealthDTO },
-          { new: true }
+            { infor_health: id },
+            { $set: updateHealthDTO },
+            { new: true }
         ).populate([
             { path: 'user_id' },
             {
                 path: 'blood_id',
                 model: 'Blood',
-                localField: 'blood_id',      
-                foreignField: 'blood_id',  
+                localField: 'blood_id',
+                foreignField: 'blood_id',
                 justOne: true,
             },
         ]);
-      
-        return updatedHealth;
-      }
 
-      async updateByUser(user: IUser, updateHealthDTO: UpdateInforHealthDto, file?: Express.Multer.File) {
+        return updatedHealth;
+    }
+
+    async updateByUser(user: IUser, updateHealthDTO: UpdateInforHealthDto, file?: Express.Multer.File) {
         if (!updateHealthDTO.user_id || updateHealthDTO.user_id === null || updateHealthDTO.user_id === '') {
             updateHealthDTO = { ...updateHealthDTO, user_id: user.user_id };
         }
         const health = await this.findByUserId(user.user_id);
         console.log(health);
         if (!health) {
-          throw new BadRequestException("Không tìm thấy thông tin sức khỏe");
+            throw new BadRequestException("Không tìm thấy thông tin sức khỏe");
         }
 
-        const { blood_id } = updateHealthDTO;      
+        const { blood_id } = updateHealthDTO;
         const blood = await this.bloodServices.findOne(blood_id);
         if (!blood) {
-          throw new BadRequestException("Không tìm thấy nhóm máu");
+            throw new BadRequestException("Không tìm thấy nhóm máu");
         }
 
         const latest_donate = updateHealthDTO.latest_donate;
@@ -247,11 +247,11 @@ export class InforHealthService {
             imgUrl = result.secure_url;
             updateHealthDTO.img_health = imgUrl;
         }
-       
+
         const updatedHealth = await this.inforHealthModel.findOneAndUpdate(
-          { infor_health: health.infor_health },
-          { $set: updateHealthDTO },
-          { new: true }
+            { infor_health: health.infor_health },
+            { $set: updateHealthDTO },
+            { new: true }
         ).populate([
             {
                 path: 'user_id',
@@ -263,20 +263,25 @@ export class InforHealthService {
             {
                 path: 'blood_id',
                 model: 'Blood',
-                localField: 'blood_id',      
-                foreignField: 'blood_id',  
+                localField: 'blood_id',
+                foreignField: 'blood_id',
                 justOne: true,
             },
         ]);
-      
+
         return updatedHealth;
-      }
-      
+    }
+
 
     async remove(id: string) {
-        const deleted = await this.inforHealthModel.softDelete(id);
-        if (!deleted) throw new BadRequestException("Không tìm thấy thông tin sức khỏe");
-        return { deleted: deleted.deletedCount || 0 };
+        // const deleted = await this.inforHealthModel.softDelete(id);
+        // if (!deleted) throw new BadRequestException("Không tìm thấy thông tin sức khỏe");
+        // return { deleted: deleted.deletedCount || 0 };
+        const deleted = await this.inforHealthModel.deleteOne({ infor_health: id });
+        if (deleted.deletedCount === 0) {
+            throw new BadRequestException("Không tìm thấy thông tin sức khỏe");
+        }
+        return { deleted: true };
     }
 
     async findByUserId(user_id: string) {
@@ -289,31 +294,31 @@ export class InforHealthService {
     async findInfoHealthByUserId(user_id: string) {
         const health = (await this.inforHealthModel.findOne({ user_id: user_id }))
             .populate([
-            {
-                path: 'user_id',
-                model: 'User',
-                localField: 'user_id',
-                foreignField: 'user_id',
-                justOne: true,
-                select: 'fullname gender email ',
-            },
-            {
-                path: 'blood_id',
-                model: 'Blood',
-                localField: 'blood_id',
-                foreignField: 'blood_id',
-                justOne: true,
-                select: 'blood_id',
-            },
-        ]);
+                {
+                    path: 'user_id',
+                    model: 'User',
+                    localField: 'user_id',
+                    foreignField: 'user_id',
+                    justOne: true,
+                    select: 'fullname gender email ',
+                },
+                {
+                    path: 'blood_id',
+                    model: 'Blood',
+                    localField: 'blood_id',
+                    foreignField: 'blood_id',
+                    justOne: true,
+                    select: 'blood_id',
+                },
+            ]);
         if (!health) throw new BadRequestException("Không tìm thấy thông tin sức khỏe");
         return health;
     }
 
     async findByListId(ids: string[]): Promise<InforHealth[]> {
-    return this.inforHealthModel.find({
-        infor_health: { $in: ids }
-    });
+        return this.inforHealthModel.find({
+            infor_health: { $in: ids }
+        });
     }
 
     async updateForDonate(user_id: string, is_regist_donate: boolean) {
