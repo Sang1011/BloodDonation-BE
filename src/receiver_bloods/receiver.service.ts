@@ -263,7 +263,7 @@ export class ReceiverBloodService {
     if (!updated) {
       throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
     }
-    await this.inforHealthsService.updateForDonate(user.user_id, false);
+    await this.inforHealthsService.updateForReceive(user.user_id, false);
     if (user.role = "MEMBER") {
       await this.notifyService.create({
         user_id: user.user_id,
