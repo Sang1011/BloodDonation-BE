@@ -274,15 +274,22 @@ export class InforHealthService {
 
 
     async remove(id: string) {
-        // const deleted = await this.inforHealthModel.softDelete(id);
-        // if (!deleted) throw new BadRequestException("Không tìm thấy thông tin sức khỏe");
-        // return { deleted: deleted.deletedCount || 0 };
-        const deleted = await this.inforHealthModel.deleteOne({ infor_health: id });
-        if (deleted.deletedCount === 0) {
-            throw new BadRequestException("Không tìm thấy thông tin sức khỏe");
-        }
-        return { deleted: true };
+    const find = await this.inforHealthModel.findOne({ infor_health: id });
+    if (!find) {
+        throw new BadRequestException("Không tìm thấy thông tin sức khỏe");
     }
+
+    const deleted = await this.inforHealthModel.updateOne(
+        { infor_health: id },
+        { $set: { is_deleted: true } }
+    );
+
+    if (deleted.modifiedCount === 0) {
+        throw new BadRequestException("Không thể xóa thông tin sức khỏe");
+    }
+
+    return { deleted: true };
+}
 
     async findByUserId(user_id: string) {
         const health = await this.inforHealthModel.findOne({ user_id: user_id });
