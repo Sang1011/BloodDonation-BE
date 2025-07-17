@@ -73,19 +73,19 @@ export class DonateBloodController {
     return await this.donateBloodService.update(id, dto);
   }
 
-  @ApiOperation({ summary: 'Cancel schedule by ID' })
-  @ApiResponse({
-    status: 200,
-    description: 'Cancle receive schedule successfully',
-    type: UpdateDonateBloodResponseDto,
-  })
-  @ApiBearerAuth('access-token')
-  @ApiSecurity('access-token')
-  @ResponseMessage(MESSAGES.DONATE_BLOOD.CANCELLED_SUCESS)
-  @Patch('cancel-donate-schedule/:id')
-  async cancel(@User() user: IUser, @Param('id') receiver_id: string): Promise<void> {
-    await this.donateBloodService.cancelSchedule(user, receiver_id);
-  }
+  // @ApiOperation({ summary: 'Cancel schedule by ID' })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'Cancle receive schedule successfully',
+  //   type: UpdateDonateBloodResponseDto,
+  // })
+  // @ApiBearerAuth('access-token')
+  // @ApiSecurity('access-token')
+  // @ResponseMessage(MESSAGES.DONATE_BLOOD.CANCELLED_SUCESS)
+  // @Patch('cancel-donate-schedule/:id')
+  // async cancel(@User() user: IUser, @Param('id') receiver_id: string): Promise<void> {
+  //   await this.donateBloodService.cancelSchedule(user, receiver_id);
+  // }
 
   @ApiOperation({ summary: 'Delete a donate blood record by ID' })
   @ResponseMessage(MESSAGES.DONATE_BLOOD.DELETE_SUCCESS)
@@ -93,8 +93,8 @@ export class DonateBloodController {
   @ApiBearerAuth('access-token')
   @ApiSecurity('access-token')
   @ApiOkResponse({ type: DeleteByIdDonateBloodDTO })
-  async remove(@Param('id') id: string): Promise<void> {
-    await this.donateBloodService.remove(id);
+  async remove(@User() user: IUser, @Param('id') id: string): Promise<void> {
+    await this.donateBloodService.remove(user, id);
   }
 
   @Get('history/user')

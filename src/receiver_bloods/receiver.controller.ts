@@ -101,23 +101,23 @@ export class ReceiveBloodController {
   @ApiOkResponse({type: DeleteByIdReceiveBloodDTO})
   @ResponseMessage("Receiver Blood record deleted successfully")
   @Delete(':receiver_id')
-  async remove(@Param('receiver_id') receiver_id: string): Promise<void> {
-    await this.receiveBloodService.remove(receiver_id);
+  async remove(@User() user: IUser, @Param('receiver_id') receiver_id: string): Promise<void> {
+    await this.receiveBloodService.remove(user,receiver_id);
   }
 
-  @ApiOperation({ summary: 'Cancel schedule by ID' })
-  @ApiResponse({
-    status: 200,
-    description: 'Cancle receive schedule successfully',
-    type: UpdateReceiveBloodResponseDto,
-  })
-  @ApiBearerAuth('access-token')
-  @ApiSecurity('access-token')
-  @ResponseMessage(MESSAGES.RECEIVE_BLOOD.CANCELLED_SUCESS)
-  @Patch('cancel-receive-schedule/:receiver_id')
-  async cancel(@User() user: IUser, @Param('receiver_id') receiver_id: string): Promise<void> {
-    await this.receiveBloodService.cancelSchedule(user, receiver_id);
-  }
+  // @ApiOperation({ summary: 'Cancel schedule by ID' })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'Cancle receive schedule successfully',
+  //   type: UpdateReceiveBloodResponseDto,
+  // })
+  // @ApiBearerAuth('access-token')
+  // @ApiSecurity('access-token')
+  // @ResponseMessage(MESSAGES.RECEIVE_BLOOD.CANCELLED_SUCESS)
+  // @Patch('cancel-receive-schedule/:receiver_id')
+  // async cancel(@User() user: IUser, @Param('receiver_id') receiver_id: string): Promise<void> {
+  //   await this.receiveBloodService.cancelSchedule(user, receiver_id);
+  // }
 
   @ApiOperation({ summary: 'Get list receive blood by central blood ID' })
   @ApiBearerAuth('access-token')

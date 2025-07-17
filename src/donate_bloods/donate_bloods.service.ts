@@ -342,7 +342,7 @@ export class DonateBloodService {
     return updated;
   }
 
-  async remove(id: string) {
+  async remove(user: IUser, id: string) {
     const existingDonateBlood = await this.donateBloodModel.findOne({ donate_id: id });
     if (!existingDonateBlood) {
       throw new NotFoundException("Không tìm thấy thông tin hiến máu");
@@ -350,6 +350,15 @@ export class DonateBloodService {
     const deleted = await this.donateBloodModel.deleteOne({ donate_id: id });
     if (!deleted) {
       throw new NotFoundException("Không tìm thấy thông tin hiến máu");
+    }
+    await this.inforHealthsService.updateForDonate(user.user_id, false);
+    if (user.role = "MEMBER") {
+      await this.notifyService.create({
+        user_id: user.user_id,
+        title: NotificationTemplates.CANCELLED_DONATE_SCHEDULE.title,
+        message: NotificationTemplates.CANCELLED_DONATE_SCHEDULE.message,
+        type: NotificationTemplates.CANCELLED_DONATE_SCHEDULE.type,
+      });
     }
     return { deleted: deleted.deletedCount || 0 };
   }

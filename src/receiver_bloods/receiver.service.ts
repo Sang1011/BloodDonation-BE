@@ -275,7 +275,7 @@ export class ReceiverBloodService {
     return updated;
   }
 
-  async remove(id: string) {
+  async remove(user: IUser, id: string) {
     const existingReceiverBlood = await this.receiverBloodModel.findOne({ receiver_id: id });
     if (!existingReceiverBlood) {
       throw new NotFoundException("Không tìm thấy bản ghi nhận máu với ID đã cung cấp");
@@ -283,6 +283,18 @@ export class ReceiverBloodService {
     const deleted = await this.receiverBloodModel.deleteOne({ receiver_id: id });
     if (!deleted) {
       throw new NotFoundException(MESSAGES.DONATE_BLOOD.NOT_FOUND);
+    }
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+    await this.inforHealthsService.updateForReceive(user.user_id, false);
+    if (user.role = "MEMBER") {
+      await this.notifyService.create({
+        user_id: user.user_id,
+        title: NotificationTemplates.CANCELLED_RECEIVE_SCHEDULE.title,
+        message: NotificationTemplates.CANCELLED_RECEIVE_SCHEDULE.message,
+        type: NotificationTemplates.CANCELLED_RECEIVE_SCHEDULE.type,
+      });
     }
     return { deleted: deleted.deletedCount || 0 };
   }
