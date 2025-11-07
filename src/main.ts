@@ -75,6 +75,8 @@ async function bootstrap() {
 
   // fs.writeFileSync('./swagger.json', JSON.stringify(document));
   // export file
-  await app.listen(configService.get<string>("PORT"), '0.0.0.0');
+
+  const port = configService.get<string>("PORT") || 8000; 
+  await app.listen(port, '0.0.0.0');
 }
 bootstrap();

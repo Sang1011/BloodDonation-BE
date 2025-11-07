@@ -278,4 +278,4 @@ Luôn nói chuyện thân thiện, ngắn gọn, rõ ràng như đang tư vấn 
       return 'Xin lỗi, hiện tại tôi không thể xử lý câu hỏi. Vui lòng thử lại sau.';
     }
   }
-} 1
+} 
